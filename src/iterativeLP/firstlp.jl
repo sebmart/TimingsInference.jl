@@ -5,7 +5,8 @@
 
 
 """
-    mipTravelTimes
+    lpTravelTimes :
+    optimize travel times to minimize L1 error from data with given paths
 """
 function lpTravelTimes(
         n::RoutingNetwork,                 # The network
