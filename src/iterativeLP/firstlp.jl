@@ -8,13 +8,11 @@
     lpTravelTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
-function lpTravelTimes(
-        n::RoutingNetwork,                 # The network
-        tripData::Vector{NetworkTrip},     # The data we want to optimize on
-        paths::Vector{Vector{Int}}),       # The paths corresponding to this data
-        minTimes::AbstractArray{Float64,2} # The links times corresponding to maximum speed
-    )
-    g = n.graph
+function lpTravelTimes(s::IterativeState)
+    g = s.network.graph
+    paths = s.paths
+    tripData = s.tripData
+
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
@@ -22,7 +20,7 @@ function lpTravelTimes(
 
     # DECISION VARIABLES
     # Road times
-    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= minTimes[i,j])
+    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
 

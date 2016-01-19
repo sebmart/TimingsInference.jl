@@ -11,5 +11,8 @@ export NetworkTimings, NetworkTrip
 
 include("networktimings.jl")
 
-include("mip/firstlp.jl")
+include("iterativeLP/iterativeState.jl")
+include("iterativeLP/iterativeLP.jl")
+include("iterativeLP/firstLP.jl")
+
 end # module
