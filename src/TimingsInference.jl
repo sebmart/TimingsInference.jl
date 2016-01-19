@@ -9,6 +9,9 @@ using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs
 
 export NetworkTimings, NetworkTrip
 
+export IterativeState, iterativeLP
+
+
 include("networktimings.jl")
 
 include("iterativeLP/iterativeState.jl")
