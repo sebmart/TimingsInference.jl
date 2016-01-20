@@ -7,12 +7,14 @@ module TimingsInference
 
 using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions
 
+#general
 export NetworkTimings, NetworkTrip
-
+#network data
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
-
-export IterativeState, StaticIterative, iterativeLP!
-
+#iterative heuristic
+export IterativeState, StaticIterative, doIteration!
+#analysis
+export tripsStd, tripsMAE
 
 include("networktimings.jl")
 
@@ -22,5 +24,7 @@ include("networkdata/generateRides.jl")
 include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")
 include("iterativeLP/firstLP.jl")
+
+include("analysis/statistics.jl")
 
 end # module
