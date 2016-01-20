@@ -9,10 +9,14 @@ using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs
 
 export NetworkTimings, NetworkTrip
 
-export IterativeState, iterativeLP
+export roadTypeTimings, maxSpeedTimes
+
+export IterativeState, StaticIterative, iterativeLP
 
 
 include("networktimings.jl")
+
+include("networkdata/createtimings.jl")
 
 include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")

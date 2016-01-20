@@ -1,6 +1,6 @@
 ###################################################
 ## iterativeState.jl
-## Represents state information in iterative process
+## Different iterative procedures
 ###################################################
 
 """
