@@ -43,7 +43,7 @@ function StaticIterative(data::NetworkData, initTimes::AbstractArray{Float64,2};
 
     # randomly select the trips
     srand(1991)
-    trips = shuffle(data.trips)[1:min(max_trip,length(data.trips)]
+    trips = shuffle(data.trips)[1:min(max_trip,length(data.trips))]
 
     # One path per trip: the initial shortest path
     paths = Vector{Vector{Int}}[getPath(timings, t.orig, t.dest) for t in trips]

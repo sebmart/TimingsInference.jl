@@ -19,18 +19,18 @@
 function noisyVirtualData(t::NetworkTimings, density::Float64=0.2, frequency::Float64=2.;
                           timeStd::Float64 = 20.)
     g = t.network.graph
-    rides = NetworkTrip[]
+    trips = NetworkTrip[]
     # subset rides
     tt = getPathTimes(t)
     if frequency <= 1.
         error("frequency must be >1")
     end
-    geo = Geometric(1/(frequency-1))
+    geo = Geometric(1/frequency)
     for orig in 1:nv(g), dest in 1:nv(g)
-        if rand() >= density && tt[orig,dest] >= 30.
+        if rand() <= density && tt[orig,dest] >= 30.
             count = rand(geo) + 1
-            time  = rand(Normal(tt[orig,dest],timeStd*sqrt(tt[orig,dest]/(count*60.))))
-            push!(rides,NetworkTrip(orig,dest,time,count))
+            time  = max(20.,rand(Normal(tt[orig,dest],timeStd*sqrt(tt[orig,dest]/(count*60.)))))
+            push!(trips, NetworkTrip(orig,dest,time,count))
         end
     end
     return NetworkData(t.network,trips, maxSpeedTimes(t.network))
