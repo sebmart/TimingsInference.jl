@@ -9,9 +9,9 @@ using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions
 
 export NetworkTimings, NetworkTrip
 
-export roadTypeTimings, maxSpeedTimes, noisyVirtualData
+export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 
-export IterativeState, StaticIterative, iterativeLP
+export IterativeState, StaticIterative, iterativeLP!
 
 
 include("networktimings.jl")

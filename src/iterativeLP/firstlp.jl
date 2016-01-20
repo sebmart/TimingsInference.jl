@@ -47,7 +47,7 @@ function lpTravelTimes(s::IterativeState)
     times = getValue(t)
 
     # Export result as sparse matrix
-    result = spzeros(Float64,(nv(g), nv(g)))
+    result = spzeros(Float64, nv(g), nv(g))
     for i in vertices(g), j in out_neighbors(g,i)
         result[i,j] = times[i,j]
     end

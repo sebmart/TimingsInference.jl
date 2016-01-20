@@ -28,3 +28,17 @@ function maxSpeedTimes(n::Network)
     end
     return times
 end
+
+"""
+    `uniformTimes`
+    - returns road times corresponding to constant speed (sparse array)
+    - `speed` in km/h
+"""
+function uniformTimes(n::Network, speed=90)
+    g = n.graph
+    times = spzeros(nv(g),nv(g))
+    for ((o,d),r) in n.roads
+        times[o,d] = 3.6*r.distance/speed
+    end
+    return times
+end

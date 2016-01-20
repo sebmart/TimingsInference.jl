@@ -19,6 +19,14 @@
 """
 abstract IterativeState
 
+
+function Base.show(io::IO, s::IterativeState)
+    nTrips = length(s.trips)
+    nPaths = sum([length(paths) for paths in s.paths])
+    println(io,"Iterative heuristic: $(string(typeof(s)))")
+    println(io,"Optimizing on $nTrips trips and $nPaths paths")
+end
+
 """
     `StaticState`
      Iterative state optimizing on static data
@@ -30,7 +38,7 @@ type StaticIterative <: IterativeState
     data::NetworkData
     timings::NetworkTimings
     trips::Vector{NetworkTrip}
-    paths::Vector{Vector{Int}}
+    paths::Vector{Vector{Vector{Int}}} # for each trip, a vector of paths
 end
 
 """
@@ -39,15 +47,13 @@ end
 """
 function StaticIterative(data::NetworkData, initTimes::AbstractArray{Float64,2};
     max_trip::Int=1000)
-    timings = NetworkTimings(s.data.network, times)
+    timings = NetworkTimings(data.network, initTimes)
 
     # randomly select the trips
     srand(1991)
     trips = shuffle(data.trips)[1:min(max_trip,length(data.trips))]
-
     # One path per trip: the initial shortest path
-    paths = Vector{Vector{Int}}[getPath(timings, t.orig, t.dest) for t in trips]
-
+    paths = [Vector{Int}[getPath(timings, t.orig, t.dest)] for t in trips]
     return StaticIterative(data,timings,trips,paths)
 end
 
@@ -60,14 +66,12 @@ function updateState!(s::StaticIterative, times::AbstractArray{Float64,2})
     s.timings = NetworkTimings(s.data.network, times)
 
     #for all data point, check if we already have the new path.
-    # if so, put it in first position
-    # if not, add it in first position
     for (d,t) in enumerate(s.trips)
         sp = getPath(s.timings, t.orig, t.dest)
         index = findfirst(s.paths[d],sp)
-        if index == 0
+        if index == 0     # if so, put it in first position
             unshift!(s.paths[d], sp)
-        else
+        else    # if not, add it in first position
             s.paths[d][index], s.paths[d][1] = s.paths[d][1], s.paths[d][index] #swap
         end
     end
