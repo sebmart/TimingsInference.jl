@@ -10,7 +10,7 @@
 """
 function roadTypeTimings(n::RoutingNetwork)
     # Timings are 70% of maximum speed
-    times = maxSpeedTimes(n) * 0.7
+    times = maxSpeedTimes(n) * 0.6
     return NetworkTimings(n, times)
 end
 
@@ -24,7 +24,7 @@ function maxSpeedTimes(n::RoutingNetwork)
     maxspeed = [130.,110.,90.,50.,50.,20.,0.,0.]
     times = szeros(nv(g),nv(g))
     for ((o,d),r) in n.roads
-        times[o,d] = r.distance/maxspeed[r.roadType]
+        times[o,d] = 3.6*r.distance/maxspeed[r.roadType]
     end
     return times
 end
