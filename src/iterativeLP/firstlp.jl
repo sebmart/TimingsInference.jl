@@ -9,9 +9,9 @@
     optimize travel times to minimize L1 error from data with given paths
 """
 function lpTravelTimes(s::IterativeState)
-    g = s.network.graph
+    g = s.data.network.graph
     paths = s.paths
-    tripData = s.tripData
+    tripData = s.trips
 
 
     #Create the model (will be changed to avoid hard-coded parameters)
@@ -20,7 +20,7 @@ function lpTravelTimes(s::IterativeState)
 
     # DECISION VARIABLES
     # Road times
-    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.minTimes[i,j])
+    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
 
