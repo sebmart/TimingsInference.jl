@@ -62,8 +62,13 @@ end
 function allPathsStd(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     tt1 = getPathTimes(timingsRef)
     tt2 = getPathTimes(timingsNew)
-    #remove trips where o==d
-    return sqrt(sum(((tt1-tt2)./tt1).^2)/(length(tt1)-size(tt1)[1]))
+
+    res = ((tt1-tt2)./tt1).^2
+    #remove NAN where o==d
+    for i in 1:size(tt1)[1]
+        res[i,i] = 0.
+    end
+    return sqrt(sum(res)/(length(tt1)-size(tt1)[1]))
 end
 
 """
@@ -74,29 +79,45 @@ end
 function allPathsMAE(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     tt1 = getPathTimes(timingsRef)
     tt2 = getPathTimes(timingsNew)
-    #remove trips where o==d
-    return sum(abs(tt1-tt2)./tt1)/(length(tt1)-size(tt1)[1])
+
+    res = abs(tt1-tt2)./tt1
+    #remove NAN where o==d
+    for i in 1:size(tt1)[1]
+        res[i,i] = 0.
+    end
+    return sum(res)/(length(tt1)-size(tt1)[1])
 end
 
 """
     `roadTimeStd`: compute standard deviation of road time error percentage
-    - `timesRef`: reference times
-    - `timesNew`: times to compare with
+    - `timingsRef`: reference times
+    - `timingsNew`: times to compare with
 """
-function roadTimeStd(timesRef::AbstractArray{Float64,2}, timesNew::AbstractArray{Float64,2})
-    return sqrt(sum(((timesRef-timesNew)./timesRef).^2)/nnz(timesRef))
+function roadTimeStd(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
+    g = timingsRef.network.graph
+    t1 = timingsRef.times
+    t2 = timingsNew.times
+    error = 0.
+    for o in vertices(g), d in out_neighbors(g,o)
+        error += ((t1[o,d]-t2[o,d])/t1[o,d])^2
+    end
+    return sqrt(error/ne(g))
 end
 
-roadTimeStd(t1::NetworkTimings, t2::NetworkTimings) = roadTimeStd(t1.times, t2.times)
 
 
 """
-`roadTimeMAE`: compute Mean Absolute Error of road time error percentage
-    - `timesRef`: reference times
-    - `timesNew`: times to compare with
+    `roadTimeMAE`: compute Mean Absolute Error of road time error percentage
+    - `timingsRef`: reference times
+    - `timingsNew`: times to compare with
 """
-function roadTimeMAE(timesRef::AbstractArray{Float64,2}, timesNew::AbstractArray{Float64,2})
-    return sum(abs(timesRef-timesNew)./timesRef)/nnz(timesRef)
+function roadTimeMAE(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
+    g = timingsRef.network.graph
+    t1 = timingsRef.times
+    t2 = timingsNew.times
+    error = 0.
+    for o in vertices(g), d in out_neighbors(g,o)
+        error += abs(t1[o,d]-t2[o,d])/t1[o,d]
+    end
+    return error/ne(g)
 end
-
-roadTimeMAE(t1::NetworkTimings, t2::NetworkTimings) = roadTimeMAE(t1.times, t2.times)

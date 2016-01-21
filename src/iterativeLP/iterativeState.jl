@@ -32,6 +32,7 @@ end
 
 """
     `printStats`: print statistics about the current iterative state
+    - if `ref::NetworkTimings` optional argument represents "real" timings expectations
 """
 function printStats(s::IterativeState)
     nTrips = length(s.trips)
@@ -39,22 +40,38 @@ function printStats(s::IterativeState)
     typeName = split(string(typeof(s)),".")[end]
     mae1 = tripsMAE(s.timings,s.trips)
     mae2 = tripsMAE(s.timings,s.data.trips)
-    mae3 = tripsMAE(s.timings,s.trips, weighted=true)
-    mae4 = tripsMAE(s.timings,s.data.trips, weighted=true)
     std1 = tripsStd(s.timings,s.trips)
     std2 = tripsStd(s.timings,s.data.trips)
-    std3 = tripsStd(s.timings,s.trips, weighted=true)
-    std4 = tripsStd(s.timings,s.data.trips, weighted=true)
 
     println("Iterative heuristic: $(typeName) method")
     println("Optimizing on $(nTrips)/$(length(s.data.trips)) trips and $nPaths paths")
     println("\n=================MAE====================")
     @printf("current trips: %.2f%%, all trips: %.2f%%\n",  100*mae1, 100*mae2)
-    @printf("current rides: %.2f%%, all rides: %.2f%%\n",  100*mae3, 100*mae4)
     println("\n==============Error std=================")
     @printf("current trips: %.2f%%, all trips: %.2f%%\n",  100*std1, 100*std2)
-    @printf("current rides: %.2f%%, all rides: %.2f%%\n",  100*std3, 100*std4)
+    return
 end
+
+function printStats(s::IterativeState, ref::NetworkTimings)
+    printStats(s)
+    mae1 = allPathsMAE(ref,s.timings)
+    mae2 = roadTimeMAE(ref,s.timings)
+    std1 = allPathsStd(ref,s.timings)
+    std2 = roadTimeStd(ref,s.timings)
+    mae3 = tripsMAE(ref,s.trips)
+    mae4 = tripsMAE(ref,s.data.trips)
+    std3 = tripsStd(ref,s.trips)
+    std4 = tripsStd(ref,s.data.trips)
+
+    println("\n========From reference timings==========")
+    @printf("All paths: MAE=%.2f%%, STD=%.2f%%\n",  100*mae1, 100*std1)
+    @printf("All roads: MAE=%.2f%%, STD=%.2f%%\n",  100*mae2, 100*std2)
+    println("\n==============Data Noise================")
+    @printf("current trips: MAE=%.2f%%, STD=%.2f%%\n",  100*mae3, 100*std3)
+    @printf("    all trips: MAE=%.2f%%, STD=%.2f%%\n",  100*mae4, 100*std4)
+    return
+end
+
 
 """
     `StaticState`
@@ -75,12 +92,12 @@ end
     - for now, randomly subsets the data to fit trip_number
 """
 function StaticIterative(data::NetworkData, initTimes::AbstractArray{Float64,2};
-    max_trip::Int=1000)
+    maxTrip::Int=1000)
     timings = NetworkTimings(data.network, initTimes)
 
     # randomly select the trips
     srand(1991)
-    trips = shuffle(data.trips)[1:min(max_trip,length(data.trips))]
+    trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
     paths = [Vector{Int}[getPath(timings, t.orig, t.dest)] for t in trips]
     return StaticIterative(data,timings,trips,paths)
