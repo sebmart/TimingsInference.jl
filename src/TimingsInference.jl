@@ -12,7 +12,7 @@ export NetworkTimings, NetworkTrip
 #network data
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 #iterative heuristic
-export IterativeState, StaticIterative, doIteration!
+export IterativeState, printStats, StaticIterative, doIteration!
 #analysis
 export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
 

@@ -21,10 +21,39 @@ abstract IterativeState
 
 
 function Base.show(io::IO, s::IterativeState)
+    typeName = split(string(typeof(s)),".")[end]
     nTrips = length(s.trips)
     nPaths = sum([length(paths) for paths in s.paths])
-    println(io,"Iterative heuristic: $(string(typeof(s)))")
+    mae = tripsMAE(s.timings, s.trips)
+    println(io,"Iterative heuristic: $(typeName)")
     println(io,"Optimizing on $nTrips trips and $nPaths paths")
+    @printf(io,"MAE on current trips: %.2f%%\n", mae*100)
+end
+
+"""
+    `printStats`: print statistics about the current iterative state
+"""
+function printStats(s::IterativeState)
+    nTrips = length(s.trips)
+    nPaths = sum([length(paths) for paths in s.paths])
+    typeName = split(string(typeof(s)),".")[end]
+    mae1 = tripsMAE(s.timings,s.trips)
+    mae2 = tripsMAE(s.timings,s.data.trips)
+    mae3 = tripsMAE(s.timings,s.trips, weighted=true)
+    mae4 = tripsMAE(s.timings,s.data.trips, weighted=true)
+    std1 = tripsStd(s.timings,s.trips)
+    std2 = tripsStd(s.timings,s.data.trips)
+    std3 = tripsStd(s.timings,s.trips, weighted=true)
+    std4 = tripsStd(s.timings,s.data.trips, weighted=true)
+
+    println("Iterative heuristic: $(typeName) method")
+    println("Optimizing on $(nTrips)/$(length(s.data.trips)) trips and $nPaths paths")
+    println("\n=================MAE====================")
+    @printf("current trips: %.2f%%, all trips: %.2f%%\n",  100*mae1, 100*mae2)
+    @printf("current rides: %.2f%%, all rides: %.2f%%\n",  100*mae3, 100*mae4)
+    println("\n==============Error std=================")
+    @printf("current trips: %.2f%%, all trips: %.2f%%\n",  100*std1, 100*std2)
+    @printf("current rides: %.2f%%, all rides: %.2f%%\n",  100*std3, 100*std4)
 end
 
 """

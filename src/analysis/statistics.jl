@@ -13,18 +13,20 @@
 function tripsStd(timings::NetworkTimings, trips::Vector{NetworkTrip};weighted=false)
     tt = getPathTimes(timings)
     error = 0.
-    if weighted
+    if !weighted
         for t in trips
             error += ((t.time - tt[t.orig,t.dest])/t.time)^2
         end
-        return sqrt(error/length(trips))
+        error = sqrt(error/length(trips))
     else
         count = 0.
         for t in trips
             count += t.count
             error += t.count * ((t.time - tt[t.orig,t.dest])/t.time)^2
         end
-        return sqrt(error/count)
+        error= sqrt(error/count)
+    end
+    return error
 end
 
 """
@@ -36,18 +38,20 @@ end
 function tripsMAE(timings::NetworkTimings, trips::Vector{NetworkTrip};weighted=false)
     tt = getPathTimes(timings)
     error = 0.
-    if weighted
+    if !weighted
         for t in trips
-            error += abs(t.time - tt[t.orig,t.dest])/t.time)
+            error += abs(t.time - tt[t.orig,t.dest])/t.time
         end
-        return error/length(trips)
+        error = error/length(trips)
     else
         count = 0.
         for t in trips
             count += t.count
-            error += t.count * abs(t.time - tt[t.orig,t.dest])/t.time)
+            error += t.count * abs(t.time - tt[t.orig,t.dest])/t.time
         end
-        return error/count
+        error = error/count
+    end
+    return error
 end
 
 """
