@@ -14,7 +14,7 @@ export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 #iterative heuristic
 export IterativeState, StaticIterative, doIteration!
 #analysis
-export tripsStd, tripsMAE
+export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
 
 include("networktimings.jl")
 
