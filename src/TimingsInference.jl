@@ -5,7 +5,10 @@
 
 module TimingsInference
 
-using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions
+using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions, SFML
+import Colors
+
+import RoutingNetworks: visualInit, visualEvent, visualUpdate
 
 #general
 export NetworkTimings, NetworkTrip
@@ -15,6 +18,8 @@ export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export IterativeState, printStats, StaticIterative, doIteration!
 #analysis
 export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
+#visualization
+export ShowTimes
 
 include("networktimings.jl")
 
@@ -26,5 +31,7 @@ include("iterativeLP/iterativeLP.jl")
 include("iterativeLP/firstLP.jl")
 
 include("analysis/statistics.jl")
+
+include("visualization/showtimes.jl")
 
 end # module
