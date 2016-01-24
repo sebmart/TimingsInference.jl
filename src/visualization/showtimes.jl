@@ -21,20 +21,42 @@ type ShowTimes <: NetworkVisualizer
     currentTime::Int
     "color palette"
     palette::Vector{Colors.RGB{Float64}}
+    "minimum speed"
+    minSpeed::Float64
+    "maximum speed"
+    maxSpeed::Float64
 
     "contructor"
-    function ShowTimes(n::Network, times::Vector{AbstractArray{Float64,2}})
-        obj = new()
+    function ShowTimes(n::Network, times::Vector{AbstractArray{Float64,2}}; speedRange::Tuple{Int,Int} = (-1,-1))
+        if length(times) == 0
+            error("Need at least one set of road times")
+        end
+                obj = new()
         obj.network  = n
         obj.times = times
         obj.currentTime = 1
         obj.palette = Colors.colormap("Blues")
-        if length(times) == 0
-            error("Need at least one set of road times")
+
+        # if no speed range: compute it
+        if speedRange == (-1,-1)
+            minSpeed, maxSpeed = Inf, -Inf
+            for ((o,d),r) in n.roads, t in 1:length(times)
+                s = r.distance/times[t][o,d]
+                s < minSpeed && (minSpeed = s)
+                s > maxSpeed && (maxSpeed = s)
+            end
+            obj.minSpeed = minSpeed
+            obj.maxSpeed = maxSpeed
+        else
+            (obj.minSpeed,obj.maxSpeed) = speedRange
         end
         return obj
     end
 end
+
+ShowTimes(n::Network,time::AbstractArray{Float64,2}; args...) = ShowTimes(n,AbstractArray{Float64,2}[time],args...)
+ShowTimes(n::Network,timing::NetworkTimings; args...) = ShowTimes(n,AbstractArray{Float64,2}[timing.times],args...)
+ShowTimes(n::Network,timings::Vector{NetworkTimings}; args...) = ShowTimes(n,AbstractArray{Float64,2}[t.times] for t in timings,args...)
 
 function visualInit(v::ShowTimes)
     #Change the road colors to the first timing set
@@ -64,17 +86,10 @@ end
     `updateRoadsColor`: update road color given timings
 """
 function updateRoadsColor(v::ShowTimes)
-    #load min and max speed
-    minSpeed, maxSpeed = Inf, -Inf
-    for ((o,d),r) in v.network.roads
-        s = r.distance/v.times[v.currentTime][o,d]
-        s < minSpeed && (minSpeed = s)
-        s > maxSpeed && (maxSpeed = s)
-    end
     #change colors
     for ((o,d),r) in v.network.roads
         s = r.distance/v.times[v.currentTime][o,d]
-        c = round(Int,(s-minSpeed)/(maxSpeed-minSpeed) * (length(v.palette)-1)) +1
+        c = round(Int,(s-v.minSpeed)/(v.maxSpeed-v.minSpeed) * (length(v.palette)-1)) +1
         color = v.palette[c]
         set_fillcolor(v.roads[o,d],Color(round(Int,color.r*255),round(Int,255*color.g),round(Int,255*color.b)))
     end
