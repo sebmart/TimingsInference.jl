@@ -6,29 +6,31 @@
 module TimingsInference
 
 using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions, SFML
-using  Base.Dates
+using Base.Dates
 import Colors
 import RoutingNetworks: visualInit, visualEvent, visualUpdate
 
-#general
+
+#network data
 export NetworkTimings, NetworkTrip
-#timings data
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
-export GeoTrip, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
-export inPolygon, getPolygon
+export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
+
+#geo data
+export GeoTrip, TripData
+export inPolygon, getPolygon, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
+
 #iterative heuristic
 export IterativeState, printStats, StaticIterative, doIteration!
-#analysis
-export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
 #visualization
 export ShowTimes
 
-include("networktimings.jl")
+include("networkdata/networktimings.jl")
+include("networkdata/createtimings.jl")
+include("networkdata/generateRides.jl")
 
-include("timingdata/createtimings.jl")
-include("timingdata/generateRides.jl")
-include("timingdata/geotrip.jl")
-include("timingdata/nyctaxi.jl")
+include("geodata/geotrip.jl")
+include("geodata/nyctaxi.jl")
 
 include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")

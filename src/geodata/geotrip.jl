@@ -29,7 +29,7 @@ end
 """
 typealias TripData Vector{GeoTrip}
 
-function stats(trips::TripData)
+function Base.show(io::IO, t::TripData)
     println("TripData: trip information in GPS coordinates")
     println("--- $(length(trips)) trips: $(sizeof(trips)/1e6)MB")
 end
