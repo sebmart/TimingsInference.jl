@@ -14,7 +14,8 @@ import RoutingNetworks: visualInit, visualEvent, visualUpdate
 export NetworkTimings, NetworkTrip
 #timings data
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
-export GeoTrip, fromNYCTaxiCSV
+export GeoTrip, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
+export inPolygon, getPolygon
 #iterative heuristic
 export IterativeState, printStats, StaticIterative, doIteration!
 #analysis
