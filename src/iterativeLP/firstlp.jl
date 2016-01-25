@@ -25,7 +25,7 @@ function lpTravelTimes(s::IterativeState)
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{ sqrt(tripData[d].count)*epsilon[d], d=eachindex(tripData)})
+    @setObjective(m, Min, sum{ sqrt(tripData[d].weight)*epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path

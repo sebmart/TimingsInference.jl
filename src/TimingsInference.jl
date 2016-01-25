@@ -12,7 +12,7 @@ import RoutingNetworks: visualInit, visualEvent, visualUpdate
 
 
 #network data
-export NetworkTimings, NetworkTrip
+export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
 

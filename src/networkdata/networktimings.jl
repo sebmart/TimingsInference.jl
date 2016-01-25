@@ -10,7 +10,7 @@ immutable NetworkTrip
     orig::Int
     dest::Int
     time::Float64
-    count::Int
+    weight::Float64
 end
 
 """
@@ -36,12 +36,11 @@ typealias NetworkTimings RoutingPaths
 
 
 function Base.show(io::IO, t::NetworkTrip)
-    print(io,"$(t.orig)=>$(t.dest), n=$(t.count), t=$(t.time) seconds")
+    @printf(io,"%d=>%d, w=%.2f, t=%.1fs",t.orig,t.dest,t.weight,t.time)
 end
 
 function Base.show(io::IO, n::NetworkData)
+    density = 100*length(n.trips)/((ne(n.network.graph)-1)*ne(n.network.graph))
     println(io,"NetworkData: trip information in network")
-    ntrips = length(n.trips)
-    nrides = sum([t.count for t in n.trips])
-    println(io,"$ntrips trips, $nrides rides")
+    @printf(io,"%d trips (%.2f%% density)",length(n.trips), density)
 end

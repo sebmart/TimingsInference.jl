@@ -28,7 +28,7 @@ function noisyVirtualData(t::NetworkTimings, density::Float64=0.2, frequency::Fl
     geo = Geometric(1/frequency)
     for orig in 1:nv(g), dest in 1:nv(g)
         if rand() <= density && tt[orig,dest] >= 30.
-            count = rand(geo) + 1
+            count = rand(geo) + 1.
             time  = max(20.,rand(Normal(tt[orig,dest],timeStd*sqrt(tt[orig,dest]/(count*60.)))))
             push!(trips, NetworkTrip(orig,dest,time,count))
         end
