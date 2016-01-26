@@ -8,7 +8,7 @@ module TimingsInference
 using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions, SFML
 using Base.Dates
 import Colors
-import RoutingNetworks: visualInit, visualEvent, visualUpdate
+import RoutingNetworks: visualInit, visualEvent, visualUpdate, inPolygon
 
 
 #network data
@@ -28,6 +28,7 @@ export ShowTimes
 include("networkdata/networktimings.jl")
 include("networkdata/createtimings.jl")
 include("networkdata/generateRides.jl")
+include("networkdata/statistics.jl")
 
 include("geodata/geotrip.jl")
 include("geodata/nyctaxi.jl")
@@ -35,8 +36,6 @@ include("geodata/nyctaxi.jl")
 include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")
 include("iterativeLP/firstLP.jl")
-
-include("analysis/statistics.jl")
 
 include("visualization/showtimes.jl")
 

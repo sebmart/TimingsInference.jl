@@ -43,5 +43,6 @@ function fromNYCTaxiCSV(fileName::AbstractString)
             ((dTime-pTime).value)/1000.f0
         )
     end
+    print("\r100.00% trips parsed     ")
     return trips
 end
