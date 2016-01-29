@@ -42,7 +42,7 @@ function Base.show(io::IO, t::NetworkTrip)
 end
 
 function Base.show(io::IO, n::NetworkData)
-    density = 100*length(n.trips)/((ne(n.network.graph)-1)*ne(n.network.graph))
+    density = 100*length(n.trips)/((nv(n.network.graph)-1)*nv(n.network.graph))
     println(io,"NetworkData: trip information in network")
     @printf(io,"%d trips (%.2f%% density)",length(n.trips), density)
 end

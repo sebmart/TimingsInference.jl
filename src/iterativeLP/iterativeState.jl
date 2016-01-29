@@ -11,11 +11,9 @@
     - `data::NetworkData`          timing data in the network
     - `timings::NetworkTimings`    the current timings solution
     - `trips::Vector{NetworkTrip}` trips that we currently optimize on
-    - `paths::Vector{Vector{Int}}` path subset for each current trip datapoint
+    - `paths::Vector{Vector{Vector{Int}}}` path subset for each current trip datapoint
     Must implement:
     - `updateState!` updates the state when new timings are computed
-    - a constructor that initialize the instance with using a NetworkData object
-
 """
 abstract IterativeState
 
