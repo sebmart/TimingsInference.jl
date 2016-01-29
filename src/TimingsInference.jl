@@ -6,7 +6,7 @@
 module TimingsInference
 
 using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions, SFML
-using Base.Dates
+using Base.Dates, NearestNeighbors
 import Colors
 import RoutingNetworks: visualInit, visualEvent, visualUpdate, inPolygon
 
@@ -17,11 +17,12 @@ export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
 
 #geo data
-export GeoTrip, TripData
+export GeoTrip, TripData, NetworkProjector, NearestNode
 export inPolygon, getPolygon, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
-
+export preloadData!, getNetworkTrips, getTripTiming
 #iterative heuristic
 export IterativeState, printStats, StaticIterative, doIteration!
+
 #visualization
 export ShowTimes
 
@@ -32,6 +33,7 @@ include("networkdata/statistics.jl")
 
 include("geodata/geotrip.jl")
 include("geodata/nyctaxi.jl")
+include("geodata/networkprojector.jl")
 
 include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")

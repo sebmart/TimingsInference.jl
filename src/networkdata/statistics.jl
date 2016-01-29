@@ -16,8 +16,6 @@ function tripsStd(timings::NetworkTimings, trips::Vector{NetworkTrip})
     for t in trips
         error += ((t.time - tt[t.orig,t.dest])/t.time)^2
     end
-    error = sqrt(error/length(trips))
-
     return sqrt(error/length(trips))
 end
 
@@ -33,7 +31,6 @@ function tripsMAE(timings::NetworkTimings, trips::Vector{NetworkTrip})
     for t in trips
         error += abs(t.time - tt[t.orig,t.dest])/t.time
     end
-    error = error/length(trips)
     return error/length(trips)
 end
 

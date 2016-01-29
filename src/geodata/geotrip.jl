@@ -29,7 +29,10 @@ end
 """
 typealias TripData Vector{GeoTrip}
 
-function Base.show(io::IO, t::TripData)
+"""
+    `stats`: print information
+"""
+function stats(t::TripData)
     println("TripData: trip information in GPS coordinates")
     println("--- $(length(trips)) trips: $(sizeof(trips)/1e6)MB")
 end
@@ -40,7 +43,7 @@ end
 function removeOutliers(trips::TripData)
     reg = Bool[isRegular(t) for t in trips]
     t = trips[reg]
-    @printf("%2.f%% outliers removed\n", 100*(1-length(t)/length(trips)))
+    @printf("%.2f%% outliers removed\n", 100*(1-length(t)/length(trips)))
     return t
 end
 

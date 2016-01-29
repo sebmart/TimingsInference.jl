@@ -17,11 +17,10 @@ end
 """
     `maxSpeedTimes`
     - returns road times corresponding to maximum allowed speed (sparse array)
+    - `maxspeed`: km/h maximum speeds for each road-type
 """
-function maxSpeedTimes(n::Network)
+function maxSpeedTimes(n::Network; maxspeed::Vector{Float64} = [130.,110.,90.,50.,50.,20.,0.,0.])
     g = n.graph
-    # speeds in km/h for each roadType
-    maxspeed = [130.,110.,90.,50.,50.,20.,0.,0.]
     times = spzeros(nv(g),nv(g))
     for ((o,d),r) in n.roads
         times[o,d] = 3.6*r.distance/maxspeed[r.roadType]

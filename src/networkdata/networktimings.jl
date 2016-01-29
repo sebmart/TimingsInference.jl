@@ -26,6 +26,8 @@ type NetworkData
     minTimes::AbstractArray{Float64,2}
 end
 
+NetworkData(n::Network, trips::Vector{NetworkTrip}) = NetworkData(n, trips, maxSpeedTimes(n))
+
 
 """
     Contains timings from anywhere to anywhere in a network
