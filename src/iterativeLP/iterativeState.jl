@@ -70,62 +70,11 @@ function printStats(s::IterativeState, ref::NetworkTimings)
     return
 end
 
-
-"""
-    `StaticState`
-     Iterative state optimizing on static data
-     - do not add or remove datapoints, use them all
-     - for now, no path limitation
-"""
-type StaticIterative <: IterativeState
-    # inherited attributes
-    data::NetworkData
-    timings::NetworkTimings
-    trips::Vector{NetworkTrip}
-    paths::Vector{Vector{Vector{Int}}} # for each trip, a vector of paths
-end
-
-"""
-    initialize from NetworkData
-    - for now, randomly subsets the data to fit trip_number
-"""
-function StaticIterative(data::NetworkData, initTimes::AbstractArray{Float64,2};
-    maxTrip::Int=1000)
-    timings = NetworkTimings(data.network, initTimes)
-
-    # randomly select the trips
-    srand(1991)
-    trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
-    # One path per trip: the initial shortest path
-    paths = [Vector{Int}[getPath(timings, t.orig, t.dest)] for t in trips]
-    return StaticIterative(data,timings,trips,paths)
-end
-
-"""
-    update paths of StaticState object given new timings
-"""
-function updateState!(s::StaticIterative, times::AbstractArray{Float64,2})
-
-    # update the timings and compute shortest paths
-    s.timings = NetworkTimings(s.data.network, times)
-
-    #for all data point, check if we already have the new path.
-    for (d,t) in enumerate(s.trips)
-        sp = getPath(s.timings, t.orig, t.dest)
-        index = findfirst(s.paths[d],sp)
-        if index == 0     # if so, put it in first position
-            unshift!(s.paths[d], sp)
-        else    # if not, add it in first position
-            s.paths[d][index], s.paths[d][1] = s.paths[d][1], s.paths[d][index] #swap
-        end
-    end
-
-end
-
 """
     `FixedNumPathsPerTripState`
     Iterative state optimizing on static trip list, with each trip having a fixed max number of paths
     Paths are removed on a per-trip basis
+    Default number of paths per trip is infinite
 """
 type FixedNumPathsPerTripState <: IterativeState
     # inherited attributes
@@ -140,7 +89,7 @@ end
     Creates initial fixed number of paths per trip state
     takes in NetworkData object, initial times as 2D array, and max number of paths per trip as integer
 """
-function FixedNumPathsPerTripState(data::NetworkData, initTimes::AbstractArray{Float64, 2}, maxNumPathsPerTrip::Int = 5; maxTrip::Int=1000)
+function FixedNumPathsPerTripState(data::NetworkData, initTimes::AbstractArray{Float64, 2}; maxNumPathsPerTrip::Int = typemax(Int), maxTrip::Int=1000)
     # check that enough paths per trip
     if maxNumPathsPerTrip < 1
         error("Must have at least one path per trip")
