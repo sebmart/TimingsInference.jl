@@ -38,6 +38,7 @@ include("geodata/networkprojector.jl")
 include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")
 include("iterativeLP/firstLP.jl")
+include("iterativeLP/mip.jl")
 
 include("visualization/showtimes.jl")
 

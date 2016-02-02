@@ -43,15 +43,15 @@ function mipTravelTimes(s::IterativeState)
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
-        sum{t[paths[d][p][i], paths[d][p][i+1]], i=1:(length(paths[d][p])-1)} >= T )
+        sum{t[paths[d][p][i], paths[d][p][i+1]], i=1:(length(paths[d][p])-1)} >= T[d] )
 
     # "minimum equality" contraints
     @addConstraint(m, equalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
-        sum{t[paths[d][p][i], paths[d][p][i+1]], i=1:(length(paths[d][p])-1)} - M[d] * (1 - minP[d,p]) <= T)
+        sum{t[paths[d][p][i], paths[d][p][i+1]], i=1:(length(paths[d][p])-1)} - M[d]*(1 - minP[d,p]) <= T[d])
 
     # integer constraints
     @addConstraint(m, equalityPath[d=eachindex(tripData)], sum{minP[d,p], p = eachindex(paths[d])} == 1)
-    
+
     # SOLVE LP
     status = solve(m)
     times = getValue(t)
