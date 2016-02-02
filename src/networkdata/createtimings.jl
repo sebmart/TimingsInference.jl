@@ -33,7 +33,7 @@ end
     - returns road times corresponding to constant speed (sparse array)
     - `speed` in km/h
 """
-function uniformTimes(n::Network, speed=90)
+function uniformTimes(n::Network, speed::Float64=90.)
     g = n.graph
     times = spzeros(nv(g),nv(g))
     for ((o,d),r) in n.roads
