@@ -70,27 +70,30 @@ function printStats(s::IterativeState, ref::NetworkTimings)
     return
 end
 
-
 """
-    `StaticState`
-     Iterative state optimizing on static data
-     - do not add or remove datapoints, use them all
-     - for now, no path limitation
+    `FixedNumPathsPerTripState`
+    Iterative state optimizing on static trip list, with each trip having a fixed max number of paths
+    Paths are removed on a per-trip basis
+    Default number of paths per trip is infinite
 """
-type StaticIterative <: IterativeState
+type FixedNumPathsPerTripState <: IterativeState
     # inherited attributes
     data::NetworkData
     timings::NetworkTimings
     trips::Vector{NetworkTrip}
-    paths::Vector{Vector{Vector{Int}}} # for each trip, a vector of paths
+    paths::Vector{Vector{Vector{Int}}}  # for each trip, a vector of paths
+    maxNumPathsPerTrip::Int64           # maxNumber of paths per trip
 end
 
 """
-    initialize from NetworkData
-    - for now, randomly subsets the data to fit trip_number
+    Creates initial fixed number of paths per trip state
+    takes in NetworkData object, initial times as 2D array, and max number of paths per trip as integer
 """
-function StaticIterative(data::NetworkData, initTimes::AbstractArray{Float64,2};
-    maxTrip::Int=1000)
+function FixedNumPathsPerTripState(data::NetworkData, initTimes::AbstractArray{Float64, 2}; maxNumPathsPerTrip::Int = typemax(Int), maxTrip::Int=1000)
+    # check that enough paths per trip
+    if maxNumPathsPerTrip < 1
+        error("Must have at least one path per trip")
+    end
     timings = NetworkTimings(data.network, initTimes)
 
     # randomly select the trips
@@ -98,26 +101,46 @@ function StaticIterative(data::NetworkData, initTimes::AbstractArray{Float64,2};
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
     paths = [Vector{Int}[getPath(timings, t.orig, t.dest)] for t in trips]
-    return StaticIterative(data,timings,trips,paths)
+    return FixedNumPathsPerTripState(data,timings,trips,paths,maxNumPathsPerTrip)
 end
 
 """
-    update paths of StaticState object given new timings
+    Update paths of FixedNumPathsPerTripState object given new times
 """
-function updateState!(s::StaticIterative, times::AbstractArray{Float64,2})
-
-    #update the timings and compute shortest paths
+function updateState!(s::FixedNumPathsPerTripState, times::AbstractArray{Float64, 2})
+    # update the timings and compute shortest paths
     s.timings = NetworkTimings(s.data.network, times)
 
-    #for all data point, check if we already have the new path.
-    for (d,t) in enumerate(s.trips)
-        sp = getPath(s.timings, t.orig, t.dest)
-        index = findfirst(s.paths[d],sp)
-        if index == 0     # if so, put it in first position
-            unshift!(s.paths[d], sp)
-        else    # if not, add it in first position
-            s.paths[d][index], s.paths[d][1] = s.paths[d][1], s.paths[d][index] #swap
+    if s.maxNumPathsPerTrip == 1
+        for (d,t) in enumerate(s.trips)
+            sp = getPath(s.timings, t.orig, t.dest)
+            s.paths[d][1] = sp
+        end
+    else
+        # for all data points, check if we already have the new path.
+        for (d,t) in enumerate(s.trips)
+            sp = getPath(s.timings, t.orig, t.dest)
+            index = findfirst(s.paths[d],sp)
+            if index != 0   # if so, put it in first position
+                s.paths[d][index], s.paths[d][1] = s.paths[d][1], s.paths[d][index] #swap
+            elseif length(s.paths[d]) < s.maxNumPathsPerTrip # if not, and if enough room to add, add it in first position
+                unshift!(s.paths[d], sp)
+            else        # replace least useful path
+                worstIndex = findWorstPathIndex(s.paths[d], s.timings)
+                s.paths[d][worstIndex] = s.paths[d][1]
+                s.paths[d][1] = sp
+            end
         end
     end
+end
 
+"""
+    Find path that is least useful for a given trip (i.e. longest path)
+"""
+function findWorstPathIndex(paths::Vector{Vector{Int}}, t::NetworkTimings)
+    pathTime = zeros(length(paths))
+    for i = 1:length(pathTime)
+        pathTime[i] = sum([t.times[paths[i][a],paths[i][a+1]] for a = 1:(length(paths[i])-1)])
+    end
+    return indmax(pathTime)
 end

@@ -21,7 +21,7 @@ export GeoTrip, TripData, NetworkProjector, NearestNode
 export inPolygon, getPolygon, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
 export preloadData!, getNetworkTrips, getTripTiming
 #iterative heuristic
-export IterativeState, printStats, StaticIterative, doIteration!
+export IterativeState, printStats, doIteration!, FixedNumPathsPerTripState
 
 #visualization
 export ShowTimes
