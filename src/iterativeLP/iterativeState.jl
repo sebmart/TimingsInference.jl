@@ -162,17 +162,25 @@ function updateState!(s::FixedNumPathsPerTripState, times::AbstractArray{Float64
     # update the timings and compute shortest paths
     s.timings = NetworkTimings(s.data.network, times)
 
-    # for all data points, check if we already have the new path.
-    for (d,t) in enumerate(s.trips)
-        sp = getPath(s.timings, t.orig, t.dest)
-        index = findfirst(s.paths[d],sp)
-        if index != 0   # if so, put it in first position
-            s.paths[d][index], s.paths[d][1] = s.paths[d][1], s.paths[d][index] #swap
-        elseif length(s.paths[d]) < s.maxNumPathsPerTrip # if not, and if enough room to add, add it in first position
-            unshift!(s.paths[d], sp)
-        else        # replace least useful path
-            worstIndex = findWorstPathIndex(s.paths[d], s.timings)
-            s.paths[d][1], s.paths[d][worstIndex] = sp, s.paths[d][1] # swap and update
+    if s.maxNumPathsPerTrip == 1
+        for (d,t) in enumerate(s.trips)
+            sp = getPath(s.timings, t.orig, t.dest)
+            s.paths[d][1] = sp
+        end
+    else
+        # for all data points, check if we already have the new path.
+        for (d,t) in enumerate(s.trips)
+            sp = getPath(s.timings, t.orig, t.dest)
+            index = findfirst(s.paths[d],sp)
+            if index != 0   # if so, put it in first position
+                s.paths[d][index], s.paths[d][1] = s.paths[d][1], s.paths[d][index] #swap
+            elseif length(s.paths[d]) < s.maxNumPathsPerTrip # if not, and if enough room to add, add it in first position
+                unshift!(s.paths[d], sp)
+            else        # replace least useful path
+                worstIndex = findWorstPathIndex(s.paths[d], s.timings)
+                s.paths[d][worstIndex] = s.paths[d][1]
+                s.paths[d][1] = sp
+            end
         end
     end
 end
