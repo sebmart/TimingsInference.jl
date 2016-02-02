@@ -82,6 +82,7 @@ type FixedNumPathsPerTripState <: IterativeState
     timings::NetworkTimings
     trips::Vector{NetworkTrip}
     paths::Vector{Vector{Vector{Int}}}  # for each trip, a vector of paths
+
     maxNumPathsPerTrip::Int64           # maxNumber of paths per trip
 end
 
@@ -126,21 +127,10 @@ function updateState!(s::FixedNumPathsPerTripState, times::AbstractArray{Float64
             elseif length(s.paths[d]) < s.maxNumPathsPerTrip # if not, and if enough room to add, add it in first position
                 unshift!(s.paths[d], sp)
             else        # replace least useful path
-                worstIndex = findWorstPathIndex(s.paths[d], s.timings)
+                worstIndex = indmax([pathTime(s.timings, p) for p in s.paths[d]])
                 s.paths[d][worstIndex] = s.paths[d][1]
                 s.paths[d][1] = sp
             end
         end
     end
-end
-
-"""
-    Find path that is least useful for a given trip (i.e. longest path)
-"""
-function findWorstPathIndex(paths::Vector{Vector{Int}}, t::NetworkTimings)
-    pathTime = zeros(length(paths))
-    for i = 1:length(pathTime)
-        pathTime[i] = sum([t.times[paths[i][a],paths[i][a+1]] for a = 1:(length(paths[i])-1)])
-    end
-    return indmax(pathTime)
 end
