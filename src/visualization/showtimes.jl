@@ -47,6 +47,9 @@ type ShowTimes <: NetworkVisualizer
             end
             obj.minSpeed = minSpeed
             obj.maxSpeed = maxSpeed
+            if minSpeed == maxSpeed
+                obj.minSpeed *= 0.99
+            end
         else
             (obj.minSpeed,obj.maxSpeed) = speedRange
         end
