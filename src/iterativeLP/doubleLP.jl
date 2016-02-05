@@ -48,7 +48,7 @@ function doubleLP(s::IterativeState)
 
     # SET UP SECOND STEP
     # objective function variables
-    @defVar(m, delta2[i=nodes,j=out[i]] >= 0)
+    @defVar(m, delta2[i=vertices(g), j=out_neighbors(g,i)] >= 0)
 
     # CONSTRAINTS
     # for objective
@@ -67,7 +67,7 @@ function doubleLP(s::IterativeState)
 		)
 
 	# OBJECTIVE
-	@setObjective(m, Min, sum{delta2[i,j], i=nodes, j=out[i]})
+	@setObjective(m, Min, sum{delta2[i,j], i=vertices(g), j=out_neighbors(g,i)})
 
 	# SOLVE SECOND LP
 	status = solve(m)
