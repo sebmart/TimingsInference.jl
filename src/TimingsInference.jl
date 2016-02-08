@@ -39,6 +39,7 @@ include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")
 include("iterativeLP/firstLP.jl")
 include("iterativeLP/mip.jl")
+include("iterativeLP/doubleLP.jl")
 
 include("visualization/showtimes.jl")
 

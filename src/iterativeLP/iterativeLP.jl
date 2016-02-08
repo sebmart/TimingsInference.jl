@@ -8,13 +8,15 @@
     - `state`: state to iterate on, `n`: number of iterations
     - `method`: method to optimize traveltimes (default = "lp")
 """
-function doIteration!(state::IterativeState, n::Int=1; method::AbstractString="lp")
+function doIteration!(state::IterativeState, n::Int=1; method::AbstractString="lp2")
     for k in 1:n
         #running the method and save the new times
         if method == "lp"
             times = lpTravelTimes(state)
         elseif method == "mip"
             times = mipTravelTimes(state)
+        elseif method == "lp2"
+            times = doubleLP(state)
         else
             error("method $method is not implemented")
         end
