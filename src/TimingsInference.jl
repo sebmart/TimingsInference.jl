@@ -17,7 +17,7 @@ export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
 
 #geo data
-export GeoTrip, GeoData, NetworkProjector, NearestNode
+export GeoTrip, GeoData, NetworkProjector, NearestNode, DataSplit, RandomSplit
 export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
 export preloadData!, getNetworkTrips, getTripTiming
 #iterative heuristic
@@ -34,6 +34,7 @@ include("networkdata/statistics.jl")
 include("geodata/geotrip.jl")
 include("geodata/nyctaxi.jl")
 include("geodata/networkprojector.jl")
+include("geodata/splitdata.jl")
 
 include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")

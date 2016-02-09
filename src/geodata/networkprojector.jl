@@ -4,9 +4,9 @@
 ###################################################
 
 """
-    `NetworkProjector`: abstract type that the link between NetworkData and GeoData
+    `NetworkProjector`: abstract type that creates a link between NetworkData and GeoData
     is used to project geographical data onto network and to use network results
-    must implements attributes:
+    must implement attributes:
     - `network::Network`
     - `trips::GeoData` : reference to trip data
     methods:
@@ -35,7 +35,6 @@ function NetworkData(
     # Create the "NetworkTrip" array
     return NetworkData(proj.network, getNetworkTrips(proj, trips, args...), minTimes)
 end
-
 
 """
     `NearestNode` : Projects trips to the nearest nodes, give the associated prediction
