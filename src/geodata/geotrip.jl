@@ -25,22 +25,22 @@ function Base.show(io::IO, t::GeoTrip)
 end
 
 """
-    `TripData`: list of `GeoTrip`
+    `GeoData`: list of `GeoTrip`
 """
-typealias TripData Vector{GeoTrip}
+typealias GeoData Vector{GeoTrip}
 
 """
     `stats`: print information
 """
-function stats(t::TripData)
-    println("TripData: trip information in GPS coordinates")
+function stats(t::GeoData)
+    println("GeoData: trip information in GPS coordinates")
     println("--- $(length(t)) trips: $(sizeof(t)/1e6)MB")
 end
 
 """
     `removeBadTrips`: filter a `GeoTrip` list to remove outliers
 """
-function removeOutliers(trips::TripData)
+function removeOutliers(trips::GeoData)
     reg = Bool[isRegular(t) for t in trips]
     t = trips[reg]
     @printf("%.2f%% outliers removed\n", 100*(1-length(t)/length(trips)))
@@ -82,7 +82,7 @@ function inPolygon(t::GeoTrip, poly::Vector{Tuple{Float32,Float32}})
     return pointInsidePolygon(t.pLon,t.pLat,poly) && pointInsidePolygon(t.dLon,t.dLat,poly)
 end
 
-function inPolygon(trips::TripData, poly::Vector{Tuple{Float32,Float32}})
+function inPolygon(trips::GeoData, poly::Vector{Tuple{Float32,Float32}})
     mask = BitArray(length(trips))
     for (i,t) in enumerate(trips)
         if i%10_000 == 0

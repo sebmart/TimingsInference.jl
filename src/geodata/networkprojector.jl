@@ -8,9 +8,9 @@
     is used to project geographical data onto network and to use network results
     must implements attributes:
     - `network::Network`
-    - `trips::TripData` : reference to trip data
+    - `trips::GeoData` : reference to trip data
     methods:
-    - `preloadData!`: takes TripData and load it
+    - `preloadData!`: takes GeoData and load it
     - `getNetworkTrips`: returns network trips associated with given geo-trips
     - `getTripTiming` : returns timing estimation for a geographical trip (random or known)
 """
@@ -43,7 +43,7 @@ end
 type NearestNode <: NetworkProjector
     # compulsory attributes
     network::Network
-    trips::TripData
+    trips::GeoData
 
     # projection KD-tree
     tree::KDTree
@@ -53,7 +53,7 @@ type NearestNode <: NetworkProjector
     function NearestNode(n::Network)
         obj = new()
         obj.network = n
-        obj.trips = TripData[]
+        obj.trips = GeoData[]
         obj.proj  = Tuple{Int,Int}[]
         # Constructing tree
         dataPos = Array(Float32,(2,length(n.nodes)))
@@ -69,7 +69,7 @@ end
 """
     `NearestNode` extended constructor: also preloads the data
 """
-function NearestNode(n::Network, trips::TripData)
+function NearestNode(n::Network, trips::GeoData)
     nn = NearestNode(n)
     preloadData!(nn, trips)
     nn
@@ -78,7 +78,7 @@ end
 """
     `preloadData!`: project all trips onto their nearest node
 """
-function preloadData!(nn::NearestNode, trips::TripData)
+function preloadData!(nn::NearestNode, trips::GeoData)
     nTrips = length(trips)
     println("Projecting $nTrips geo-trips onto network-nodes...")
     #initializing containers

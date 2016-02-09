@@ -17,7 +17,7 @@ export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
 
 #geo data
-export GeoTrip, TripData, NetworkProjector, NearestNode
+export GeoTrip, GeoData, NetworkProjector, NearestNode
 export inPolygon, getPolygon, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
 export preloadData!, getNetworkTrips, getTripTiming
 #iterative heuristic
