@@ -74,6 +74,28 @@ end
 tripDistance(t::GeoTrip) = distanceGeo(t.pLon,t.pLat,t.dLon,t.dLat)
 
 """
+    `inTimeWindow`: keep trips in a certain time window
+    - for GeoTrip object: returns boolean
+    - for GeoData object: returns filtered GeoData object
+"""
+function inTimeWindow(t::GeoTrip, startHour::Int, endHour::Int)
+    return startHour <= Dates.hour(t.pTime) && Dates.hour(t.pTime) < endHour
+end
+
+function inTimeWindow(trips::GeoData, startHour::Int, endHour::Int)
+    mask = BitArray(length(trips))
+    for (i, t) in enumerate(trips)
+        if i%10_000 == 0
+            @printf("\r%.2f%% trips checked     ",100*i/length(trips))
+        end
+        mask[i] = inTimeWindow(t, startHour, endHour)
+    end
+    newTrips = trips[mask]
+    @printf("\r%2.f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
+    return newTrips
+end
+
+"""
     `inPolygon`: keep trips with pickup and dropoff inside a polygon
     - for one trip: returns boolean
     - for trip list: returns filtered list
