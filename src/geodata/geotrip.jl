@@ -113,7 +113,7 @@ function onlyWeekdays(trips::GeoData)
         mask[i] = onlyWeekdays(t)
     end
     newTrips = trips[mask]
-    @printf("\r%2.f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
+    @printf("\r%.2f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
     return newTrips
 end
 """
@@ -134,7 +134,7 @@ function inPolygon(trips::GeoData, poly::Vector{Tuple{Float32,Float32}})
         mask[i] = inPolygon(t,poly)
     end
     t = trips[mask]
-    @printf("\r%2.f%% trips removed\n", 100*(1-length(t)/length(trips)))
+    @printf("\r%.2f%% trips removed\n", 100*(1-length(t)/length(trips)))
     return t
 end
 

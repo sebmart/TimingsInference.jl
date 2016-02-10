@@ -6,6 +6,7 @@
 
 """
     `fromNYCTaxiData` : extract one month of trip information from original trip CSV
+    Return GeoData object
 """
 function fromNYCTaxiCSV(fileName::AbstractString)
     println("Counting lines...")
