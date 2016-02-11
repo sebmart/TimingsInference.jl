@@ -31,7 +31,7 @@ type RandomSplit <: DataSplit
 	fractionTrain::Float64
 	function RandomSplit(geodata::GeoData, fractionTrain::Float64, trips::AbstractArray{Int64, 1} = eachindex(geodata))
 		obj = new()
-		obj.geodata = GeoData
+		obj.geodata = geodata
 		obj.fractionTrain = fractionTrain
 		# split set of trips into training and testing
 		shuf = shuffle(collect(trips))
@@ -51,4 +51,17 @@ function NetworkData(
     args...)
     # Create the "NetworkTrip" array
     return NetworkData(proj.network, getNetworkTrips(proj, datasplit.trainingIDs, args...), minTimes)
+end
+
+"""
+	`testingTripsMAE`: compute MAE on testing set 
+"""
+function testingTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit)
+	tt = getPathTimes(timings)
+	error = 0.
+	for testID in ds.testingIDs
+		error += (getTripTiming(proj, timings, testID) - ds.geodata[testID].time)/ds.geodata[testID].time
+	end
+	error = error / length(ds.testingIDs)
+	return error
 end

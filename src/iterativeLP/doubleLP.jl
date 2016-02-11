@@ -15,7 +15,7 @@ function doubleLP(s::IterativeState)
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, OutputFlag=1, Method=3, BarConvTol=1e-6))
+    m = Model(solver = GurobiSolver(TimeLimit=10000, OutputFlag=0, Method=3, BarConvTol=1e-6))
 
     # DECISION VARIABLES
     # Road times
