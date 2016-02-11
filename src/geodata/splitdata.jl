@@ -38,6 +38,7 @@ type RandomSplit <: DataSplit
 		endTraining = round(fractionTrain * length(trips), Int)
 		obj.trainingIDs = sort(shuf[1:endTraining])
 		obj.testingIDs = sort(shuf[(endTraining + 1):end])
+		return obj
 	end
 end
 

@@ -23,4 +23,14 @@ type RealDataStatObject <: StatObject
 	testingMAE::Array{Float64,1}
 	trainingMAEfull::Array{Float64,1}
 	trainingMAEused::Array{Float64,1}
+	function RealDataStatObject(initialTimes::AbstractArray{Float64, 2})
+		obj = new()
+		obj.nIter = 0
+		obj.times = AbstractArray{Float64, 2}[]
+		push!(obj.times, initialTimes)
+		obj.testingMAE = Float64[]
+		obj.trainingMAEfull = Float64[]
+		obj.trainingMAEused = Float64[]
+		return obj
+	end
 end

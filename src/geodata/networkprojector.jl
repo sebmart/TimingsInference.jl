@@ -61,7 +61,7 @@ type NearestNode <: NetworkProjector
            dataPos[2,i] = node.lat
         end
         obj.tree = KDTree(dataPos)
-        obj
+        return obj
     end
 end
 
@@ -71,7 +71,7 @@ end
 function NearestNode(n::Network, trips::GeoData)
     nn = NearestNode(n)
     preloadData!(nn, trips)
-    nn
+    return nn
 end
 
 """
@@ -92,7 +92,7 @@ function preloadData!(nn::NearestNode, trips::GeoData)
         nn.proj[i] = (idP,idD)
     end
     println("\r100.00% trips projected     ")
-    nn
+    return nn
 end
 
 """
