@@ -82,16 +82,18 @@ function allPathsMAEByLength(timingsRef::NetworkTimings, timingsNew::NetworkTimi
     errors = [0. for i=eachindex(ub)]
     nTrips = [0 for i=eachindex(ub)]
 
-    for o in vertices(g), d in vertices(g), o != d
-        pathLength = length(getPath(timingsRef, o, d))
-        idx = 1
-        while pathLength > ub[idx]
-            idx += 1
+    for o in vertices(g), d in vertices(g)
+        if o != d
+            pathLength = length(getPath(timingsRef, o, d)) - 1
+            idx = 1
+            while pathLength > ub[idx]
+                idx += 1
+            end
+            errors[idx] = (nTrips[idx] * errors[idx] + abs(tt1[o,d] - tt2[o,d])/tt1[o,d])/(nTrips[idx] + 1)
+            nTrips[idx] += 1
         end
-        errors[idx] += (nTrips[idx] * errors[idx] + abs(tt1[o,d] - tt2[o,d])/tt1[o,d])/(nTrips[idx] + 1)
-        nTrips[idx] += 1
     end
-    return ub, errors
+    return ub, errors, nTrips
 end
 
 """
