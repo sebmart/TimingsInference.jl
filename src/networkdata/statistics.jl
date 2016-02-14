@@ -69,6 +69,34 @@ function allPathsMAE(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
 end
 
 """
+    `allPathsMAEByLength`: compute MAE of timings percentage for all paths, broken down by path length
+    - `timingsRef`: reference times
+    - `timingsNew`: times to compare with
+    - `lengths`: the different length-bounds we will consider.
+"""
+function allPathsMAEByLength(timingsRef::NetworkTimings, timingsNew::NetworkTimings;
+                    lengths::Vector{Int} = [1, 2, 3, 5, 10, 15, 20, 1_000_000])
+    tt1 = getPathTimes(timingsRef)
+    tt2 = getPathTimes(timingsNew)
+
+    errors = [0. for i=eachindex(ub)]
+    nTrips = [0 for i=eachindex(ub)]
+
+    for o in 1:nNodes(timingsRef.network), d in 1:nNodes(timingsRef.network)
+        if o != d
+            pathLength = length(getPath(timingsRef, o, d)) - 1
+            idx = 1
+            while pathLength > lengths[idx]
+                idx += 1
+            end
+            errors[idx] = (nTrips[idx] * errors[idx] + abs(tt1[o,d] - tt2[o,d])/tt1[o,d])/(nTrips[idx] + 1)
+            nTrips[idx] += 1
+        end
+    end
+    return lengths, errors, nTrips
+end
+
+"""
     `roadTimeStd`: compute standard deviation of road time error percentage
     - `timingsRef`: reference times
     - `timingsNew`: times to compare with
