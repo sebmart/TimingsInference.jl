@@ -55,14 +55,24 @@ function NetworkData(
 end
 
 """
-	`testingTripsMAE`: compute MAE on testing set 
+	`tripsMAE`: compute MAE on whatever set of indices is passed
 """
-function testingTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit)
+function tripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int})
 	tt = getPathTimes(timings)
 	error = 0.
-	for testID in ds.testingIDs
-		error += (getTripTiming(proj, timings, testID) - ds.geodata[testID].time)/ds.geodata[testID].time
+	for ID in IDlist
+		error += (getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time
 	end
-	error = error / length(ds.testingIDs)
+	error = error / length(IDlist)
 	return error
 end
+
+"""
+	`testingTripsMAE`: compute MAE on testing set 
+"""
+testingTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsMAE(timings, proj, ds, ds.testingIDs)
+
+"""
+	`trainingTripsMAE`: compute MAE on full training set
+"""
+trainingTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsMAE(timings, proj, ds, ds.trainingIDs)
