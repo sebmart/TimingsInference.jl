@@ -72,3 +72,13 @@ function plotStats(so::RealDataStatObject)
 	title("Evolution of MAE with algorithm progress")
 	legend()
 end
+
+"""
+	`update!`: not a required method, but useful. Adds one round of stats to the StatObject
+"""
+function update!(so::RealDataStatObject, times::AbstractArray{Float64, 2}, trainingMAE::Float64, testingMAE::Float64)
+	so.nIter += 1
+	push!(so.times, times)
+	push!(so.trainingMAE, trainingMAE)
+	push!(so.testingMAE, testingMAE)
+end
