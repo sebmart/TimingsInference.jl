@@ -114,7 +114,7 @@ function getNetworkTrips(nn::NearestNode, tIds::AbstractArray{Int64,1})
         if haskey(netTrips, od)
             nt = netTrips[od]
             time = nt.time * nt.weight/(nt.weight + 1.) + t.time/(nt.weight + 1.)
-            netTrips[od] = NetworkTrip(nt.orig,nt.dest,time, nt.weight+1.)
+            netTrips[od] = NetworkTrip(nt.orig, nt.dest, time, nt.weight+1.)
         else
             netTrips[od] = NetworkTrip(od[1],od[2],t.time,1.)
         end
@@ -133,4 +133,78 @@ function getTripTiming(nn::NearestNode, timings::NetworkTimings, t::GeoTrip)
     o = knn(nn.tree,[t.pLon,t.pLat],1)[1][1]
     d = knn(nn.tree,[t.dLon,t.dLat],1)[1][1]
     return timings.pathTime[o,d]
+end
+
+type AvgRadius <: NetworkProjector
+    # compulsory attributes
+    network::Network
+    trips::GeoData
+
+    # radius
+    radius::Float64
+    # projection KD-tree (contains rides)
+    tree::KDTree
+    # precomputation (node->trip list)
+    nodeList::Vector{Vector{Tuple{Int,Int}}}
+
+    function AvgRadius(n::Network, r::Float64)
+        obj = new()
+        obj.radius = r
+        obj.network = n
+        obj.trips = GeoData[]
+        obj.nodeList = Vector{Tuple{Int,Int}}[]
+        nNodePairs = length(n.nodes) * length(n.nodes))
+        dataPos = Array(Float32,(4, nNodePairs))
+        for (i, startNode) in enumerate(n.nodes), (j, endNode) in enumerate(n.nodes)
+            dataPos[1, (i-1) * length(n.nodes) + j] = startNode.lon
+            dataPos[2, (i-1) * length(n.nodes) + j] = startNode.lat
+            dataPos[3, (i-1) * length(n.nodes) + j] = endNode.lon
+            dataPos[4, (i-1) * length(n.nodes) + j] = endNode.lat
+        end
+        obj.tree = KDTree(dataPos)
+        return obj
+    end
+end
+
+"""
+    `AvgRadius` extended constructor: also preloads the data
+"""
+function AvgRadius(n::Network, r::Float64, trips::GeoData)
+    ar = AvgRadius(n, r)
+    preloadData!(ar, trips)
+    return ar
+end
+
+"""
+    `preloadData!`: project all trips onto their nearest node
+"""
+function preloadData!(ar::AvgRadius, trips::GeoData)
+    nTrips = length(trips)
+    println("Projecting $nTrips geo-trips onto network-nodes...")
+    #initializing containers
+    ar.trips = trips
+    ar.nodeList = Array(Vector{Tuple{Int,Int}}, nTrips)
+    
+    # helper function to map from single index to node pair
+    function decipherNodePairIndex(idx::Int)
+        nNodes = length(ar.network.nodes)
+        startNode = Int(div(idx, nNodes)) + 1
+        endNode = idx % nNodes
+        return (startNode, endNode)
+    end
+
+    # helper function to check different start and end
+    isValidNodePair(nodePair::Tuple{Int,Int}) = (nodePair[1] != nodePair[2])
+
+    for (i,t) in enumerate(trips)
+        if i%100_000 == 0
+            @printf("\r%.2f%% trips projected     ",100*i/nTrips)
+        end
+        tripLocation = [t.pLon, t.pLat, t.dLon, t.dLat]
+        nodes = inrange(ar.tree, tripLocation, ar.radius)
+        tmpNodeList = map(decipherNodePairIndex, nodes)
+        ar.nodeList[i] = tmpNodeList[map(isValidNodePair, tmpNodeList)]
+    end
+    println("\r100.00% trips projected     ")
+    return ar
 end
