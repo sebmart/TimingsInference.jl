@@ -193,9 +193,6 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
         return (startNode, endNode)
     end
 
-    # helper function to check different start and end
-    isValidNodePair(nodePair::Tuple{Int,Int}) = (nodePair[1] != nodePair[2])
-
     for (i,t) in enumerate(trips)
         if i%100_000 == 0
             @printf("\r%.2f%% trips projected     ",100*i/nTrips)
@@ -208,3 +205,70 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
     println("\r100.00% trips projected     ")
     return ar
 end
+
+"""
+    `getNetworkTrips`: constructs list of NetworkTrip objects
+"""
+function getNetworkTrips(ar::AvgRadius, tIds::AbstractArray{Int64,1})
+    if length(ar.trips) < length(tIds)
+        error("Trips not loaded yet")
+    end
+    # Store result in dictionary : (orig,dest)->NetworkTrip
+    netTrips = Dict{Tuple{Int,Int},NetworkTrip}()
+    for id in tIds
+        t = ar.trips[id]
+        nodePairs = ar.nodeList[id]
+        for od in nodePairs
+            #if same origin/destination
+            if od[1] == od[2]
+                continue
+            end
+            if haskey(netTrips, od)
+                nt = netTrips[od]
+                time = nt.time * nt.weight/(nt.weight + 1.) + t.time/(nt.weight + 1.)
+                netTrips[od] = NetworkTrip(nt.orig, nt.dest, time, nt.weight+1.)
+            else
+                netTrips[od] = NetworkTrip(od[1],od[2],t.time,1.)
+            end
+        end
+    end
+    return collect(values(netTrips))
+end
+
+"""
+    `getTripTiming`: returns a trip timing estimation from a NetworkTimings result
+"""
+function getTripTiming(ar::AvgRadius, timings::NetworkTimings, tId::Int)
+    nodePairs = ar.nodeList[tId]
+    # average over neighboring nodes
+    time = 0.
+    for od in nodePairs
+        time += timings.pathTime[od[1], od[2]]
+    end
+    return time / length(nodePairs)
+end
+function getTripTiming(ar::AvgRadius, timings::NetworkTimings, t::GeoTrip)
+    # helper function
+    function decipherNodePairIndex(idx::Int)
+        nNodes = length(ar.network.nodes)
+        startNode = Int(div(idx, nNodes)) + 1
+        endNode = idx % nNodes
+        return (startNode, endNode)
+    end
+    # find nodes within radius
+    tripLocation = [t.pLon, t.pLat, t.dLon, t.dLat]
+    nodePairs = inrange(ar.tree, tripLocation, ar.radius)
+    nodePairs = map(decipherNodePairIndex, nodePairs)
+    nodePairs = tmpNodes[map(isValidNodePair, nodePairs)]
+    # average travel times
+    time = 0.
+    for od in nodePairs
+        time += timings.pathTime[od[1], od[2]]
+    end
+    return time / length(nodePairs)
+end
+
+"""
+    `isValidNodePair`: helper function to check different start and end
+"""
+isValidNodePair(nodePair::Tuple{Int,Int}) = (nodePair[1] != nodePair[2])
