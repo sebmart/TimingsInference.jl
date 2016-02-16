@@ -35,7 +35,7 @@ type RandomSplit <: DataSplit
 		obj.fractionTrain = fractionTrain
 		# split set of trips into training and testing
 		shuf = shuffle(collect(trips))
-		endTraining = round(fractionTrain * length(trips), Int)
+		endTraining = round(Int, fractionTrain * length(trips))
 		obj.trainingIDs = sort(shuf[1:endTraining])
 		obj.testingIDs = sort(shuf[(endTraining + 1):end])
 		return obj
