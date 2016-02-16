@@ -127,12 +127,12 @@ end
 """
 function getTripTiming(nn::NearestNode, timings::NetworkTimings, tId::Int)
     o,d = nn.proj[tId]
-    return timings.pathTime[o,d]
+    return timings.pathTimes[o,d]
 end
 function getTripTiming(nn::NearestNode, timings::NetworkTimings, t::GeoTrip)
     o = knn(nn.tree,[t.pLon,t.pLat],1)[1][1]
     d = knn(nn.tree,[t.dLon,t.dLat],1)[1][1]
-    return timings.pathTime[o,d]
+    return timings.pathTimes[o,d]
 end
 
 type AvgRadius <: NetworkProjector
