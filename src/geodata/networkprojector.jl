@@ -153,7 +153,7 @@ type AvgRadius <: NetworkProjector
         obj.network = n
         obj.trips = GeoData[]
         obj.nodeList = Vector{Tuple{Int,Int}}[]
-        nNodePairs = length(n.nodes) * length(n.nodes))
+        nNodePairs = length(n.nodes) * length(n.nodes)
         dataPos = Array(Float32,(4, nNodePairs))
         for (i, startNode) in enumerate(n.nodes), (j, endNode) in enumerate(n.nodes)
             dataPos[1, (i-1) * length(n.nodes) + j] = startNode.lon
