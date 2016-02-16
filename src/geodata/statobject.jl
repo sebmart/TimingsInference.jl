@@ -18,7 +18,7 @@ abstract StatObject
 
 function Base.show(io::IO, so::StatObject)
 	typeName = split(string(typeof(so)),".")[end]
-	println(io, "$(typeName) for iteration $(nIter)")
+	println(io, "$(typeName) for iteration $(so.nIter)")
 end
 
 type RealDataStatObject <: StatObject
