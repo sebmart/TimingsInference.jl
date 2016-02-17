@@ -57,8 +57,8 @@ type NearestNode <: NetworkProjector
         # Constructing tree
         dataPos = Array(Float32,(2,length(n.nodes)))
         for (i,node) in enumerate(n.nodes)
-           dataPos[1,i] = node.lon
-           dataPos[2,i] = node.lat
+           dataPos[1,i] = node.x
+           dataPos[2,i] = node.y
         end
         obj.tree = KDTree(dataPos)
         return obj
@@ -87,8 +87,10 @@ function preloadData!(nn::NearestNode, trips::GeoData)
         if i%100_000 == 0
             @printf("\r%.2f%% trips projected     ",100*i/nTrips)
         end
-        idP = knn(nn.tree,[t.pLon,t.pLat],1)[1][1]
-        idD = knn(nn.tree,[t.dLon,t.dLat],1)[1][1]
+        pX, pY = toENU(t.pLon, t.pLat, nn.network)
+        idP = knn(nn.tree,[pX,pY],1)[1][1]
+        dX, dY = toENU(t.dLon, t.dLat, nn.network)
+        idD = knn(nn.tree,[dX,dY],1)[1][1]
         nn.proj[i] = (idP,idD)
     end
     println("\r100.00% trips projected     ")
@@ -130,8 +132,10 @@ function getTripTiming(nn::NearestNode, timings::NetworkTimings, tId::Int)
     return timings.pathTimes[o,d]
 end
 function getTripTiming(nn::NearestNode, timings::NetworkTimings, t::GeoTrip)
-    o = knn(nn.tree,[t.pLon,t.pLat],1)[1][1]
-    d = knn(nn.tree,[t.dLon,t.dLat],1)[1][1]
+    pX, pY = toENU(t.pLon, t.pLat, nn.network)
+    o = knn(nn.tree,[pX,pY],1)[1][1]
+    dX, dY = toENU(t.dLon, t.dLat, nn.network)
+    d = knn(nn.tree,[dX,dY],1)[1][1]
     return timings.pathTimes[o,d]
 end
 
@@ -156,10 +160,10 @@ type AvgRadius <: NetworkProjector
         nNodePairs = length(n.nodes) * length(n.nodes)
         dataPos = Array(Float32,(4, nNodePairs))
         for (i, startNode) in enumerate(n.nodes), (j, endNode) in enumerate(n.nodes)
-            dataPos[1, (i-1) * length(n.nodes) + j] = startNode.lon
-            dataPos[2, (i-1) * length(n.nodes) + j] = startNode.lat
-            dataPos[3, (i-1) * length(n.nodes) + j] = endNode.lon
-            dataPos[4, (i-1) * length(n.nodes) + j] = endNode.lat
+            dataPos[1, (i-1) * length(n.nodes) + j] = startNode.x
+            dataPos[2, (i-1) * length(n.nodes) + j] = startNode.y
+            dataPos[3, (i-1) * length(n.nodes) + j] = endNode.x
+            dataPos[4, (i-1) * length(n.nodes) + j] = endNode.y
         end
         obj.tree = KDTree(dataPos)
         return obj
@@ -197,7 +201,9 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
         if i%100_000 == 0
             @printf("\r%.2f%% trips projected     ",100*i/nTrips)
         end
-        tripLocation = [t.pLon, t.pLat, t.dLon, t.dLat]
+        pX, pY = toENU(t.pLon, t.pLat, ar.network)
+        dX, dY = toENU(t.dLon, t.dLat, ar.network)
+        tripLocation = [pX, pY, dX, dY]
         nodes = inrange(ar.tree, tripLocation, ar.radius)
         tmpNodeList = map(decipherNodePairIndex, nodes)
         ar.nodeList[i] = tmpNodeList[map(isValidNodePair, tmpNodeList)]
@@ -243,27 +249,31 @@ function getTripTiming(ar::AvgRadius, timings::NetworkTimings, tId::Int)
     # average over neighboring nodes
     time = 0.
     for od in nodePairs
-        time += timings.pathTime[od[1], od[2]]
+        time += timings.pathTimes[od[1], od[2]]
     end
     return time / length(nodePairs)
 end
 function getTripTiming(ar::AvgRadius, timings::NetworkTimings, t::GeoTrip)
-    # helper function
+
+    # helper function to go from single index in KDTree to pair of nodes
     function decipherNodePairIndex(idx::Int)
         nNodes = length(ar.network.nodes)
         startNode = Int(div(idx, nNodes)) + 1
         endNode = idx % nNodes
         return (startNode, endNode)
     end
+
     # find nodes within radius
-    tripLocation = [t.pLon, t.pLat, t.dLon, t.dLat]
+    pX, pY = toENU(t.pLon, t.pLat, ar.network)
+    dX, dY = toENU(t.dLon, t.dLat, ar.network)
+    tripLocation = [pX, pY, dX, dY]
     nodePairs = inrange(ar.tree, tripLocation, ar.radius)
     nodePairs = map(decipherNodePairIndex, nodePairs)
     nodePairs = tmpNodes[map(isValidNodePair, nodePairs)]
     # average travel times
     time = 0.
     for od in nodePairs
-        time += timings.pathTime[od[1], od[2]]
+        time += timings.pathTimes[od[1], od[2]]
     end
     return time / length(nodePairs)
 end
