@@ -38,15 +38,15 @@ function printStats(s::IterativeState)
     typeName = split(string(typeof(s)),".")[end]
     mae1 = tripsMAE(s.timings,s.trips)
     mae2 = tripsMAE(s.timings,s.data.trips)
-    std1 = tripsStd(s.timings,s.trips)
-    std2 = tripsStd(s.timings,s.data.trips)
+    rms1 = tripsRMS(s.timings,s.trips)
+    rms2 = tripsRMS(s.timings,s.data.trips)
 
     println("Iterative heuristic: $(typeName) method")
     println("Optimizing on $(nTrips)/$(length(s.data.trips)) trips and $nPaths paths")
     println("\n=================MAE====================")
     @printf("current trips: %.2f%%, all trips: %.2f%%\n",  100*mae1, 100*mae2)
-    println("\n==============Error std=================")
-    @printf("current trips: %.2f%%, all trips: %.2f%%\n",  100*std1, 100*std2)
+    println("\n=================RMS====================")
+    @printf("current trips: %.2f%%, all trips: %.2f%%\n",  100*rms1, 100*rms2)
     return
 end
 
@@ -54,19 +54,19 @@ function printStats(s::IterativeState, ref::NetworkTimings)
     printStats(s)
     mae1 = allPathsMAE(ref,s.timings)
     mae2 = roadTimeMAE(ref,s.timings)
-    std1 = allPathsStd(ref,s.timings)
-    std2 = roadTimeStd(ref,s.timings)
+    rms1 = allPathsRMS(ref,s.timings)
+    rms2 = roadTimeRMS(ref,s.timings)
     mae3 = tripsMAE(ref,s.trips)
     mae4 = tripsMAE(ref,s.data.trips)
-    std3 = tripsStd(ref,s.trips)
-    std4 = tripsStd(ref,s.data.trips)
+    rms3 = tripsRMS(ref,s.trips)
+    rms4 = tripsRMS(ref,s.data.trips)
 
     println("\n========From reference timings==========")
-    @printf("All paths: MAE=%.2f%%, STD=%.2f%%\n",  100*mae1, 100*std1)
-    @printf("All roads: MAE=%.2f%%, STD=%.2f%%\n",  100*mae2, 100*std2)
+    @printf("All paths: MAE=%.2f%%, RMS=%.2f%%\n",  100*mae1, 100*rms1)
+    @printf("All roads: MAE=%.2f%%, RMS=%.2f%%\n",  100*mae2, 100*rms2)
     println("\n==============Data Noise================")
-    @printf("current trips: MAE=%.2f%%, STD=%.2f%%\n",  100*mae3, 100*std3)
-    @printf("    all trips: MAE=%.2f%%, STD=%.2f%%\n",  100*mae4, 100*std4)
+    @printf("current trips: MAE=%.2f%%, RMS=%.2f%%\n",  100*mae3, 100*rms3)
+    @printf("    all trips: MAE=%.2f%%, RMS=%.2f%%\n",  100*mae4, 100*rms4)
     return
 end
 

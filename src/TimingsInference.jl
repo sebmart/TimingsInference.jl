@@ -19,7 +19,7 @@ import RoutingNetworks: visualInit, visualEvent, visualUpdate, inPolygon
 #network data
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
-export tripsStd, tripsMAE, allPathsStd, allPathsMAE, roadTimeStd, roadTimeMAE
+export tripsRMS, tripsMAE, allPathsRMS, allPathsMAE, roadTimeRMS, roadTimeMAE
 
 #geo data
 export GeoTrip, GeoData, NetworkProjector, NearestNode, AvgRadius

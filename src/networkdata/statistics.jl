@@ -5,12 +5,11 @@
 
 
 """
-    `tripsStd`: compute standard deviation of timings error percentage
+    `tripsRMS`: compute standard deviation of timings error percentage
     - `timings`: timing reference
     - `trips` : list of trip data
-    - `weighted`: average per ride and not per trip
 """
-function tripsStd(timings::NetworkTimings, trips::Vector{NetworkTrip})
+function tripsRMS(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
     error = 0.
     for t in trips
@@ -23,7 +22,6 @@ end
     `tripsMAE`: compute Mean Absolute Error percentage between timings and trips
     - `timings`: timing reference
     - `trips` : list of trip data
-    - `weighted`: average per ride and not per trip
 """
 function tripsMAE(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
@@ -35,11 +33,11 @@ function tripsMAE(timings::NetworkTimings, trips::Vector{NetworkTrip})
 end
 
 """
-    `allPathsStd`: compute standard deviation of timings error percentage for all paths
+    `allPathsRMS`: compute standard deviation of timings error percentage for all paths
     - `timingsRef`: reference times
     - `timingsNew`: times to compare with
 """
-function allPathsStd(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
+function allPathsRMS(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     tt1 = getPathTimes(timingsRef)
     tt2 = getPathTimes(timingsNew)
 
@@ -69,11 +67,11 @@ function allPathsMAE(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
 end
 
 """
-    `roadTimeStd`: compute standard deviation of road time error percentage
+    `roadTimeRMS`: compute standard deviation of road time error percentage
     - `timingsRef`: reference times
     - `timingsNew`: times to compare with
 """
-function roadTimeStd(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
+function roadTimeRMS(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     g = timingsRef.network.graph
     t1 = timingsRef.times
     t2 = timingsNew.times

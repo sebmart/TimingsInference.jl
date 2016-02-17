@@ -54,6 +54,7 @@ function NetworkData(
     return NetworkData(proj.network, getNetworkTrips(proj, datasplit.trainingIDs, args...), minTimes)
 end
 
+########### STATISTICS ###########
 """
 	`tripsMAE`: compute MAE on whatever set of indices is passed
 """
@@ -61,18 +62,79 @@ function tripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit
 	tt = getPathTimes(timings)
 	error = 0.
 	for ID in IDlist
-		error += (getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time
+		error += abs(getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time
 	end
 	error = error / length(IDlist)
 	return error
 end
 
 """
-	`testingTripsMAE`: compute MAE on testing set 
+	`testTripsMAE`: compute MAE on testing set 
 """
-testingTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsMAE(timings, proj, ds, ds.testingIDs)
+testTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsMAE(timings, proj, ds, ds.testingIDs)
 
 """
-	`trainingTripsMAE`: compute MAE on full training set
+	`trTripsMAE`: compute MAE on training set
 """
-trainingTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsMAE(timings, proj, ds, ds.trainingIDs)
+trTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsMAE(timings, proj, ds, ds.trainingIDs)
+
+"""
+	`tripsRMS`: compute RMS on whatever set of indices is passed
+"""
+function tripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int})
+	tt = getPathTimes(timings)
+	error = 0.
+	for ID in IDlist
+		error += ((getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time)^2
+	end
+	error = sqrt(error/length(IDlist))
+	return error
+end
+
+"""
+	`testTripsRMS`: compute RMS on testing set 
+"""
+testTripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsRMS(timings, proj, ds, ds.testingIDs)
+
+"""
+	`trTripsRMS`: compute RMS on training set
+"""
+trTripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsRMS(timings, proj, ds, ds.trainingIDs)
+
+"""
+	`tripsBias`: compute bias on trips for whatever set of indices is passed
+	Bias is defined as (predicted time - real time)
+"""
+function tripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int})
+	tt = getPathTimes(timings)
+	bias = 0.
+	for ID in IDlist
+		bias += (getTripTiming(proj, timings, ID) - ds.geodata[ID].time)
+	end
+	bias = bias / length(IDlist)
+	return bias
+end
+
+"""
+	`testTripsBias`: compute Bias on testing set 
+"""
+testTripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsBias(timings, proj, ds, ds.testingIDs)
+
+"""
+	`trTripsBias`: compute Bias on training set
+"""
+trTripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsBias(timings, proj, ds, ds.trainingIDs)
+
+"""
+	`networkTripsMAE`: convert GeoTrips to NetworkTrips and compute their MAE
+"""
+networkTripsMAE(timings::NetworkTimings, proj::NetworkProjector, IDlist::Vector{Int}) = tripsMAE(timings, getNetworkTrips(proj, IDlist))
+trNetworkTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsMAE(timings, proj, ds.trainingIDs)
+testNetworkTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsMAE(timings, proj, ds.testingIDs)
+
+"""
+	`networkTripsRMS`: convert GeoTrips to NetworkTrips and compute their RMS
+"""
+networkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, IDlist::Vector{Int}) = tripsRMS(timings, getNetworkTrips(proj, IDlist))
+trNetworkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsRMS(timings, proj, ds.trainingIDs)
+testNetworkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsRMS(timings, proj, ds.testingIDs)
