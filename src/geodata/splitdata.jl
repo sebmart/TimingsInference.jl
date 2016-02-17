@@ -138,3 +138,81 @@ testNetworkTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSpl
 networkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, IDlist::Vector{Int}) = tripsRMS(timings, getNetworkTrips(proj, IDlist))
 trNetworkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsRMS(timings, proj, ds.trainingIDs)
 testNetworkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsRMS(timings, proj, ds.testingIDs)
+
+"""
+	`tripsMAEbyTime`: returns MAE on indicated subset of GeoData, subsetting errors in different time buckets
+"""
+function tripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int})
+	tt = getPathTimes(timings)
+	maxTime = maximum(tt)
+	numBins = 5
+	timeBound = [15 * maxTime/100, 25 * maxTime/100, 40 * maxTime/100, 50 * maxTime/100, maxTime]
+	error = 0. * collect(1:numBins)
+	numInBin = 0 * collect(1:numBins)
+	for ID in IDlist
+		idx = 1
+		while ds.geodata[ID].time > timeBound[idx]
+			idx += 1
+		end
+		error[idx] += abs(getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time
+		numInBin[idx] += 1
+	end
+	error = error ./ numInBin
+	return error
+end
+
+trTripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsMAEbyTime(timings, proj, ds, ds.trainingIDs)
+
+testTripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsMAEbyTime(timings, proj, ds, ds.testingIDs)
+
+"""
+	`tripsRMSbyTime`: returns RMS on indicated subset of GeoData, subsetting errors in different time buckets
+"""
+function tripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int})
+	tt = getPathTimes(timings)
+	maxTime = maximum(tt)
+	numBins = 5
+	timeBound = [15 * maxTime/100, 25 * maxTime/100, 40 * maxTime/100, 50 * maxTime/100, maxTime]
+	error = 0. * collect(1:numBins)
+	numInBin = 0 * collect(1:numBins)
+	for ID in IDlist
+		idx = 1
+		while ds.geodata[ID].time > timeBound[idx]
+			idx += 1
+		end
+		error[idx] += ((getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time)^2
+		numInBin[idx] += 1
+	end
+	error = sqrt(error ./ numInBin)
+	return error
+end
+
+trTripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsRMSbyTime(timings, proj, ds, ds.trainingIDs)
+
+testTripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsRMSbyTime(timings, proj, ds, ds.testingIDs)
+
+"""
+	`tripsBiasByTime`: returns bias on indicated subset of GeoData, subsetting errors in different time buckets
+"""
+function tripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int})
+	tt = getPathTimes(timings)
+	maxTime = maximum(tt)
+	numBins = 5
+	timeBound = [15 * maxTime/100, 25 * maxTime/100, 40 * maxTime/100, 50 * maxTime/100, maxTime]
+	error = 0. * collect(1:numBins)
+	numInBin = 0 * collect(1:numBins)
+	for ID in IDlist
+		idx = 1
+		while ds.geodata[ID].time > timeBound[idx]
+			idx += 1
+		end
+		error[idx] += (getTripTiming(proj, timings, ID) - ds.geodata[ID].time)
+		numInBin[idx] += 1
+	end
+	error = error ./ numInBin
+	return error
+end
+
+trTripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsBiasByTime(timings, proj, ds, ds.trainingIDs)
+
+testTripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = tripsBiasByTime(timings, proj, ds, ds.testingIDs)

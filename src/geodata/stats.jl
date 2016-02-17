@@ -1,10 +1,10 @@
 ###################################################
-## statObject.jl
+## Stats.jl
 ## Data type to save stats 
 ###################################################
 
 """
-`StatObject` : abstract type that stores statistics about an algorithm run
+`Stats` : abstract type that stores statistics about an algorithm run
 must implement attributes:
 - nIter : number of iterations
 - times : array of time arrays, of length (nIter + 1), corresponding to the road times after each iteration.
@@ -14,20 +14,20 @@ must implement methods:
 - plotStats : plot these stats in a nice way
 """
 
-abstract StatObject
+abstract Stats
 
-function Base.show(io::IO, so::StatObject)
+function Base.show(io::IO, so::Stats)
 	typeName = split(string(typeof(so)),".")[end]
 	println(io, "$(typeName) for iteration $(so.nIter)")
 end
 
-type RealDataStatObject <: StatObject
+type RealDataStats <: Stats
 	nIter::Int
 	times::Array{AbstractArray{Float64, 2}}
 
 	testingMAE::Array{Float64,1}
 	trainingMAE::Array{Float64,1}
-	function RealDataStatObject(initialTimes::AbstractArray{Float64, 2})
+	function RealDataStats(initialTimes::AbstractArray{Float64, 2})
 		obj = new()
 		obj.nIter = 0
 		obj.times = AbstractArray{Float64, 2}[]
@@ -39,10 +39,10 @@ type RealDataStatObject <: StatObject
 end
 
 """
-	`printStats`: prints out relevant statistics stored in given StatObject
+	`printStats`: prints out relevant statistics stored in given Stats
 	Optional argument outputFileName if you want to write this to a file instead
 """
-function printStats(so::RealDataStatObject; outputFileName = "")
+function printStats(so::RealDataStats; outputFileName = "")
 	if outputFileName == ""
 		println(so)
 		println("Iteration\tTraining MAE\tTesting MAE")
@@ -61,9 +61,9 @@ function printStats(so::RealDataStatObject; outputFileName = "")
 end
 
 """
-	`plotStats`: plot relevant statistics stored in given StatObject
+	`plotStats`: plot relevant statistics stored in given Stats
 """
-function plotStats(so::RealDataStatObject)
+function plotStats(so::RealDataStats)
 	iterations = collect(1:so.nIter)
 	plot(iterations, so.trainingMAE, color = "red", label = "Training MAE")
 	plot(iterations, so.testingMAE, color = "blue", label = "Testing MAE")
@@ -74,9 +74,9 @@ function plotStats(so::RealDataStatObject)
 end
 
 """
-	`update!`: not a required method, but useful. Adds one round of stats to the StatObject
+	`update!`: not a required method, but useful. Adds one round of stats to the Stats
 """
-function update!(so::RealDataStatObject, times::AbstractArray{Float64, 2}, trainingMAE::Float64, testingMAE::Float64)
+function update!(so::RealDataStats, times::AbstractArray{Float64, 2}, trainingMAE::Float64, testingMAE::Float64)
 	so.nIter += 1
 	push!(so.times, times)
 	push!(so.trainingMAE, trainingMAE)
