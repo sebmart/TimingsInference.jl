@@ -24,7 +24,7 @@ function doubleLP(s::IterativeState; OutputFlag::Int = 1)
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{ sqrt(tripData[d].weight)*epsilon[d], d=eachindex(tripData)})
+    @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
