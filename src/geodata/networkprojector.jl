@@ -178,6 +178,7 @@ function AvgRadius(n::Network, r::Float64, trips::GeoData)
     preloadData!(ar, trips)
     return ar
 end
+AvgRadius(n::Network, r::Int, trips::GeoData) = AvgRadius(n, Float64(r), trips)
 
 """
     `preloadData!`: project all trips onto their nearest node
@@ -192,8 +193,11 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
     # helper function to map from single index to node pair
     function decipherNodePairIndex(idx::Int)
         nNodes = length(ar.network.nodes)
-        startNode = Int(div(idx, nNodes)) + 1
+        startNode = Int(div(idx - 1, nNodes)) + 1
         endNode = idx % nNodes
+        if endNode == 0
+            endNode = nNodes
+        end
         return (startNode, endNode)
     end
 
@@ -258,8 +262,11 @@ function getTripTiming(ar::AvgRadius, timings::NetworkTimings, t::GeoTrip)
     # helper function to go from single index in KDTree to pair of nodes
     function decipherNodePairIndex(idx::Int)
         nNodes = length(ar.network.nodes)
-        startNode = Int(div(idx, nNodes)) + 1
+        startNode = Int(div(idx - 1, nNodes)) + 1
         endNode = idx % nNodes
+        if endNode == 0
+            endNode = nNodes
+        end
         return (startNode, endNode)
     end
 
