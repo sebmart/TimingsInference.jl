@@ -33,6 +33,20 @@ function tripsMAE(timings::NetworkTimings, trips::Vector{NetworkTrip})
 end
 
 """
+    `tripsBias`: compute bias between trimings and trips
+    - `timings`: timing reference
+    - `trips` : list of trip data
+"""
+function tripsBias(timings::NetworkTimings, trips::Vector{NetworkTrip})
+    tt = getPathTimes(timings)
+    bias = 0.
+    for t in trips
+        bias += tt[t.orig, t.dest] - t.time
+    end
+    return bias/length(trips)
+end
+
+"""
     `allPathsRMS`: compute standard deviation of timings error percentage for all paths
     - `timingsRef`: reference times
     - `timingsNew`: times to compare with
