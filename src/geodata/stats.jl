@@ -63,12 +63,19 @@ end
 	Optional argument outputFileName if you want to write this to a file instead
 """
 function printStats(so::RealDataStats, statName::AbstractString; outputFileName = "")
+	if !(statName in collect(keys(so.sdict)))
+		error("Statistic not found")
+	end
 	if outputFileName == ""
 		println(so)
 		println("Iteration\t$statName")
 		if contains(statName, "bt")
 			for i = 0:so.nIter
 				println("$i ", so.sdict[statName][i + 1])
+			end
+		elseif contains(lowercase(statName), "bias")
+			for i = 0:so.nIter
+				@printf("%d\t\t\t%.2f s\n", i, so.sdict[statName][i + 1])
 			end
 		else
 			for i = 0:so.nIter
@@ -82,6 +89,10 @@ function printStats(so::RealDataStats, statName::AbstractString; outputFileName 
 		if contains(statName, "bt")
 			for i = 0:so.nIter
 				write(f, string("$i ", so.sdict[statName][i + 1], "\n"))
+			end
+		elseif contains(lowercase(statName), "bias")
+			for i = 0:so.nIter
+				@printf(f, "%d\t\t\t%.2f s\n", i, so.sdict[statName][i + 1])
 			end
 		else
 			for i = 0:so.nIter
@@ -97,6 +108,9 @@ end
 """
 function plotStats(so::RealDataStats, statName::AbstractString)
 	COLORS = ["red", "blue", "green", "orange", "black"]
+	if !(statName in collect(keys(so.sdict)))
+		error("Statistic not found")
+	end
 	iterations = collect(0:so.nIter)
 	if contains(statName, "bt")
 		for (i, timeBound) in enumerate(so.timeBound)
