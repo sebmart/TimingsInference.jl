@@ -158,6 +158,7 @@ type AvgRadius <: NetworkProjector
         obj.trips = GeoData[]
         obj.nodeList = Vector{Tuple{Int,Int}}[]
         nNodePairs = length(n.nodes) * length(n.nodes)
+        println("Creating KDTree...")
         dataPos = Array(Float32,(4, nNodePairs))
         for (i, startNode) in enumerate(n.nodes), (j, endNode) in enumerate(n.nodes)
             dataPos[1, (i-1) * length(n.nodes) + j] = Float32(startNode.x)
@@ -209,6 +210,9 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
         dX, dY = toENU(t.dLon, t.dLat, ar.network)
         tripLocation = [Float32(pX), Float32(pY), Float32(dX), Float32(dY)]
         nodes = inrange(ar.tree, tripLocation, ar.radius)
+        if length(nodes) == 0
+            println("Radius too small, trip $i not projected!")
+        end
         tmpNodeList = map(decipherNodePairIndex, nodes)
         ar.nodeList[i] = tmpNodeList[map(isValidNodePair, tmpNodeList)]
     end
