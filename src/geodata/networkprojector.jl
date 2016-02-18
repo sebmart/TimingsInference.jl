@@ -57,8 +57,8 @@ type NearestNode <: NetworkProjector
         # Constructing tree
         dataPos = Array(Float32,(2,length(n.nodes)))
         for (i,node) in enumerate(n.nodes)
-           dataPos[1,i] = node.x
-           dataPos[2,i] = node.y
+           dataPos[1,i] = float32(node.x)
+           dataPos[2,i] = float32(node.y)
         end
         obj.tree = KDTree(dataPos)
         return obj
@@ -88,9 +88,9 @@ function preloadData!(nn::NearestNode, trips::GeoData)
             @printf("\r%.2f%% trips projected     ",100*i/nTrips)
         end
         pX, pY = toENU(t.pLon, t.pLat, nn.network)
-        idP = knn(nn.tree,[pX,pY],1)[1][1]
+        idP = knn(nn.tree,[float32(pX),float32(pY)],1)[1][1]
         dX, dY = toENU(t.dLon, t.dLat, nn.network)
-        idD = knn(nn.tree,[dX,dY],1)[1][1]
+        idD = knn(nn.tree,[float32(dX),float32(dY)],1)[1][1]
         nn.proj[i] = (idP,idD)
     end
     println("\r100.00% trips projected     ")
@@ -133,9 +133,9 @@ function getTripTiming(nn::NearestNode, timings::NetworkTimings, tId::Int)
 end
 function getTripTiming(nn::NearestNode, timings::NetworkTimings, t::GeoTrip)
     pX, pY = toENU(t.pLon, t.pLat, nn.network)
-    o = knn(nn.tree,[pX,pY],1)[1][1]
+    o = knn(nn.tree,[float32(pX),float32(pY)],1)[1][1]
     dX, dY = toENU(t.dLon, t.dLat, nn.network)
-    d = knn(nn.tree,[dX,dY],1)[1][1]
+    d = knn(nn.tree,[float32(dX),float32(dY)],1)[1][1]
     return timings.pathTimes[o,d]
 end
 
@@ -160,10 +160,10 @@ type AvgRadius <: NetworkProjector
         nNodePairs = length(n.nodes) * length(n.nodes)
         dataPos = Array(Float32,(4, nNodePairs))
         for (i, startNode) in enumerate(n.nodes), (j, endNode) in enumerate(n.nodes)
-            dataPos[1, (i-1) * length(n.nodes) + j] = startNode.x
-            dataPos[2, (i-1) * length(n.nodes) + j] = startNode.y
-            dataPos[3, (i-1) * length(n.nodes) + j] = endNode.x
-            dataPos[4, (i-1) * length(n.nodes) + j] = endNode.y
+            dataPos[1, (i-1) * length(n.nodes) + j] = float32(startNode.x)
+            dataPos[2, (i-1) * length(n.nodes) + j] = float32(startNode.y)
+            dataPos[3, (i-1) * length(n.nodes) + j] = float32(endNode.x)
+            dataPos[4, (i-1) * length(n.nodes) + j] = float32(endNode.y)
         end
         obj.tree = KDTree(dataPos)
         return obj
@@ -203,7 +203,7 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
         end
         pX, pY = toENU(t.pLon, t.pLat, ar.network)
         dX, dY = toENU(t.dLon, t.dLat, ar.network)
-        tripLocation = [pX, pY, dX, dY]
+        tripLocation = [float32(pX), float32(pY), float32(dX), float32(dY)]
         nodes = inrange(ar.tree, tripLocation, ar.radius)
         tmpNodeList = map(decipherNodePairIndex, nodes)
         ar.nodeList[i] = tmpNodeList[map(isValidNodePair, tmpNodeList)]
@@ -266,7 +266,7 @@ function getTripTiming(ar::AvgRadius, timings::NetworkTimings, t::GeoTrip)
     # find nodes within radius
     pX, pY = toENU(t.pLon, t.pLat, ar.network)
     dX, dY = toENU(t.dLon, t.dLat, ar.network)
-    tripLocation = [pX, pY, dX, dY]
+    tripLocation = [float32(pX), float32(pY), float32(dX), float32(dY)]
     nodePairs = inrange(ar.tree, tripLocation, ar.radius)
     nodePairs = map(decipherNodePairIndex, nodePairs)
     nodePairs = tmpNodes[map(isValidNodePair, nodePairs)]
