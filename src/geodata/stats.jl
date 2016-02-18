@@ -34,7 +34,7 @@ type RealDataStats <: Stats
 		obj = new()
 		obj.nIter = -1
 		obj.times = AbstractArray{Float64, 2}[]
-		obj.sdict = Dict{AbstractString, Array{Float64,1}}(
+		obj.sdict = Dict{AbstractString, Array{Union{Float64, Array{Float64,1}},1}}(
 			"testTripsMAE" => Float64[],
 			"trTripsMAE" => Float64[],
 			"testTripsRMS" => Float64[],
@@ -46,7 +46,7 @@ type RealDataStats <: Stats
 			"trNetworkTripsRMS" => Float64[],
 			"testNetworkTripsRMS" => Float64[],
 			"trNetworkTripsBias" => Float64[],
-			"testNetworkTripsBias" => FLoat64[],
+			"testNetworkTripsBias" => Float64[],
 			"testTripsMAEbt" => Array{Float64,1}[],
 			"trTripsMAEbt" => Array{Float64,1}[],
 			"testTripsRMSbt" => Array{Float64,1}[],
