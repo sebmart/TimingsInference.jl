@@ -11,7 +11,7 @@ must implement attributes:
 		the first element is the set of road times used to initialize the algrithm
 - sdict : dictionary mapping stat names to arrays containing relevant values
 must implement methods:
-- update! : given every possible kind of information needed, computes stats
+- updateStats! : given every possible kind of information needed, computes stats
 - printStats : print a summary of statistics on the algorithm run
 - plotStats : plot these stats in a nice way
 """
@@ -21,11 +21,6 @@ abstract Stats
 function Base.show(io::IO, so::Stats)
 	typeName = split(string(typeof(so)),".")[end]
 	println(io, "$(typeName) for iteration $(so.nIter)")
-	statList = collect(keys(so.sdict))
-	println(io, "Contains following stats:")
-	for stat in statList
-		println(io, stat)
-	end
 end
 
 type RealDataStats <: Stats
@@ -35,11 +30,10 @@ type RealDataStats <: Stats
 
 	timeBound::Array{Float64,1}
 
-	function RealDataStats(initialTimes::AbstractArray{Float64, 2})
+	function RealDataStats()
 		obj = new()
-		obj.nIter = 0
+		obj.nIter = -1
 		obj.times = AbstractArray{Float64, 2}[]
-		push!(obj.times, initialTimes)
 		obj.sdict = Dict{AbstractString, Array{Float64,1}}(
 			"testTripsMAE" => Float64[],
 			"trTripsMAE" => Float64[],
@@ -65,62 +59,81 @@ type RealDataStats <: Stats
 end
 
 """
-	`printStats`: prints out relevant statistics stored in given Stats
+	`printStats`: prints out statistic identified by statName stored in given Stats
 	Optional argument outputFileName if you want to write this to a file instead
 """
-function printStats(so::RealDataStats; outputFileName = "")
+function printStats(so::RealDataStats, statName::AbstractString; outputFileName = "")
 	if outputFileName == ""
 		println(so)
-		println("Iteration\tTraining MAE\tTesting MAE")
-		for i = 1:so.nIter
-			@printf("%d\t\t\t%.2f%%\t%.2f%%\n", i, 100 * so.trainingMAE, 100 * so.testingMAE)
+		println("Iteration\t$statName")
+		if contains(statName, "bt")
+			for i = 0:so.nIter
+				println("$i ", so.sdict[statName][i + 1])
+			end
+		else
+			for i = 0:so.nIter
+				@printf("%d\t\t\t%.2f%%\n", i, so.sdict[statName][i + 1])
+			end
 		end
 	else
 		f = open(outputFileName, "w")
 		write(f, so)
-		write(f, "Iteration\tTraining MAE\tTesting MAE\n")
-		for i = 1:so.nIter
-			@printf(f, "%d\t\t\t%.2f%%\t%.2f%%\n", i, 100 * so.trainingMAE, 100 * so.testingMAE)
+		write(f, "Iteration\t$statName")
+		if contains(statName, "bt")
+			for i = 0:so.nIter
+				write(f, string("$i ", so.sdict[statName][i + 1], "\n"))
+			end
+		else
+			for i = 0:so.nIter
+				@printf(f, "%d\t\t\t%.2f%%\n", i, so.sdict[statName][i + 1])
+			end
 		end
 		close(f)
 	end
 end
 
 """
-	`plotStats`: plot relevant statistics stored in given Stats
+	`plotStats`: plot relevant statistic, identified by statName, stored in given Stats object
 """
-function plotStats(so::RealDataStats)
-	iterations = collect(1:so.nIter)
-	plot(iterations, so.trainingMAE, color = "red", label = "Training MAE")
-	plot(iterations, so.testingMAE, color = "blue", label = "Testing MAE")
-	xlabel("Iteration number")
-	ylabel("MAE")
-	title("Evolution of MAE with algorithm progress")
+function plotStats(so::RealDataStats, statName::AbstractString)
+	COLORS = ["red", "blue", "green", "orange", "black"]
+	iterations = collect(0:so.nIter)
+	if contains(statName, "bt")
+		for (i, timeBound) in enumerate(so.timeBound)
+			stat = [so.sdict[statName][j][i] for j=eachindex(so.sdict[statName])]
+			plot(iterations, stat, color = COLORS[i % 5], label = string("<", 100 * time, "%"))
+		end
+	else
+		plot(iterations, so.sdict[statName], color = "red", label = statName)
+	end
+	xlabel("Algorithm Step")
+	ylabel(statName)
+	title("Evolution of $(statName) with algorithm progress")
 	legend()
 end
 
 """
-	`updateStats!`: not a required method, but useful. Adds one round of stats to the Stats
+	`updateStats!`: Adds one round of stats to the Stats object
 """
-function update!(so::RealDataStats, s::IterativeState, proj::NetworkProjector, ds::DataSplit)
+function updateStats!(so::RealDataStats, s::IterativeState, proj::NetworkProjector, ds::DataSplit)
 	so.nIter += 1
-	push!(so.times, times)
-	push!(so.sdict["testTripsMAE"], testTripsMAE(s.timings, proj, ds))
-	push!(so.sdict["trTripsMAE"], trTripsMAE(s.timings, proj, ds))
-	push!(so.sdict["testTripsRMS"], testTripsRMS(s.timings, proj, ds))
-	push!(so.sdict["trTripsRMS"], trTripsRMS(s.timings, proj, ds))
+	push!(so.times, s.timings.times)
+	push!(so.sdict["testTripsMAE"], 100 * testTripsMAE(s.timings, proj, ds))
+	push!(so.sdict["trTripsMAE"], 100 * trTripsMAE(s.timings, proj, ds))
+	push!(so.sdict["testTripsRMS"], 100 * testTripsRMS(s.timings, proj, ds))
+	push!(so.sdict["trTripsRMS"], 100 * trTripsRMS(s.timings, proj, ds))
 	push!(so.sdict["testTripsBias"], testTripsBias(s.timings, proj, ds))
 	push!(so.sdict["trTripsBias"], trTripsBias(s.timings, proj, ds))
-	push!(so.sdict["testNetworkTripsMAE"], testNetworkTripsMAE(s.timings, proj, ds))
-	push!(so.sdict["trNetworkTripsMAE"], trNetworkTripsMAE(s.timings, proj, ds))
-	push!(so.sdict["testNetworkTripsRMS"], testNetworkTripsRMS(s.timings, proj, ds))
-	push!(so.sdict["trNetworkTripsRMS"], trNetworkTripsRMS(s.timings, proj, ds))
+	push!(so.sdict["testNetworkTripsMAE"], 100 * testNetworkTripsMAE(s.timings, proj, ds))
+	push!(so.sdict["trNetworkTripsMAE"], 100 * trNetworkTripsMAE(s.timings, proj, ds))
+	push!(so.sdict["testNetworkTripsRMS"], 100 * testNetworkTripsRMS(s.timings, proj, ds))
+	push!(so.sdict["trNetworkTripsRMS"], 100 * trNetworkTripsRMS(s.timings, proj, ds))
 	push!(so.sdict["testNetworkTripsBias"], testNetworkTripsBias(s.timings, proj, ds))
 	push!(so.sdict["trNetworkTripsBias"], trNetworkTripsBias(s.timings, proj, ds))
-	push!(so.sdict["testTripsMAEbt"], testTripsMAEbyTime(s.timings, proj, ds, so.timeBound))
-	push!(so.sdict["trTripsMAEbt"], trTripsMAEbyTime(s.timings, proj, ds, so.timeBound))
-	push!(so.sdict["testTripsRMSbt"], testTripsRMSbyTime(s.timings, proj, ds, so.timeBound))
-	push!(so.sdict["trTripsRMSbt"], trTripsRMSbyTime(s.timings, proj, ds, so.timeBound))
+	push!(so.sdict["testTripsMAEbt"], 100 * testTripsMAEbyTime(s.timings, proj, ds, so.timeBound))
+	push!(so.sdict["trTripsMAEbt"], 100 * trTripsMAEbyTime(s.timings, proj, ds, so.timeBound))
+	push!(so.sdict["testTripsRMSbt"], 100 * testTripsRMSbyTime(s.timings, proj, ds, so.timeBound))
+	push!(so.sdict["trTripsRMSbt"], 100 * trTripsRMSbyTime(s.timings, proj, ds, so.timeBound))
 	push!(so.sdict["testTripsBiasbt"], testTripsBiasByTime(s.timings, proj, ds, so.timeBound))
 	push!(so.sdict["trTripsBiasbt"], trTripsBiasByTime(s.timings, proj, ds, so.timeBound))
 end
