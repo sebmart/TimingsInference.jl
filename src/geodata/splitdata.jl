@@ -158,7 +158,7 @@ function tripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::Dat
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
 		idx = 1
-		while ds.geodata[ID].time > timeBound[idx]
+		while tt[ds.geodata[ID].orig, ds.geodata[ID].dest] > timeBound[idx]
 			idx += 1
 		end
 		error[idx] += abs(getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time
@@ -184,7 +184,7 @@ function tripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::Dat
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
 		idx = 1
-		while ds.geodata[ID].time > timeBound[idx]
+		while tt[ds.geodata[ID].orig, ds.geodata[ID].dest] > timeBound[idx]
 			idx += 1
 		end
 		error[idx] += ((getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time)^2
@@ -210,7 +210,7 @@ function tripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::Da
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
 		idx = 1
-		while ds.geodata[ID].time > timeBound[idx]
+		while tt[ds.geodata[ID].orig, ds.geodata[ID].dest] > timeBound[idx]
 			idx += 1
 		end
 		error[idx] += (getTripTiming(proj, timings, ID) - ds.geodata[ID].time)
