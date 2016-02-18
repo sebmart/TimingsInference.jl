@@ -39,17 +39,17 @@ include("networkdata/createtimings.jl")
 include("networkdata/generateRides.jl")
 include("networkdata/statistics.jl")
 
-include("geodata/geotrip.jl")
-include("geodata/nyctaxi.jl")
-include("geodata/networkprojector.jl")
-include("geodata/splitdata.jl")
-include("geodata/stats.jl")
-
 include("iterativeLP/iterativeState.jl")
 include("iterativeLP/iterativeLP.jl")
 include("iterativeLP/firstLP.jl")
 include("iterativeLP/mip.jl")
 include("iterativeLP/doubleLP.jl")
+
+include("geodata/geotrip.jl")
+include("geodata/nyctaxi.jl")
+include("geodata/networkprojector.jl")
+include("geodata/splitdata.jl")
+include("geodata/stats.jl")
 
 include("visualization/showtimes.jl")
 
