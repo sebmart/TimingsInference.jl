@@ -177,7 +177,7 @@ testTripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSpli
 function tripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 1.])
 	maxTime = maximum([ds.geodata[id].time for id in IDlist])
 	numBins = length(timeBound)
-	timeBound = maxTime * timebound
+	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
