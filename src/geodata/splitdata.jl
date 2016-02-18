@@ -150,15 +150,14 @@ testNetworkTripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSp
 	`tripsMAEbyTime`: returns MAE on indicated subset of GeoData, subsetting errors in different time buckets
 """
 function tripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 1.])
-	tt = getPathTimes(timings)
-	maxTime = maximum(tt)
+	maxTime = maximum([ds.geodata[id].time for id in IDlist])
 	numBins = length(timeBound)
 	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
 		idx = 1
-		while tt[ds.geodata[ID].orig, ds.geodata[ID].dest] > timeBound[idx]
+		while ds.geodata[ID].time > timeBound[idx]
 			idx += 1
 		end
 		error[idx] += abs(getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time
@@ -176,15 +175,14 @@ testTripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSpli
 	`tripsRMSbyTime`: returns RMS on indicated subset of GeoData, subsetting errors in different time buckets
 """
 function tripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 1.])
-	tt = getPathTimes(timings)
-	maxTime = maximum(tt)
+	maxTime = maximum([ds.geodata[id].time for id in IDlist])
 	numBins = length(timeBound)
 	timeBound = maxTime * timebound
 	error = 0. * collect(1:numBins)
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
 		idx = 1
-		while tt[ds.geodata[ID].orig, ds.geodata[ID].dest] > timeBound[idx]
+		while ds.geodata[ID].time > timeBound[idx]
 			idx += 1
 		end
 		error[idx] += ((getTripTiming(proj, timings, ID) - ds.geodata[ID].time)/ds.geodata[ID].time)^2
@@ -202,15 +200,14 @@ testTripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSpli
 	`tripsBiasByTime`: returns bias on indicated subset of GeoData, subsetting errors in different time buckets
 """
 function tripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 1.])
-	tt = getPathTimes(timings)
-	maxTime = maximum(tt)
+	maxTime = maximum([ds.geodata[id].time for id in IDlist])
 	numBins = length(timeBound)
 	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
 		idx = 1
-		while tt[ds.geodata[ID].orig, ds.geodata[ID].dest] > timeBound[idx]
+		while ds.geodata[ID].time > timeBound[idx]
 			idx += 1
 		end
 		error[idx] += (getTripTiming(proj, timings, ID) - ds.geodata[ID].time)
