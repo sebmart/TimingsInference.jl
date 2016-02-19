@@ -64,7 +64,7 @@ function tripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit
 	counter = 0
 	for ID in IDlist
 		timing = getTripTiming(proj, timings, ID)
-		if timing != NaN
+		if !isnan(timing)
 			error += abs(timing - ds.geodata[ID].time)/ds.geodata[ID].time
 			counter += 1
 		end
@@ -92,7 +92,7 @@ function tripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit
 	counter = 0
 	for ID in IDlist
 		timing = getTripTiming(proj, timings, ID)
-		if timing != NaN
+		if !isnan(timing)
 			error += ((timing - ds.geodata[ID].time)/ds.geodata[ID].time)^2
 			counter += 1
 		end
@@ -121,7 +121,7 @@ function tripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSpli
 	counter = 0
 	for ID in IDlist
 		timing = getTripTiming(proj, timings, ID)
-		if timing != NaN
+		if !isnan(timing)
 			bias += (timing - ds.geodata[ID].time)
 			counter += 1
 		end
@@ -176,7 +176,7 @@ function tripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::Dat
 			idx += 1
 		end
 		timing = getTripTiming(proj, timings, ID)
-		if timing != NaN
+		if !isnan(timing)
 			error[idx] += abs(timing - ds.geodata[ID].time)/ds.geodata[ID].time
 			numInBin[idx] += 1
 		end
@@ -204,7 +204,7 @@ function tripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::Dat
 			idx += 1
 		end
 		timing = getTripTiming(proj, timings, ID)
-		if timing != NaN
+		if !isnan(timing)
 			error[idx] += ((timing - ds.geodata[ID].time)/ds.geodata[ID].time)^2
 			numInBin[idx] += 1
 		end
@@ -232,7 +232,7 @@ function tripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::Da
 			idx += 1
 		end
 		timing = getTripTiming(proj, timings, ID)
-		if timing != NaN
+		if !isnan(timing)
 			error[idx] += (timing - ds.geodata[ID].time)
 			numInBin[idx] += 1
 		end
