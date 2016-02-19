@@ -210,11 +210,11 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
         dX, dY = toENU(t.dLon, t.dLat, ar.network)
         tripLocation = [Float32(pX), Float32(pY), Float32(dX), Float32(dY)]
         nodes = inrange(ar.tree, tripLocation, ar.radius)
-        if length(nodes) == 0
-            println("Radius too small, trip $i not projected!")
-        end
         tmpNodeList = map(decipherNodePairIndex, nodes)
         ar.nodeList[i] = tmpNodeList[map(isValidNodePair, tmpNodeList)]
+        # if length(ar.nodeList[i]) == 0
+        #     # do something if necessary
+        # end
     end
     println("\r100.00% trips projected     ")
     return ar
