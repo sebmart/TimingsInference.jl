@@ -182,7 +182,6 @@ function tripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::Dat
 		end
 	end
 	error = error ./ numInBin
-	println(numInBin)
 	return error
 end
 
