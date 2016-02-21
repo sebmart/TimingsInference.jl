@@ -53,7 +53,7 @@ type RealDataStats <: Stats
 			"trTripsRMSbt" => Array{Float64,1}[],
 			"testTripsBiasbt" => Array{Float64,1}[],
 			"trTripsBiasbt" => Array{Float64,1}[])
-		obj.timeBound = [0.15, 0.25, 0.4, 0.5, 1.01]
+		obj.timeBound = [0.15, 0.25, 0.4, 0.5, 100.]
 		return obj
 	end
 end
