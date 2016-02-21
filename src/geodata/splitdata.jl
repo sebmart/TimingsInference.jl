@@ -164,8 +164,8 @@ testNetworkTripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSp
 """
 	`tripsMAEbyTime`: returns MAE on indicated subset of GeoData, subsetting errors in different time buckets
 """
-function tripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 1.])
-	maxTime = maximum([ds.geodata[id].time for id in IDlist])
+function tripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 100.])
+	maxTime = 1800.
 	numBins = length(timeBound)
 	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
@@ -182,18 +182,19 @@ function tripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::Dat
 		end
 	end
 	error = error ./ numInBin
+	println(numInBin)
 	return error
 end
 
-trTripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 1.]) = tripsMAEbyTime(timings, proj, ds, ds.trainingIDs, timeBound)
+trTripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsMAEbyTime(timings, proj, ds, ds.trainingIDs, timeBound)
 
-testTripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 1.]) = tripsMAEbyTime(timings, proj, ds, ds.testingIDs, timeBound)
+testTripsMAEbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsMAEbyTime(timings, proj, ds, ds.testingIDs, timeBound)
 
 """
 	`tripsRMSbyTime`: returns RMS on indicated subset of GeoData, subsetting errors in different time buckets
 """
-function tripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 1.])
-	maxTime = maximum([ds.geodata[id].time for id in IDlist])
+function tripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 100.])
+	maxTime = 1800.
 	numBins = length(timeBound)
 	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
@@ -213,15 +214,15 @@ function tripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::Dat
 	return error
 end
 
-trTripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 1.]) = tripsRMSbyTime(timings, proj, ds, ds.trainingIDs, timeBound)
+trTripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsRMSbyTime(timings, proj, ds, ds.trainingIDs, timeBound)
 
-testTripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 1.]) = tripsRMSbyTime(timings, proj, ds, ds.testingIDs, timeBound)
+testTripsRMSbyTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsRMSbyTime(timings, proj, ds, ds.testingIDs, timeBound)
 
 """
 	`tripsBiasByTime`: returns bias on indicated subset of GeoData, subsetting errors in different time buckets
 """
-function tripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 1.])
-	maxTime = maximum([ds.geodata[id].time for id in IDlist])
+function tripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 100.])
+	maxTime = 1800.
 	numBins = length(timeBound)
 	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
@@ -241,6 +242,6 @@ function tripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::Da
 	return error
 end
 
-trTripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 1.]) = tripsBiasByTime(timings, proj, ds, ds.trainingIDs, timeBound)
+trTripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsBiasByTime(timings, proj, ds, ds.trainingIDs, timeBound)
 
-testTripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 1.]) = tripsBiasByTime(timings, proj, ds, ds.testingIDs, timeBound)
+testTripsBiasByTime(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsBiasByTime(timings, proj, ds, ds.testingIDs, timeBound)

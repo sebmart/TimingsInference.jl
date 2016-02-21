@@ -7,11 +7,8 @@ module TimingsInference
 
 using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions, SFML
 using Base.Dates, NearestNeighbors
-try 
-	using PyPlot
-catch e
-	println(e)
-end
+using PyPlot
+
 import Colors
 import RoutingNetworks: visualInit, visualEvent, visualUpdate, inPolygon
 

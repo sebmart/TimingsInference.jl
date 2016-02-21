@@ -63,7 +63,7 @@ function doubleLP(s::IterativeState; OutputFlag::Int = 1)
 	# fix objective from first step
 	@addConstraint(m, fixObjective,
 		sum{ sqrt(tripData[d].weight)*epsilon[d], d=eachindex(tripData)} <= 
-		1.005 * objective
+		1.02 * objective
 		)
 
 	# OBJECTIVE

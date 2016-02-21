@@ -115,7 +115,7 @@ function plotStats(so::RealDataStats, statName::AbstractString)
 	if contains(statName, "bt")
 		for (i, timeBound) in enumerate(so.timeBound)
 			stat = [so.sdict[statName][j][i] for j=eachindex(so.sdict[statName])]
-			plot(iterations, stat, color = COLORS[i % 5], label = string("<", 100 * time, "%"))
+			plot(iterations, stat, color = COLORS[i % 5 + 1], label = string("<", 100 * timeBound, "%"))
 		end
 	else
 		plot(iterations, so.sdict[statName], color = "red", label = statName)
