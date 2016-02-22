@@ -8,7 +8,7 @@
     lpTravelTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
-function lpTravelTimes(s::IterativeState; OutputFlag::Int=1)
+function lpTravelTimes(s::IterativeState; args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -16,7 +16,7 @@ function lpTravelTimes(s::IterativeState; OutputFlag::Int=1)
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, Crossover=0, OutputFlag=OutputFlag, Method=3, BarConvTol=1e-6))
+    m = Model(solver = GurobiSolver(TimeLimit=10000, Crossover=0, Method=3, BarConvTol=1e-6, args...))
 
     # DECISION VARIABLES
     # Road times

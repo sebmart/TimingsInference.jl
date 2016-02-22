@@ -1,6 +1,6 @@
 ###################################################
 ## Stats.jl
-## Data type to save stats 
+## Data type to save stats
 ###################################################
 
 """
@@ -8,7 +8,7 @@
 must implement attributes:
 - nIter : number of iterations
 - times : array of time arrays, of length (nIter + 1), corresponding to the road times after each iteration.
-		the first element is the set of road times used to initialize the algrithm
+		the first element is the set of road times used to initialize the algorithm
 - sdict : dictionary mapping stat names to arrays containing relevant values
 must implement methods:
 - updateStats! : given every possible kind of information needed, computes stats

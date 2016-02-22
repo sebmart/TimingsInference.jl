@@ -44,21 +44,21 @@ type NearestNode <: NetworkProjector
     network::Network
     trips::GeoData
 
-    # projection KD-tree
+    "projection KD-tree"
     tree::KDTree
-    # precomputation (trip->node projections)
+    "precomputation (trip->node projections)"
     proj::Vector{Tuple{Int,Int}}
 
     function NearestNode(n::Network)
         obj = new()
         obj.network = n
-        obj.trips = GeoData[]
+        obj.trips = GeoData()
         obj.proj  = Tuple{Int,Int}[]
         # Constructing tree
-        dataPos = Array(Float32,(2,length(n.nodes)))
+        dataPos = Array(Float64,(2,length(n.nodes)))
         for (i,node) in enumerate(n.nodes)
-           dataPos[1,i] = Float32(node.x)
-           dataPos[2,i] = Float32(node.y)
+           dataPos[1,i] = node.x
+           dataPos[2,i] = node.y
         end
         obj.tree = KDTree(dataPos)
         return obj
@@ -88,9 +88,9 @@ function preloadData!(nn::NearestNode, trips::GeoData)
             @printf("\r%.2f%% trips projected     ",100*i/nTrips)
         end
         pX, pY = toENU(t.pLon, t.pLat, nn.network)
-        idP = knn(nn.tree,[Float32(pX),Float32(pY)],1)[1][1]
+        idP = knn(nn.tree,[pX,pY],1)[1][1]
         dX, dY = toENU(t.dLon, t.dLat, nn.network)
-        idD = knn(nn.tree,[Float32(dX),Float32(dY)],1)[1][1]
+        idD = knn(nn.tree,[dX,dY],1)[1][1]
         nn.proj[i] = (idP,idD)
     end
     println("\r100.00% trips projected     ")
@@ -144,11 +144,11 @@ type AvgRadius <: NetworkProjector
     network::Network
     trips::GeoData
 
-    # radius
+    "radius"
     radius::Float64
-    # projection KD-tree (contains rides)
+    "projection KD-tree (contains rides)"
     tree::KDTree
-    # precomputation (node->trip list)
+    "precomputation (node->trip list)"
     nodeList::Vector{Vector{Tuple{Int,Int}}}
 
     function AvgRadius(n::Network, r::Float64)
@@ -159,12 +159,12 @@ type AvgRadius <: NetworkProjector
         obj.nodeList = Vector{Tuple{Int,Int}}[]
         nNodePairs = length(n.nodes) * length(n.nodes)
         println("Creating KDTree...")
-        dataPos = Array(Float32,(4, nNodePairs))
+        dataPos = Array(Float64,(4, nNodePairs))
         for (i, startNode) in enumerate(n.nodes), (j, endNode) in enumerate(n.nodes)
-            dataPos[1, (i-1) * length(n.nodes) + j] = Float32(startNode.x)
-            dataPos[2, (i-1) * length(n.nodes) + j] = Float32(startNode.y)
-            dataPos[3, (i-1) * length(n.nodes) + j] = Float32(endNode.x)
-            dataPos[4, (i-1) * length(n.nodes) + j] = Float32(endNode.y)
+            dataPos[1, (i-1) * length(n.nodes) + j] = startNode.x
+            dataPos[2, (i-1) * length(n.nodes) + j] = startNode.y
+            dataPos[3, (i-1) * length(n.nodes) + j] = endNode.x
+            dataPos[4, (i-1) * length(n.nodes) + j] = endNode.y
         end
         obj.tree = KDTree(dataPos)
         return obj
@@ -190,7 +190,7 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
     #initializing containers
     ar.trips = trips
     ar.nodeList = Array(Vector{Tuple{Int,Int}}, nTrips)
-    
+
     # helper function to map from single index to node pair
     function decipherNodePairIndex(idx::Int)
         nNodes = length(ar.network.nodes)
@@ -208,7 +208,7 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
         end
         pX, pY = toENU(t.pLon, t.pLat, ar.network)
         dX, dY = toENU(t.dLon, t.dLat, ar.network)
-        tripLocation = [Float32(pX), Float32(pY), Float32(dX), Float32(dY)]
+        tripLocation = [pX, pY, dX, dY]
         nodes = inrange(ar.tree, tripLocation, ar.radius)
         tmpNodeList = map(decipherNodePairIndex, nodes)
         ar.nodeList[i] = tmpNodeList[map(isValidNodePair, tmpNodeList)]
