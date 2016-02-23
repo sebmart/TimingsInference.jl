@@ -47,6 +47,7 @@ include("geodata/nyctaxi.jl")
 include("geodata/networkprojector.jl")
 include("geodata/splitdata.jl")
 include("geodata/stats.jl")
+include("geodata/statistics.jl")
 
 include("visualization/showtimes.jl")
 

@@ -14,7 +14,7 @@ function doIteration!(state::IterativeState, n::Int=1; method::AbstractString="l
         if method == "lp"
             times = lpTravelTimes(state, solverArgs...)
         elseif method == "mip"
-            times = mipTravelTimes(state)
+            times = mipTravelTimes(state, solverArgs...)
         elseif method == "lp2"
             times = doubleLP(state, solverArgs...)
         else
