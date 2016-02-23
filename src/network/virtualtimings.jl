@@ -1,6 +1,6 @@
 ###################################################
-## createtimings.jl
-## Create timings given a network object
+## network/virtualtimings.jl
+## Create virtual timings in a network
 ###################################################
 
 """
