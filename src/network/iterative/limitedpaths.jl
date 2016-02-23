@@ -31,12 +31,12 @@ function LimitedPaths(data::NetworkData, startSolution::NetworkTimings; pathsPer
     srand(1991)
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
-    paths = [Vector{Int}[getPath(timings, t.orig, t.dest)] for t in trips]
-    return LimitedPaths(data,timings,trips,paths,pathsPerTrip)
+    paths = [Vector{Int}[getPath(startSolution, t.orig, t.dest)] for t in trips]
+    return LimitedPaths(data,startSolution,trips,paths,pathsPerTrip)
 end
 
 LimitedPaths(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
-    LimitedPaths(data, NetworkTimings(data.network, initTimes), args...)
+    LimitedPaths(data, NetworkTimings(data.network, initTimes); args...)
 
 
 """
@@ -46,7 +46,7 @@ function updateState!(s::LimitedPaths, times::AbstractArray{Float64, 2})
     # update the timings and compute shortest paths
     s.timings = NetworkTimings(s.data.network, times)
 
-    if s.maxNumPathsPerTrip == 1
+    if s.pathsPerTrip == 1
         for (d,t) in enumerate(s.trips)
             sp = getPath(s.timings, t.orig, t.dest)
             s.paths[d][1] = sp

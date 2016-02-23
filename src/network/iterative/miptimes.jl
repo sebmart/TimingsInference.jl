@@ -19,7 +19,7 @@ function mipTimes(s::IterativeState, args...)
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, OutputFlag=1, Method=3, BarConvTol=1e-6, args...))
+    m = Model(solver = GurobiSolver(TimeLimit=10000, OutputFlag=1, Method=3, BarConvTol=1e-6; args...))
 
     # DECISION VARIABLES
     # Road times

@@ -43,4 +43,5 @@ function doIteration!(it::IterativeState; method::AbstractString="lp2", solverAr
     else
         error("Unknown optimizer")
     end
+    return it
 end

@@ -13,11 +13,12 @@ import Colors
 import RoutingNetworks: visualInit, visualEvent, inPolygon
 
 
-#network data
+#network
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export tripsRMS, tripsMAE, allPathsRMS, allPathsMAE, roadTimeRMS, roadTimeMAE
-
+#iterative
+export IterativeState, doIteration!, LimitedPaths, updateState!, lpTimes, lp2Times, mipTimes
 #geo data
 export GeoTrip, GeoData, NetworkProjector, NearestNode, AvgRadius
 export DataSplit, RandomSplit
@@ -25,22 +26,20 @@ export Stats, RealDataStats
 export printStats, plotStats, updateStats!
 export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
 export preloadData!, getNetworkTrips, getTripTiming
-#iterative heuristic
-export IterativeState, printStats, doIteration!, FixedNumPathsPerTripState
 
 #visualization
 export ShowTimes
 
-include("networkdata/networktimings.jl")
-include("networkdata/createtimings.jl")
-include("networkdata/generateRides.jl")
-include("networkdata/statistics.jl")
+include("network/networktypes.jl")
+include("network/statistics.jl")
+include("network/virtualdata.jl")
+include("network/virtualtimings.jl")
 
-include("iterativeLP/iterativeState.jl")
-include("iterativeLP/iterativeLP.jl")
-include("iterativeLP/firstLP.jl")
-include("iterativeLP/mip.jl")
-include("iterativeLP/doubleLP.jl")
+include("network/iterative/state.jl")
+include("network/iterative/limitedpaths.jl")
+include("network/iterative/lptimes.jl")
+include("network/iterative/lp2times.jl")
+include("network/iterative/miptimes.jl")
 
 include("geodata/geotrip.jl")
 include("geodata/nyctaxi.jl")

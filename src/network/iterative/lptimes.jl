@@ -16,7 +16,7 @@ function lpTimes(s::IterativeState; args...)
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, Crossover=0, Method=3, BarConvTol=1e-6, args...))
+    m = Model(solver = GurobiSolver(TimeLimit=10000, Crossover=0, Method=3, BarConvTol=1e-6; args...))
 
     # DECISION VARIABLES
     # Road times
