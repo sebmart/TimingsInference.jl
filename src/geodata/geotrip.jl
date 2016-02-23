@@ -25,22 +25,22 @@ function Base.show(io::IO, t::GeoTrip)
 end
 
 """
-    `TripData`: list of `GeoTrip`
+    `GeoData`: list of `GeoTrip`
 """
-typealias TripData Vector{GeoTrip}
+typealias GeoData Vector{GeoTrip}
 
 """
     `stats`: print information
 """
-function stats(t::TripData)
-    println("TripData: trip information in GPS coordinates")
+function stats(t::GeoData)
+    println("GeoData: trip information in GPS coordinates")
     println("--- $(length(t)) trips: $(sizeof(t)/1e6)MB")
 end
 
 """
     `removeBadTrips`: filter a `GeoTrip` list to remove outliers
 """
-function removeOutliers(trips::TripData)
+function removeOutliers(trips::GeoData)
     reg = Bool[isRegular(t) for t in trips]
     t = trips[reg]
     @printf("%.2f%% outliers removed\n", 100*(1-length(t)/length(trips)))
@@ -74,6 +74,49 @@ end
 tripDistance(t::GeoTrip) = distanceGeo(t.pLon,t.pLat,t.dLon,t.dLat)
 
 """
+    `inTimeWindow`: keep trips in a certain time window
+    - for GeoTrip object: returns boolean
+    - for GeoData object: returns filtered GeoData object
+"""
+function inTimeWindow(t::GeoTrip, startHour::Int, endHour::Int)
+    return startHour <= Dates.hour(t.pTime) && Dates.hour(t.pTime) < endHour
+end
+
+function inTimeWindow(trips::GeoData, startHour::Int, endHour::Int)
+    mask = BitArray(length(trips))
+    for (i, t) in enumerate(trips)
+        if i%10_000 == 0
+            @printf("\r%.2f%% trips checked     ",100*i/length(trips))
+        end
+        mask[i] = inTimeWindow(t, startHour, endHour)
+    end
+    newTrips = trips[mask]
+    @printf("\r%2.f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
+    return newTrips
+end
+
+"""
+    `onlyWeekdays`: keep trips that occur on weekdays
+    - for GeoTrip object: returns boolean
+    - for GeoData object: returns filtered GeoData object
+"""
+function onlyWeekdays(t::GeoTrip)
+    return Dates.dayofweek(t.pTime) < 6
+end
+
+function onlyWeekdays(trips::GeoData)
+    mask = BitArray(length(trips))
+    for (i, t) in enumerate(trips)
+        if i%10_000 == 0
+            @printf("\r%.2f%% trips checked     ",100*i/length(trips))
+        end
+        mask[i] = onlyWeekdays(t)
+    end
+    newTrips = trips[mask]
+    @printf("\r%.2f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
+    return newTrips
+end
+"""
     `inPolygon`: keep trips with pickup and dropoff inside a polygon
     - for one trip: returns boolean
     - for trip list: returns filtered list
@@ -82,7 +125,7 @@ function inPolygon(t::GeoTrip, poly::Vector{Tuple{Float32,Float32}})
     return pointInsidePolygon(t.pLon,t.pLat,poly) && pointInsidePolygon(t.dLon,t.dLat,poly)
 end
 
-function inPolygon(trips::TripData, poly::Vector{Tuple{Float32,Float32}})
+function inPolygon(trips::GeoData, poly::Vector{Tuple{Float32,Float32}})
     mask = BitArray(length(trips))
     for (i,t) in enumerate(trips)
         if i%10_000 == 0
@@ -91,7 +134,7 @@ function inPolygon(trips::TripData, poly::Vector{Tuple{Float32,Float32}})
         mask[i] = inPolygon(t,poly)
     end
     t = trips[mask]
-    @printf("\r%2.f%% trips removed\n", 100*(1-length(t)/length(trips)))
+    @printf("\r%.2f%% trips removed\n", 100*(1-length(t)/length(trips)))
     return t
 end
 

@@ -8,7 +8,7 @@
     `mipTravelTimes` :
     optimize travel times to minimize L1 error from data with given paths
 """
-function mipTravelTimes(s::IterativeState)
+function mipTravelTimes(s::IterativeState, args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -20,7 +20,7 @@ function mipTravelTimes(s::IterativeState)
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, OutputFlag=1, Method=3, BarConvTol=1e-6))
+    m = Model(solver = GurobiSolver(TimeLimit=10000, OutputFlag=1, Method=3, BarConvTol=1e-6, args...))
 
     # DECISION VARIABLES
     # Road times
@@ -34,7 +34,7 @@ function mipTravelTimes(s::IterativeState)
 
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{ sqrt(tripData[d].weight)*epsilon[d], d=eachindex(tripData)})
+    @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path

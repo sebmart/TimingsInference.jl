@@ -5,12 +5,11 @@
 
 
 """
-    `tripsStd`: compute standard deviation of timings error percentage
+    `tripsRMS`: compute standard deviation of timings error percentage
     - `timings`: timing reference
     - `trips` : list of trip data
-    - `weighted`: average per ride and not per trip
 """
-function tripsStd(timings::NetworkTimings, trips::Vector{NetworkTrip})
+function tripsRMS(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
     error = 0.
     for t in trips
@@ -23,7 +22,6 @@ end
     `tripsMAE`: compute Mean Absolute Error percentage between timings and trips
     - `timings`: timing reference
     - `trips` : list of trip data
-    - `weighted`: average per ride and not per trip
 """
 function tripsMAE(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
@@ -35,11 +33,25 @@ function tripsMAE(timings::NetworkTimings, trips::Vector{NetworkTrip})
 end
 
 """
-    `allPathsStd`: compute standard deviation of timings error percentage for all paths
+    `tripsBias`: compute bias between trimings and trips
+    - `timings`: timing reference
+    - `trips` : list of trip data
+"""
+function tripsBias(timings::NetworkTimings, trips::Vector{NetworkTrip})
+    tt = getPathTimes(timings)
+    bias = 0.
+    for t in trips
+        bias += tt[t.orig, t.dest] - t.time
+    end
+    return bias/length(trips)
+end
+
+"""
+    `allPathsRMS`: compute standard deviation of timings error percentage for all paths
     - `timingsRef`: reference times
     - `timingsNew`: times to compare with
 """
-function allPathsStd(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
+function allPathsRMS(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     tt1 = getPathTimes(timingsRef)
     tt2 = getPathTimes(timingsNew)
 
@@ -69,39 +81,11 @@ function allPathsMAE(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
 end
 
 """
-    `allPathsMAEByLength`: compute MAE of timings percentage for all paths, broken down by path length
-    - `timingsRef`: reference times
-    - `timingsNew`: times to compare with
-    - `lengths`: the different length-bounds we will consider.
-"""
-function allPathsMAEByLength(timingsRef::NetworkTimings, timingsNew::NetworkTimings;
-                    lengths::Vector{Int} = [1, 2, 3, 5, 10, 15, 20, 1_000_000])
-    tt1 = getPathTimes(timingsRef)
-    tt2 = getPathTimes(timingsNew)
-
-    errors = [0. for i=eachindex(ub)]
-    nTrips = [0 for i=eachindex(ub)]
-
-    for o in 1:nNodes(timingsRef.network), d in 1:nNodes(timingsRef.network)
-        if o != d
-            pathLength = length(getPath(timingsRef, o, d)) - 1
-            idx = 1
-            while pathLength > lengths[idx]
-                idx += 1
-            end
-            errors[idx] = (nTrips[idx] * errors[idx] + abs(tt1[o,d] - tt2[o,d])/tt1[o,d])/(nTrips[idx] + 1)
-            nTrips[idx] += 1
-        end
-    end
-    return lengths, errors, nTrips
-end
-
-"""
-    `roadTimeStd`: compute standard deviation of road time error percentage
+    `roadTimeRMS`: compute standard deviation of road time error percentage
     - `timingsRef`: reference times
     - `timingsNew`: times to compare with
 """
-function roadTimeStd(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
+function roadTimeRMS(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     g = timingsRef.network.graph
     t1 = timingsRef.times
     t2 = timingsNew.times
