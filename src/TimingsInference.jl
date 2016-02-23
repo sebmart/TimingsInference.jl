@@ -50,7 +50,6 @@ include("geodata/avgradius.jl")
 include("geodata/splitdata.jl")
 include("geodata/geostatdefs.jl")
 include("geodata/stats.jl")
-include("geodata/statistics.jl")
 
 include("visualization/showtimes.jl")
 
