@@ -1,14 +1,13 @@
 ###################################################
-## mip.jl
+## network/iterative/miptimes.jl
 ## MIP to select minimums
 ###################################################
 
 
 """
-    `mipTravelTimes` :
-    optimize travel times to minimize L1 error from data with given paths
+    `mipTimes` : optimize travel times to minimize L1 error from data with given paths
 """
-function mipTravelTimes(s::IterativeState, args...)
+function mipTimes(s::IterativeState, args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
