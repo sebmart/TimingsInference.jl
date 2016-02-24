@@ -1,5 +1,5 @@
 ###################################################
-## projectors/nearestnode.jl
+## geo/projectors/nearestnode.jl
 ## implementation of network projector with nn projection
 ###################################################
 
@@ -98,10 +98,11 @@ function getTripTiming(nn::NearestNode, timings::NetworkTimings, tId::Int)
     o,d = nn.proj[tId]
     return timings.pathTimes[o,d]
 end
-function getTripTiming(nn::NearestNode, timings::NetworkTimings, t::GeoTrip)
-    pX, pY = toENU(t.pLon, t.pLat, nn.network)
+function getTripTiming(nn::NearestNode, timings::NetworkTimings,
+            pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)
+    pX, pY = toENU(pLon, pLat, nn.network)
     o = knn(nn.tree,[pX,pY],1)[1][1]
-    dX, dY = toENU(t.dLon, t.dLat, nn.network)
+    dX, dY = toENU(dLon, dLat, nn.network)
     d = knn(nn.tree,[dX,dY],1)[1][1]
     return timings.pathTimes[o,d]
 end

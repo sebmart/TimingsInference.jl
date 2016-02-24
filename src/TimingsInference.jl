@@ -20,13 +20,13 @@ export tripsRMS, tripsMAE, allPathsRMS, allPathsMAE, roadTimeRMS, roadTimeMAE
 #iterative
 export IterativeState, doIteration!, LimitedPaths, updateState!, lpTimes, lp2Times, mipTimes
 #geo data
-export GeoTrip, GeoData, NetworkProjector, NearestNode, AvgRadius
-export DataSplit, RandomSplit
-export Stats, RealDataStats
-export printStats, plotStats, updateStats!
-export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
-export preloadData!, getNetworkTrips, getTripTiming
-
+export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance
+export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, trainSet
+export testSet, Stats, RealDataStats, printStats, plotStats, updateStats!
+#projectors
+export NetworkProjector, NearestNode, AvgRadius
+#geo-timings
+export GeoTimings, TimingsFromNetwork, estimateTime
 #visualization
 export ShowTimes
 
@@ -41,14 +41,20 @@ include("network/iterative/lptimes.jl")
 include("network/iterative/lp2times.jl")
 include("network/iterative/miptimes.jl")
 
-include("geodata/geotrip.jl")
-include("geodata/nyctaxi.jl")
-include("geodata/networkprojector.jl")
-include("geodata/nearestnode.jl")
-include("geodata/avgradius.jl")
-include("geodata/splitdata.jl")
-include("geodata/geostatdefs.jl")
-include("geodata/stats.jl")
+include("geo/trips.jl")
+include("geo/nyctaxi.jl")
+include("geo/datafilters.jl")
+
+
+include("geo/projectors/networkprojector.jl")
+include("geo/projectors/nearestnode.jl")
+include("geo/projectors/avgradius.jl")
+include("geo/datasplit.jl")
+include("geo/statistics.jl")
+include("geo/stats.jl")
+
+include("geo/timings/geotimings.jl")
+include("geo/timings/fromnetwork.jl")
 
 include("visualization/showtimes.jl")
 

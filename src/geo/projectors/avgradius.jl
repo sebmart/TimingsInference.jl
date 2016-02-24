@@ -114,10 +114,11 @@ function getTripTiming(ar::AvgRadius, timings::NetworkTimings, tId::Int)
     end
     return time / length(nodePairs)
 end
-function getTripTiming(ar::AvgRadius, timings::NetworkTimings, t::GeoTrip)
+function getTripTiming(ar::AvgRadius, timings::NetworkTimings,
+        pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)
     # find nodes within radius
-    pX, pY = toENU(t.pLon, t.pLat, ar.network)
-    dX, dY = toENU(t.dLon, t.dLat, ar.network)
+    pX, pY = toENU(pLon, pLat, ar.network)
+    dX, dY = toENU(dLon, dLat, ar.network)
     tripLocation = [pX, pY, dX, dY]
     nodePairs = inrange(ar.tree, tripLocation, ar.radius)
     nodePairs = [decipherNodePairIndex(node, length(ar.network.nodes)) for node in nodePairs]
