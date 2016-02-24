@@ -1,5 +1,5 @@
 ###################################################
-## avgradius.jl
+## projectors/avgradius.jl
 ## implementation of network projector with radius projection
 ###################################################
 

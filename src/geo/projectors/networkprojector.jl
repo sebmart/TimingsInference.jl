@@ -1,5 +1,5 @@
 ###################################################
-## networkprojector.jl
+## projectors/networkprojector.jl
 ## link geographical and network data
 ###################################################
 
@@ -29,8 +29,7 @@ end
 function NetworkData(
         proj::NetworkProjector,
         trips::AbstractArray{Int64,1} = eachindex(proj.trips),
-        minTimes::AbstractArray{Float64,2} = maxSpeedTimes(proj.network); #max speeds timings
-        args...)
+        minTimes::AbstractArray{Float64,2} = maxSpeedTimes(proj.network))
     # Create the "NetworkTrip" array
-    return NetworkData(proj.network, getNetworkTrips(proj, trips, args...), minTimes)
+    return NetworkData(proj.network, getNetworkTrips(proj, trips), minTimes)
 end

@@ -1,5 +1,5 @@
 ###################################################
-## geotrip.jl
+## geo/geodata.jl
 ## Representing trip data with continuous geographical locations
 ###################################################
 """

@@ -1,5 +1,5 @@
 ###################################################
-## nearestnode.jl
+## projectors/nearestnode.jl
 ## implementation of network projector with nn projection
 ###################################################
 
