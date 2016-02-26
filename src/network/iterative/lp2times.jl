@@ -61,7 +61,7 @@ function lp2Times(s::IterativeState; args...) #args is solver args
 		)
 	# fix objective from first step
 	@addConstraint(m, fixObjective,
-		sum{ sqrt(tripData[d].weight)*epsilon[d], d=eachindex(tripData)} <=
+		sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)} <=
 		1.02 * objective
 		)
 
