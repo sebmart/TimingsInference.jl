@@ -21,7 +21,7 @@ type KnnTimings <: GeoTimings
     "training set indices"
     trainset::Vector{Int}
 
-    function KnnTimings(trips::GeoData, trainSet::AbstractArray{Int}, k::Int; weigthed::Bool=false)
+    function KnnTimings(trips::GeoData, trainSet::AbstractArray{Int}, k::Int; weighted::Bool=false)
         gt = new()
         gt.trips = trips
         gt.k = k
@@ -30,32 +30,32 @@ type KnnTimings <: GeoTimings
         # create center for projection
         minLat, maxLat, minLon, maxLon = Inf32, -Inf32, Inf32, -Inf32
         for t in trips
-            minLat > pLat && (minLat = pLat)
-            minLat > dLat && (minLat = dLat)
-            minLon > pLon && (minLon = pLon)
-            minLon > dLon && (minLon = dLon)
-            maxLat < pLat && (maxLat = pLat)
-            maxLat < dLat && (maxLat = dLat)
-            maxLon < pLon && (maxLon = pLon)
-            maxLon < dLon && (maxLon = dLon)
+            minLat > t.pLat && (minLat = t.pLat)
+            minLat > t.dLat && (minLat = t.dLat)
+            minLon > t.pLon && (minLon = t.pLon)
+            minLon > t.dLon && (minLon = t.dLon)
+            maxLat < t.pLat && (maxLat = t.pLat)
+            maxLat < t.dLat && (maxLat = t.dLat)
+            maxLon < t.pLon && (maxLon = t.pLon)
+            maxLon < t.dLon && (maxLon = t.dLon)
         end
         gt.center = ((maxLon + minLon)/2, (maxLat + minLat)/2)
         println("Creating KDTree...")
         dataPos = Array(Float64,(4, length(trainSet)))
-        for i in eachindex(trainSet)
+        for (k,i) in enumerate(trainSet)
             px, py = toENU(trips[i].pLon, trips[i].pLat, gt.center)
             dx, dy = toENU(trips[i].dLon, trips[i].dLat, gt.center)
-            dataPos[1, i] = px
-            dataPos[2, i] = py
-            dataPos[3, i] = dx
-            dataPos[4, i] = dy
+            dataPos[1, k] = px
+            dataPos[2, k] = py
+            dataPos[3, k] = dx
+            dataPos[4, k] = dy
         end
         gt.tree = KDTree(dataPos)
 
         return gt
     end
 end
-KnnTimings(s::DataSplit, k::Int) =  KnnTimings(s.trips, trainSet(s), k)
+KnnTimings(s::DataSplit, k::Int; args...) =  KnnTimings(s.geodata, trainSet(s), k; args...)
 
 function estimateTime(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)
 @inbounds begin
@@ -67,9 +67,9 @@ function estimateTime(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float3
         denum = 0.
         for i in eachindex(idxs)
             if dists[i] == 0.
-                return trips[gt.trainset[idxs[i]]].time
+                return gt.trips[gt.trainset[idxs[i]]].time
             else
-                num += trips[gt.trainset[idxs[i]]].time / dists[i]
+                num += gt.trips[gt.trainset[idxs[i]]].time / dists[i]
                 denum += 1./dists[i]
             end
         end
@@ -77,7 +77,7 @@ function estimateTime(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float3
     else
         mean = 0.
         for id in idxs
-            mean += trips[gt.trainset[id]].time
+            mean += gt.trips[gt.trainset[id]].time
         end
         return mean / length(idxs)
     end

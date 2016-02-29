@@ -20,13 +20,13 @@ export tripsRMS, tripsMAE, allPathsRMS, allPathsMAE, roadTimeRMS, roadTimeMAE
 #iterative
 export IterativeState, doIteration!, LimitedPaths, updateState!, lpTimes, lp2Times, mipTimes
 #geo data
-export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance
+export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
 export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, trainSet
 export testSet, Stats, RealDataStats, printStats, plotStats, updateStats!
 #projectors
 export NetworkProjector, NearestNode, AvgRadius
 #geo-timings
-export GeoTimings, TimingsFromNetwork, estimateTime
+export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 #visualization
 export ShowTimes
 
@@ -55,6 +55,7 @@ include("geo/stats.jl")
 
 include("geo/timings/geotimings.jl")
 include("geo/timings/fromnetwork.jl")
+include("geo/timings/knn.jl")
 
 include("visualization/showtimes.jl")
 
