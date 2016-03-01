@@ -126,7 +126,7 @@ end
 """
 function updateStats!(so::RealGeoStats, gt::GeoTimings, ds::DataSplit)
 	so.nIter += 1
-	push!(so.times, s.timings.times)
+	push!(so.times, gt.timings.times)
 	push!(so.sdict["testTripsMAE"], 100 * testTripsMAE(gt, ds))
 	push!(so.sdict["trTripsMAE"], 100 * trTripsMAE(gt, ds))
 	push!(so.sdict["testTripsRMS"], 100 * testTripsRMS(gt, ds))
