@@ -18,7 +18,7 @@ must implement methods:
 
 abstract GeoStats
 
-function Base.show(io::IO, so::Stats)
+function Base.show(io::IO, so::GeoStats)
 	typeName = split(string(typeof(so)),".")[end]
 	println(io, "$(typeName) for iteration $(so.nIter)")
 end
@@ -53,7 +53,7 @@ type RealGeoStats <: GeoStats
 end
 
 """
-	`printStats`: prints out statistic identified by statName stored in given Stats
+	`printStats`: prints out statistic identified by statName stored in given GeoStats
 	Optional argument outputFileName if you want to write this to a file instead
 """
 function printStats(so::RealGeoStats, statName::AbstractString; outputFileName = "")
@@ -98,7 +98,7 @@ function printStats(so::RealGeoStats, statName::AbstractString; outputFileName =
 end
 
 """
-	`plotStats`: plot relevant statistic, identified by statName, stored in given Stats object
+	`plotStats`: plot relevant statistic, identified by statName, stored in given GeoStats object
 """
 function plotStats(so::RealGeoStats, statName::AbstractString)
 	COLORS = ["red", "blue", "green", "orange", "black"]
@@ -122,7 +122,7 @@ function plotStats(so::RealGeoStats, statName::AbstractString)
 end
 
 """
-	`updateStats!`: Adds one round of stats to the Stats object
+	`updateStats!`: Adds one round of stats to the GeoStats object
 """
 function updateStats!(so::RealGeoStats, s::IterativeState, proj::NetworkProjector, ds::DataSplit)
 	so.nIter += 1
