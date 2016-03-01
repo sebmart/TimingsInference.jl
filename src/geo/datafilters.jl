@@ -45,12 +45,12 @@ tripDistance(t::GeoTrip) = distanceGeo(t.pLon,t.pLat,t.dLon,t.dLat)
     - for GeoTrip object: returns boolean
     - for GeoData object: returns filtered GeoData object
 """
-inTimeWindow(t::GeoTrip, startHour::Int, startMin::Int, endHour::Int, endMin::Int) =
-(startHour < Dates.hour(t.pTime) ||
-        (startHour == Dates.hour(t.pTime) && startMin <= Dates.minute(t.pTime))) &&
-(endHour   > Dates.hour(t.pTime) ||
-        (endHour   == Dates.hour(t.pTime) && endMin > Dates.minute(t.pTime)))
-
+function inTimeWindow(t::GeoTrip, startHour::Int, startMin::Int, endHour::Int, endMin::Int)
+    return ((startHour < Dates.hour(t.pTime) || 
+        (startHour == Dates.hour(t.pTime) && startMin <= Dates.minute(t.pTime))) && 
+    (endHour > Dates.hour(t.pTime) || 
+        (endHour   == Dates.hour(t.pTime) && endMin > Dates.minute(t.pTime))))
+end
 
 function inTimeWindow(trips::GeoData, startHour::Int, startMin::Int, endHour::Int, endMin::Int)
     mask = BitArray(length(trips))

@@ -124,19 +124,19 @@ end
 """
 	`updateStats!`: Adds one round of stats to the GeoStats object
 """
-function updateStats!(so::RealGeoStats, s::IterativeState, proj::NetworkProjector, ds::DataSplit)
+function updateStats!(so::RealGeoStats, gt::GeoTimings, ds::DataSplit)
 	so.nIter += 1
 	push!(so.times, s.timings.times)
-	push!(so.sdict["testTripsMAE"], 100 * testTripsMAE(s.timings, proj, ds))
-	push!(so.sdict["trTripsMAE"], 100 * trTripsMAE(s.timings, proj, ds))
-	push!(so.sdict["testTripsRMS"], 100 * testTripsRMS(s.timings, proj, ds))
-	push!(so.sdict["trTripsRMS"], 100 * trTripsRMS(s.timings, proj, ds))
-	push!(so.sdict["testTripsBias"], testTripsBias(s.timings, proj, ds))
-	push!(so.sdict["trTripsBias"], trTripsBias(s.timings, proj, ds))
-	push!(so.sdict["testTripsMAEbt"], 100 * testTripsMAEbyTime(s.timings, proj, ds, so.timeBound))
-	push!(so.sdict["trTripsMAEbt"], 100 * trTripsMAEbyTime(s.timings, proj, ds, so.timeBound))
-	push!(so.sdict["testTripsRMSbt"], 100 * testTripsRMSbyTime(s.timings, proj, ds, so.timeBound))
-	push!(so.sdict["trTripsRMSbt"], 100 * trTripsRMSbyTime(s.timings, proj, ds, so.timeBound))
-	push!(so.sdict["testTripsBiasbt"], testTripsBiasByTime(s.timings, proj, ds, so.timeBound))
-	push!(so.sdict["trTripsBiasbt"], trTripsBiasByTime(s.timings, proj, ds, so.timeBound))
+	push!(so.sdict["testTripsMAE"], 100 * testTripsMAE(gt, ds))
+	push!(so.sdict["trTripsMAE"], 100 * trTripsMAE(gt, ds))
+	push!(so.sdict["testTripsRMS"], 100 * testTripsRMS(gt, ds))
+	push!(so.sdict["trTripsRMS"], 100 * trTripsRMS(gt, ds))
+	push!(so.sdict["testTripsBias"], testTripsBias(gt, ds))
+	push!(so.sdict["trTripsBias"], trTripsBias(gt, ds))
+	push!(so.sdict["testTripsMAEbt"], 100 * testTripsMAEbyTime(gt, ds, so.timeBound))
+	push!(so.sdict["trTripsMAEbt"], 100 * trTripsMAEbyTime(gt, ds, so.timeBound))
+	push!(so.sdict["testTripsRMSbt"], 100 * testTripsRMSbyTime(gt, ds, so.timeBound))
+	push!(so.sdict["trTripsRMSbt"], 100 * trTripsRMSbyTime(gt, ds, so.timeBound))
+	push!(so.sdict["testTripsBiasbt"], testTripsBiasByTime(gt, ds, so.timeBound))
+	push!(so.sdict["trTripsBiasbt"], trTripsBiasByTime(gt, ds, so.timeBound))
 end
