@@ -7,7 +7,7 @@
     `TimingsFromNetwork`, uses projector to extend timings from network
 """
 type TimingsFromNetwork <: GeoTimings
-    trips::GeoData # compulsary attribute
+    trips::GeoData # compulsory attribute
 
     "timings in network"
     timings::NetworkTimings

@@ -22,7 +22,7 @@ export IterativeState, doIteration!, LimitedPaths, updateState!, lpTimes, lp2Tim
 #geo data
 export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
 export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, trainSet
-export testSet, Stats, RealDataStats, printStats, plotStats, updateStats!
+export testSet, GeoStats, RealGeoStats, printStats, plotStats, updateStats!
 #projectors
 export NetworkProjector, NearestNode, AvgRadius
 #geo-timings
