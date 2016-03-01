@@ -1,6 +1,6 @@
 ###################################################
-## generateRides.jl
-## generate "virtual" network ride data
+## network/virtualdata.jl
+## generate "virtual" network data
 ###################################################
 
 """

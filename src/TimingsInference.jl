@@ -10,46 +10,53 @@ using Base.Dates, NearestNeighbors
 using PyPlot
 
 import Colors
-import RoutingNetworks: visualInit, visualEvent, visualUpdate, inPolygon
+import RoutingNetworks: visualInit, visualEvent, inPolygon
 
 
-#network data
+#network
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export tripsRMS, tripsMAE, allPathsRMS, allPathsMAE, roadTimeRMS, roadTimeMAE
-
+#iterative
+export IterativeState, doIteration!, LimitedPaths, updateState!, lpTimes, lp2Times, mipTimes
 #geo data
-export GeoTrip, GeoData, NetworkProjector, NearestNode, AvgRadius
-export DataSplit, RandomSplit
-export Stats, RealDataStats
-export printStats, plotStats, updateStats!
-export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, fromNYCTaxiCSV, isRegular, removeOutliers, tripDistance, stats
-export preloadData!, getNetworkTrips, getTripTiming
-#iterative heuristic
-export IterativeState, printStats, doIteration!, FixedNumPathsPerTripState
-
+export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
+export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, trainSet
+export testSet, GeoStats, RealGeoStats, printStats, plotStats, updateStats!
+#projectors
+export NetworkProjector, NearestNode, AvgRadius
+#geo-timings
+export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 #visualization
 export ShowTimes
 
-include("networkdata/networktimings.jl")
-include("networkdata/createtimings.jl")
-include("networkdata/generateRides.jl")
-include("networkdata/statistics.jl")
+include("network/networktypes.jl")
+include("network/statistics.jl")
+include("network/virtualdata.jl")
+include("network/virtualtimings.jl")
 
-include("iterativeLP/iterativeState.jl")
-include("iterativeLP/iterativeLP.jl")
-include("iterativeLP/firstLP.jl")
-include("iterativeLP/mip.jl")
-include("iterativeLP/doubleLP.jl")
+include("network/iterative/state.jl")
+include("network/iterative/limitedpaths.jl")
+include("network/iterative/lptimes.jl")
+include("network/iterative/lp2times.jl")
+include("network/iterative/miptimes.jl")
 
-include("geodata/geotrip.jl")
-include("geodata/nyctaxi.jl")
-include("geodata/networkprojector.jl")
-include("geodata/nearestnode.jl")
-include("geodata/avgradius.jl")
-include("geodata/splitdata.jl")
-include("geodata/geostatdefs.jl")
-include("geodata/stats.jl")
+include("geo/trips.jl")
+include("geo/nyctaxi.jl")
+include("geo/datafilters.jl")
+
+
+include("geo/projectors/networkprojector.jl")
+include("geo/projectors/nearestnode.jl")
+include("geo/projectors/avgradius.jl")
+include("geo/datasplit.jl")
+
+include("geo/timings/geotimings.jl")
+include("geo/timings/fromnetwork.jl")
+include("geo/timings/knn.jl")
+
+include("geo/statistics.jl")
+include("geo/stats.jl")
 
 include("visualization/showtimes.jl")
 

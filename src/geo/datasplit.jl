@@ -1,5 +1,5 @@
 ###################################################
-## splitdata.jl
+## geo/datasplit.jl
 ## split data into training/testing subsets
 ###################################################
 
@@ -16,6 +16,9 @@ function Base.show(io::IO, ds::DataSplit)
 	typeName = split(string(typeof(ds)),".")[end]
 	println(io, "DataSplit: $(typeName)")
 end
+
+trainSet(s::DataSplit) = s.trainingIDs
+testSet(s::DataSplit) = s.testingIDs
 
 """
 	`RandomSplit`: split data set randomly, with a given fraction of the data in the training set
@@ -40,16 +43,4 @@ type RandomSplit <: DataSplit
 		obj.testingIDs = sort(shuf[(endTraining + 1):end])
 		return obj
 	end
-end
-
-"""
-    `NetworkData` : convenience function to create NetworkData using Projector and DataSplit
-"""
-function NetworkData(
-	proj::NetworkProjector,
-	datasplit::DataSplit,
-    minTimes::AbstractArray{Float64,2} = maxSpeedTimes(proj.network); #max speeds timings
-    args...)
-    # Create the "NetworkTrip" array
-    return NetworkData(proj.network, getNetworkTrips(proj, datasplit.trainingIDs, args...), minTimes)
 end

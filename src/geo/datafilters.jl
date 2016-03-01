@@ -1,41 +1,7 @@
 ###################################################
-## geotrip.jl
-## Representing trip data with continuous geographical locations
+## geo/datafilters.jl
+## Filtering geo-trips
 ###################################################
-"""
-    `GeoTrip` : data for one geographical trip
-"""
-immutable GeoTrip
-    "pick-up lonlat coordinates"
-    pLon::Float32
-    pLat::Float32
-
-    "drop-off lonlat coordinates"
-    dLon::Float32
-    dLat::Float32
-
-    "Pick-up date and time"
-    pTime::DateTime
-
-    "Trip time (seconds)"
-    time::Float32
-end
-function Base.show(io::IO, t::GeoTrip)
-    print(io,"$(t.pTime) -- ($(t.pLon),$(t.pLat))=>($(t.dLon),$(t.dLat)): $(tripDistance(t))m in $(t.time)s ")
-end
-
-"""
-    `GeoData`: list of `GeoTrip`
-"""
-typealias GeoData Vector{GeoTrip}
-
-"""
-    `stats`: print information
-"""
-function stats(t::GeoData)
-    println("GeoData: trip information in GPS coordinates")
-    println("--- $(length(t)) trips: $(sizeof(t)/1e6)MB")
-end
 
 """
     `removeBadTrips`: filter a `GeoTrip` list to remove outliers
@@ -75,26 +41,39 @@ tripDistance(t::GeoTrip) = distanceGeo(t.pLon,t.pLat,t.dLon,t.dLat)
 
 """
     `inTimeWindow`: keep trips in a certain time window
+    - time window is of the form "13:40","13:52" (here minute "52" is NOT included)
     - for GeoTrip object: returns boolean
     - for GeoData object: returns filtered GeoData object
 """
-function inTimeWindow(t::GeoTrip, startHour::Int, endHour::Int)
-    return startHour <= Dates.hour(t.pTime) && Dates.hour(t.pTime) < endHour
+function inTimeWindow(t::GeoTrip, startHour::Int, startMin::Int, endHour::Int, endMin::Int)
+    return ((startHour < Dates.hour(t.pTime) || 
+        (startHour == Dates.hour(t.pTime) && startMin <= Dates.minute(t.pTime))) && 
+    (endHour > Dates.hour(t.pTime) || 
+        (endHour   == Dates.hour(t.pTime) && endMin > Dates.minute(t.pTime))))
 end
 
-function inTimeWindow(trips::GeoData, startHour::Int, endHour::Int)
+function inTimeWindow(trips::GeoData, startHour::Int, startMin::Int, endHour::Int, endMin::Int)
     mask = BitArray(length(trips))
     for (i, t) in enumerate(trips)
         if i%10_000 == 0
             @printf("\r%.2f%% trips checked     ",100*i/length(trips))
         end
-        mask[i] = inTimeWindow(t, startHour, endHour)
+        mask[i] = inTimeWindow(t, startHour, startMin, endHour, endMin)
     end
     newTrips = trips[mask]
     @printf("\r%2.f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
     return newTrips
 end
 
+function inTimeWindow(trips::GeoData, startTime::AbstractString, endTime::AbstractString)
+    s = split(startTime,":")
+    e = split(endTime,  ":")
+    startHour = parse(Int, s[1])
+    endHour   = parse(Int, e[1])
+    startMin = parse(Int, s[2])
+    endMin   = parse(Int, e[2])
+    return inTimeWindow(trips, startHour, startMin, endHour, endMin)
+end
 """
     `onlyWeekdays`: keep trips that occur on weekdays
     - for GeoTrip object: returns boolean

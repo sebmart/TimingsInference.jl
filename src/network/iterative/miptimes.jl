@@ -1,14 +1,13 @@
 ###################################################
-## mip.jl
+## network/iterative/miptimes.jl
 ## MIP to select minimums
 ###################################################
 
 
 """
-    `mipTravelTimes` :
-    optimize travel times to minimize L1 error from data with given paths
+    `mipTimes` : optimize travel times to minimize L1 error from data with given paths
 """
-function mipTravelTimes(s::IterativeState, args...)
+function mipTimes(s::IterativeState, args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -20,7 +19,7 @@ function mipTravelTimes(s::IterativeState, args...)
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, OutputFlag=1, Method=3, BarConvTol=1e-6, args...))
+    m = Model(solver = GurobiSolver(TimeLimit=10000, OutputFlag=1, Method=3, BarConvTol=1e-6; args...))
 
     # DECISION VARIABLES
     # Road times

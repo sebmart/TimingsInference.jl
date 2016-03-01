@@ -1,5 +1,5 @@
 ###################################################
-## nyctaxi.jl
+## geo/nyctaxi.jl
 ## Everything specific to the NYC taxi trip data
 ###################################################
 
