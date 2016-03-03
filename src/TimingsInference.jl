@@ -21,8 +21,8 @@ export tripsRMS, tripsMAE, allPathsRMS, allPathsMAE, roadTimeRMS, roadTimeMAE
 export IterativeState, doIteration!, LimitedPaths, updateState!, lpTimes, lp2Times, mipTimes
 #geo data
 export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
-export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, trainSet
-export testSet, GeoStats, RealGeoStats, printStats, plotStats, updateStats!
+export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, LocSplit, trainSet
+export testSet, GeoStats, RealGeoStats, printStats, plotStats
 #projectors
 export NetworkProjector, NearestNode, AvgRadius
 #geo-timings
