@@ -44,3 +44,31 @@ type RandomSplit <: DataSplit
 		return obj
 	end
 end
+
+type LocSplit <: DataSplit
+	# compulsory
+	trainingIDs::Vector{Int}
+	testingIDs::Vector{Int}
+	geodata::GeoData
+
+	# particular
+	network::Network
+	center::Tuple{Float64, Float64, Float64, Float64}
+	radius::Float64
+	function LocSplit(geodata::GeoData, network::Network, center::Tuple{Float64, Float64, Float64, Float64}, radius::Float64, trips::AbstractArray{Int64,1} = eachindex(geodata))
+		obj = new()
+		obj.geodata = geodata
+		obj.center = center
+		obj.radius = radius
+		obj.network = network
+		mask = BitArray(length(trips))
+		for i in trips
+			pX, pY = toENU(geodata[i].pLon, geodata[i].pLat, network)
+			dX, dY = toENU(geodata[i].pLon, geodata[i].pLat, network)
+			mask[i] = ( (center[1] - pX)^2 + (center[2] - pY)^2 + (center[3] - dX)^2 + (center[4] - dY)^2 < radius^2 )
+		end
+		obj.trainingIDs = trips[!mask]
+		obj.testingIDs = trips[mask]
+		return obj
+	end
+end
