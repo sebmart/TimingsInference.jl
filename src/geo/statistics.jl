@@ -109,10 +109,8 @@ testNetworkTripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSp
 """
 	`tripsMAEbyTime`: returns MAE on indicated subset of GeoData, subsetting errors in different time buckets
 """
-function tripsMAEbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 100.])
-	maxTime = 1800.
+function tripsMAEbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [270., 450., 720., 900., 100_000.])
 	numBins = length(timeBound)
-	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
@@ -129,16 +127,14 @@ function tripsMAEbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Fl
 	error = error ./ numInBin
 	return error
 end
-trTripsMAEbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsMAEbyTime(gt, trainSet(ds), timeBound)
-testTripsMAEbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsMAEbyTime(gt, testSet(ds), timeBound)
+trTripsMAEbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsMAEbyTime(gt, trainSet(ds), timeBound)
+testTripsMAEbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsMAEbyTime(gt, testSet(ds), timeBound)
 
 """
 	`tripsRMSbyTime`: returns RMS on indicated subset of GeoData, subsetting errors in different time buckets
 """
-function tripsRMSbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 100.])
-	maxTime = 1800.
+function tripsRMSbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [270., 450., 720., 900., 100_000.])
 	numBins = length(timeBound)
-	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
@@ -155,16 +151,14 @@ function tripsRMSbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Fl
 	error = sqrt(error ./ numInBin)
 	return error
 end
-trTripsRMSbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsRMSbyTime(gt, trainSet(ds), timeBound)
-testTripsRMSbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsRMSbyTime(gt, testSet(ds), timeBound)
+trTripsRMSbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsRMSbyTime(gt, trainSet(ds), timeBound)
+testTripsRMSbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsRMSbyTime(gt, testSet(ds), timeBound)
 
 """
 	`tripsBiasByTime`: returns bias on indicated subset of GeoData, subsetting errors in different time buckets
 """
-function tripsBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [0.15, 0.25, 0.40, 0.50, 100.])
-	maxTime = 1800.
+function tripsBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [270.,450., 720., 900., 100_000.])
 	numBins = length(timeBound)
-	timeBound = maxTime * timeBound
 	error = 0. * collect(1:numBins)
 	numInBin = 0 * collect(1:numBins)
 	for ID in IDlist
@@ -181,5 +175,5 @@ function tripsBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{F
 	error = error ./ numInBin
 	return error
 end
-trTripsBiasByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsBiasByTime(gt, trainSet(ds), timeBound)
-testTripsBiasByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [0.15, 0.25, 0.40, 0.50, 100.]) = tripsBiasByTime(gt, testSet(ds), timeBound)
+trTripsBiasByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsBiasByTime(gt, trainSet(ds), timeBound)
+testTripsBiasByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsBiasByTime(gt, testSet(ds), timeBound)

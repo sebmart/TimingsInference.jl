@@ -6,91 +6,91 @@
 """
 `GeoStats` : abstract type that stores statistics about an algorithm run
 must implement attributes:
-- nIter : number of iterations
-- times : array of time arrays, of length (nIter + 1), corresponding to the road times after each iteration.
-		the first element is the set of road times used to initialize the algorithm
-- sdict : dictionary mapping stat names to arrays containing relevant values
+- name : some information about the method used to generate this
+- times : road times after each iteration.
+- sdict : dictionary mapping stat names to relevant values
 must implement methods:
-- updateStats! : given every possible kind of information needed, computes stats
 - printStats : print a summary of statistics on the algorithm run
-- plotStats : plot these stats in a nice way
 """
 
 abstract GeoStats
-
 function Base.show(io::IO, so::GeoStats)
 	typeName = split(string(typeof(so)),".")[end]
-	println(io, "$(typeName) for iteration $(so.nIter)")
+	println(io, "$(typeName): $(so.name)")
 end
 
 type RealGeoStats <: GeoStats
-	nIter::Int
-	times::Array{AbstractArray{Float64, 2}}
-	sdict::Dict{AbstractString, Array{Union{Float64, Array{Float64,1}},1}}
+	name::AbstractString
+	times::AbstractArray{Float64, 2}
+	sdict::Dict{AbstractString, Union{Float64, Array{Float64,1}}}
 
 	timeBound::Array{Float64,1}
-
-	function RealGeoStats()
+	function RealGeoStats(name::AbstractString, gt::GeoTimings, ds::DataSplit, 
+		timeBound::Vector{Float64} = [270., 450., 720., 900., 100_000.])
 		obj = new()
-		obj.nIter = -1
-		obj.times = AbstractArray{Float64, 2}[]
-		obj.sdict = Dict{AbstractString, Array{Union{Float64, Array{Float64,1}},1}}(
-			"testTripsMAE" => Float64[],
-			"trTripsMAE" => Float64[],
-			"testTripsRMS" => Float64[],
-			"trTripsRMS" => Float64[],
-			"testTripsBias" => Float64[],
-			"trTripsBias" => Float64[],
-			"testTripsMAEbt" => Array{Float64,1}[],
-			"trTripsMAEbt" => Array{Float64,1}[],
-			"testTripsRMSbt" => Array{Float64,1}[],
-			"trTripsRMSbt" => Array{Float64,1}[],
-			"testTripsBiasbt" => Array{Float64,1}[],
-			"trTripsBiasbt" => Array{Float64,1}[])
-		obj.timeBound = [0.15, 0.25, 0.4, 0.5, 100.]
+		obj.name = name
+		obj.times = gt.timings.times
+		obj.timeBound = timeBound
+		obj.sdict = Dict{AbstractString, Union{Float64, Array{Float64,1}}}(
+			"testTripsMAE" => 100 * testTripsMAE(gt, ds),
+			"trTripsMAE" => 100 * trTripsMAE(gt, ds),
+			"testTripsRMS" => 100 * testTripsRMS(gt, ds),
+			"trTripsRMS" => 100 * trTripsRMS(gt, ds),
+			"testTripsBias" => testTripsBias(gt, ds),
+			"trTripsBias" => trTripsBias(gt, ds),
+			"testTripsMAEbt" => 100 * testTripsMAEbyTime(gt, ds, obj.timeBound),
+			"trTripsMAEbt" => 100 * trTripsMAEbyTime(gt, ds, obj.timeBound),
+			"testTripsRMSbt" => 100 * testTripsRMSbyTime(gt, ds, obj.timeBound),
+			"trTripsRMSbt" => 100 * trTripsRMSbyTime(gt, ds, obj.timeBound),
+			"testTripsBiasbt" => testTripsBiasByTime(gt, ds, obj.timeBound),
+			"trTripsBiasbt" => trTripsBiasByTime(gt, ds, obj.timeBound))
 		return obj
 	end
 end
 
 """
-	`printStats`: prints out statistic identified by statName stored in given GeoStats
+	`printStats`: prints out all statistics identified by statName stored in given GeoStats
 	Optional argument outputFileName if you want to write this to a file instead
 """
-function printStats(so::RealGeoStats, statName::AbstractString; outputFileName = "")
-	if !(statName in collect(keys(so.sdict)))
-		error("Statistic not found")
-	end
+function printStats(so::RealGeoStats; outputFileName = "")
 	if outputFileName == ""
 		println(so)
-		println("Iteration\t$statName")
-		if contains(statName, "bt")
-			for i = 0:so.nIter
-				println("$i ", so.sdict[statName][i + 1])
-			end
-		elseif contains(lowercase(statName), "bias")
-			for i = 0:so.nIter
-				@printf("%d\t\t\t%.2f s\n", i, so.sdict[statName][i + 1])
-			end
-		else
-			for i = 0:so.nIter
-				@printf("%d\t\t\t%.2f%%\n", i, so.sdict[statName][i + 1])
+		for statName in sort(collect(keys(so.sdict)))
+			if contains(statName, "bt")
+				println(statName, ":")
+				for (i,time) in enumerate(so.timeBound)
+					if contains(lowercase(statName), "bias")
+						@printf("\t\tTime < %.0f s:\t%.0fs\n", time, so.sdict[statName][i])
+					else
+						@printf("\t\tTime < %.0f s:\t%.2f%%\n", time, so.sdict[statName][i])
+					end
+				end
+			elseif contains(lowercase(statName), "bias")
+				print(statName, ":\t")
+				@printf("%.2f s\n", so.sdict[statName])
+			else
+				print(statName, ":\t")
+				@printf("%.2f%%\n", so.sdict[statName])
 			end
 		end
 	else
 		f = open(outputFileName, "w")
 		write(f, so)
-		write(f, "Iteration\t$statName")
-		if contains(statName, "bt")
-			for i = 0:so.nIter
-				write(f, string("$i ", so.sdict[statName][i + 1], "\n"))
-			end
-		elseif contains(lowercase(statName), "bias")
-			for i = 0:so.nIter
-				@printf(f, "%d\t\t\t%.2f s\n", i, so.sdict[statName][i + 1])
-			end
-		else
-			for i = 0:so.nIter
-				@printf(f, "%d\t\t\t%.2f%%\n", i, so.sdict[statName][i + 1])
+		for statName in sort(collect(keys(so.sdict)))
+			if contains(statName, "bt")
+				for (i,time) in enumerate(so.timeBound)
+					if contains(lowercase(statName), "bias")
+						@printf(f, "\t\tTime < %.0f s:\t%.0fs\n", time, so.sdict[statName][i])
+					else
+						@printf(f, "\t\tTime < %.0f s:\t%.2f%%\n", time, so.sdict[statName][i])
+					end
+				end
+			elseif contains(lowercase(statName), "bias")
+				write(f, string(statName, ":\t"))
+				@printf(f, "%.0fs\n", so.sdict[statName])
+			else
+				write(f, string(statName, ":\t"))
+				@printf(f, "%.2f%%\n", so.sdict[statName])
 			end
 		end
 		close(f)
@@ -98,45 +98,79 @@ function printStats(so::RealGeoStats, statName::AbstractString; outputFileName =
 end
 
 """
-	`plotStats`: plot relevant statistic, identified by statName, stored in given GeoStats object
+	`printStats`: print relevant statistics, identified by statName, stored in given GeoStats object
 """
-function plotStats(so::RealGeoStats, statName::AbstractString)
-	COLORS = ["red", "blue", "green", "orange", "black"]
-	LABELS = ["<4min30s", "<7min30s", "<12min", "<15min", ">15 min"]
-	if !(statName in collect(keys(so.sdict)))
-		error("Statistic not found")
-	end
-	iterations = collect(0:so.nIter)
-	if contains(statName, "bt")
-		for (i, timeBound) in enumerate(so.timeBound)
-			stat = [so.sdict[statName][j][i] for j=eachindex(so.sdict[statName])]
-			plot(iterations, stat, color = COLORS[i % 5 + 1], label = LABELS[i])
+function printStats(stats::Vector{RealGeoStats}, statName::AbstractString)
+	# check if stat is valid and if timebounds are same
+	for so in stats
+		if !(statName in collect(keys(so.sdict)))
+			error("Statistic not found")
 		end
-	else
-		plot(iterations, so.sdict[statName], color = "red", label = statName)
+		if contains(statName, "bt")
+			if so.timeBound != stats[1].timeBound
+				error("Time breakdown arrays don't match")
+			end
+		end
 	end
-	xlabel("Algorithm Step")
-	ylabel(statName)
-	title("Evolution of $(statName) with algorithm progress")
-	legend()
+	# set up top row
+	println(statName)
+	if contains(statName, "bt")
+		print("\t\t")
+		for time in stats[1].timeBound
+			@printf("< %.0fs\t", time)
+		end
+		print("\n")
+	end
+	for so in stats
+		if contains(statName, "bt")
+			print(so.name, "\t")
+			for (i,time) in enumerate(so.timeBound)
+				if contains(lowercase(statName), "bias")
+					@printf("%.0fs\t", so.sdict[statName][i])
+				else
+					@printf("%.2f%%\t", so.sdict[statName][i])
+				end
+			end
+			print("\n")
+		elseif contains(lowercase(statName), "bias")
+			@printf("%s\t\t%.0fs\n", so.name, so.sdict[statName])
+		else
+			@printf("%s\t\t%.2f%%\n", so.name, so.sdict[statName])
+		end
+	end
 end
 
 """
-	`updateStats!`: Adds one round of stats to the GeoStats object
+	`plotStats`: plot relevant statistic, identified by statName, stored in given GeoStats object
 """
-function updateStats!(so::RealGeoStats, gt::GeoTimings, ds::DataSplit)
-	so.nIter += 1
-	push!(so.times, gt.timings.times)
-	push!(so.sdict["testTripsMAE"], 100 * testTripsMAE(gt, ds))
-	push!(so.sdict["trTripsMAE"], 100 * trTripsMAE(gt, ds))
-	push!(so.sdict["testTripsRMS"], 100 * testTripsRMS(gt, ds))
-	push!(so.sdict["trTripsRMS"], 100 * trTripsRMS(gt, ds))
-	push!(so.sdict["testTripsBias"], testTripsBias(gt, ds))
-	push!(so.sdict["trTripsBias"], trTripsBias(gt, ds))
-	push!(so.sdict["testTripsMAEbt"], 100 * testTripsMAEbyTime(gt, ds, so.timeBound))
-	push!(so.sdict["trTripsMAEbt"], 100 * trTripsMAEbyTime(gt, ds, so.timeBound))
-	push!(so.sdict["testTripsRMSbt"], 100 * testTripsRMSbyTime(gt, ds, so.timeBound))
-	push!(so.sdict["trTripsRMSbt"], 100 * trTripsRMSbyTime(gt, ds, so.timeBound))
-	push!(so.sdict["testTripsBiasbt"], testTripsBiasByTime(gt, ds, so.timeBound))
-	push!(so.sdict["trTripsBiasbt"], trTripsBiasByTime(gt, ds, so.timeBound))
+function plotStats(stats::Vector{RealGeoStats}, statName::AbstractString; args...)
+	COLORS = ["red", "blue", "green", "orange", "black"]
+	LABELS = ["<4min30s", "<7min30s", "<12min", "<15min", ">15 min"]
+	# check if stat is valid and if timebounds are same
+	for so in stats
+		if !(statName in collect(keys(so.sdict)))
+			error("Statistic not found")
+		end
+		if contains(statName, "bt")
+			if so.timeBound != stats[1].timeBound
+				error("Time breakdown arrays don't match")
+			end
+		end
+	end
+	x = collect(eachindex(stats))
+	xlabels = [so.name for so in stats]
+	if contains(statName, "bt")
+		for (i, timeBound) in enumerate(stats[1].timeBound)
+			stat = [stats[j].sdict[statName][i] for j=eachindex(stats)]
+			plot(x, stat, "o", color = COLORS[i % 5 + 1], label = LABELS[i])
+		end
+		legend(args...)
+	else
+		plot(x, [so.sdict[statName] for so in stats], "o", color = "red")
+	end
+	xticks(x, xlabels)
+	xlabel("Method used")
+	ylabel(statName)
+	title("$(statName)")
+	margins(0.2)
 end
