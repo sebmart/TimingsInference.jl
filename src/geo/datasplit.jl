@@ -32,7 +32,7 @@ type RandomSplit <: DataSplit
 
 	# particular
 	fractionTrain::Float64
-	function RandomSplit(geodata::GeoData, fractionTrain::Float64, trips::AbstractArray{Int64, 1} = eachindex(geodata))
+	function RandomSplit(geodata::GeoData, fractionTrain::Float64, trips::AbstractArray{Int, 1} = eachindex(geodata))
 		obj = new()
 		obj.geodata = geodata
 		obj.fractionTrain = fractionTrain
@@ -55,7 +55,7 @@ type LocSplit <: DataSplit
 	network::Network
 	center::Tuple{Float64, Float64, Float64, Float64}
 	radius::Float64
-	function LocSplit(geodata::GeoData, network::Network, center::Tuple{Float64, Float64, Float64, Float64}, radius::Float64, trips::AbstractArray{Int64,1} = eachindex(geodata))
+	function LocSplit(geodata::GeoData, network::Network, center::Tuple{Float64, Float64, Float64, Float64}, radius::Float64, trips::AbstractArray{Int,1} = eachindex(geodata))
 		obj = new()
 		obj.geodata = geodata
 		obj.center = center
@@ -64,7 +64,7 @@ type LocSplit <: DataSplit
 		mask = BitArray(length(trips))
 		for i in trips
 			pX, pY = toENU(geodata[i].pLon, geodata[i].pLat, network)
-			dX, dY = toENU(geodata[i].pLon, geodata[i].pLat, network)
+			dX, dY = toENU(geodata[i].dLon, geodata[i].dLat, network)
 			mask[i] = ( (center[1] - pX)^2 + (center[2] - pY)^2 + (center[3] - dX)^2 + (center[4] - dY)^2 < radius^2 )
 		end
 		obj.trainingIDs = trips[!mask]
@@ -72,3 +72,7 @@ type LocSplit <: DataSplit
 		return obj
 	end
 end
+
+LocSplit(geodata::GeoData, network::Network, center::Tuple{Int, Int, Int, Int}, radius::Float64, trips::AbstractArray{Int,1} = eachindex(geodata)) = LocSplit(geodata, network, (Float64(center[1]), Float64(center[2]), Float64(center[3]), Float64(center[4])), radius, trips)
+LocSplit(geodata::GeoData, network::Network, center::Tuple{Int, Int, Int, Int}, radius::Int, trips::AbstractArray{Int,1} = eachindex(geodata)) = LocSplit(geodata, network, (Float64(center[1]), Float64(center[2]), Float64(center[3]), Float64(center[4])), Float64(radius), trips)
+LocSplit(geodata::GeoData, network::Network, center::Tuple{Float64, Float64, Float64, Float64}, radius::Int, trips::AbstractArray{Int,1} = eachindex(geodata)) = LocSplit(geodata, network, center, Float64(radius), trips)
