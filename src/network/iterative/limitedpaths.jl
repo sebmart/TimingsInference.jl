@@ -15,7 +15,12 @@ type LimitedPaths <: IterativeState
     trips::Vector{NetworkTrip}
     paths::Vector{Vector{Vector{Int}}}  # for each trip, a vector of paths
 
-    pathsPerTrip::Int64           # maxNumber of paths per trip
+    "max number of paths per trip"
+    pathsPerTrip::Int64
+    "only trips longer than tripLength get extra paths"
+    tripLength::Float64
+    "distances of network, used to estimate trip length"
+    roadDistances::NetworkTimings
 end
 
 """
@@ -23,7 +28,7 @@ end
     takes in NetworkData object, initial timings (as link times or full timings),
     and max number of paths per trip as integer
 """
-function LimitedPaths(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000)
+function LimitedPaths(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), tripLength::Float64 = 0., maxTrip::Int=1000)
     if pathsPerTrip < 1
         error("Must have at least one path per trip")
     end
@@ -32,12 +37,12 @@ function LimitedPaths(data::NetworkData, startSolution::NetworkTimings; pathsPer
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
     paths = [Vector{Int}[getPath(startSolution, t.orig, t.dest)] for t in trips]
-    return LimitedPaths(data,startSolution,trips,paths,pathsPerTrip)
+    roadDistances = NetworkTimings(data.network)
+    return LimitedPaths(data,startSolution,trips,paths,pathsPerTrip,tripLength,roadDistances)
 end
 
 LimitedPaths(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
     LimitedPaths(data, NetworkTimings(data.network, initTimes); args...)
-
 
 """
     Update paths of LimitedPaths object given new times
@@ -46,15 +51,11 @@ function updateState!(s::LimitedPaths, times::AbstractArray{Float64, 2})
     # update the timings and compute shortest paths
     s.timings = NetworkTimings(s.data.network, times)
 
-    if s.pathsPerTrip == 1
-        for (d,t) in enumerate(s.trips)
-            sp = getPath(s.timings, t.orig, t.dest)
+    for (d,t) in enumerate(s.trips)
+        sp = getPath(s.timings, t.orig, t.dest)
+        if s.pathsPerTrip == 1 || traveltime(s.roadDistances, t.orig, t.dest) < s.tripLength # short trips get one path
             s.paths[d][1] = sp
-        end
-    else
-        # for all data points, check if we already have the new path.
-        for (d,t) in enumerate(s.trips)
-            sp = getPath(s.timings, t.orig, t.dest)
+        else
             index = findfirst(s.paths[d],sp)
             if index != 0   # if so, put it in first position
                 s.paths[d][index], s.paths[d][1] = s.paths[d][1], s.paths[d][index] #swap
