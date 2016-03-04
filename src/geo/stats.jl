@@ -19,11 +19,15 @@ function Base.show(io::IO, so::GeoStats)
 	println(io, "$(typeName): $(so.name)")
 end
 
+"""
+	`RealGeoStats`: instance of GeoStats, made for real trip data
+"""
 type RealGeoStats <: GeoStats
 	name::AbstractString
 	times::AbstractArray{Float64, 2}
 	sdict::Dict{AbstractString, Union{Float64, Array{Float64,1}}}
 
+	"array containing upper bounds for time breakdown of stats"
 	timeBound::Array{Float64,1}
 	function RealGeoStats(name::AbstractString, gt::GeoTimings, ds::DataSplit, 
 		timeBound::Vector{Float64} = [270., 450., 720., 900., 100_000.])

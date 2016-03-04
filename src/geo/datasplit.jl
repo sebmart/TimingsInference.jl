@@ -45,15 +45,20 @@ type RandomSplit <: DataSplit
 	end
 end
 
+"""
+	`LocSplit`: split data set geographically. All testing rides are included in a 4D sphere, everything else forms training set.
+"""
 type LocSplit <: DataSplit
 	# compulsory
 	trainingIDs::Vector{Int}
 	testingIDs::Vector{Int}
 	geodata::GeoData
 
-	# particular
+	"graph with which this is identified"
 	network::Network
+	"center of 4D sphere containing testing set"
 	center::Tuple{Float64, Float64, Float64, Float64}
+	"radius of 4D sphere containing testing set"
 	radius::Float64
 	function LocSplit(geodata::GeoData, network::Network, center::Tuple{Float64, Float64, Float64, Float64}, radius::Float64, trips::AbstractArray{Int,1} = eachindex(geodata))
 		obj = new()
