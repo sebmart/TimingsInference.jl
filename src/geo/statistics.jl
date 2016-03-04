@@ -86,27 +86,6 @@ testTripsBias(gt::GeoTimings, ds::DataSplit) = tripsBias(gt, testSet(ds))
 trTripsBias(gt::GeoTimings, ds::DataSplit) = tripsBias(gt, trainSet(ds))
 
 """
-	`networkTripsMAE`: convert GeoTrips to NetworkTrips and compute their MAE
-"""
-networkTripsMAE(timings::NetworkTimings, proj::NetworkProjector, IDlist::Vector{Int}) = tripsMAE(timings, getNetworkTrips(proj, IDlist))
-trNetworkTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsMAE(timings, proj, ds.trainingIDs)
-testNetworkTripsMAE(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsMAE(timings, proj, ds.testingIDs)
-
-"""
-	`networkTripsRMS`: convert GeoTrips to NetworkTrips and compute their RMS
-"""
-networkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, IDlist::Vector{Int}) = tripsRMS(timings, getNetworkTrips(proj, IDlist))
-trNetworkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsRMS(timings, proj, ds.trainingIDs)
-testNetworkTripsRMS(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsRMS(timings, proj, ds.testingIDs)
-
-"""
-	`networkTripsRMS`: convert GeoTrips to NetworkTrips and compute their RMS
-"""
-networkTripsBias(timings::NetworkTimings, proj::NetworkProjector, IDlist::Vector{Int}) = tripsBias(timings, getNetworkTrips(proj, IDlist))
-trNetworkTripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsBias(timings, proj, ds.trainingIDs)
-testNetworkTripsBias(timings::NetworkTimings, proj::NetworkProjector, ds::DataSplit) = networkTripsBias(timings, proj, ds.testingIDs)
-
-"""
 	`tripsMAEbyTime`: returns MAE on indicated subset of GeoData, subsetting errors in different time buckets
 """
 function tripsMAEbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [270., 450., 720., 900., 100_000.])
