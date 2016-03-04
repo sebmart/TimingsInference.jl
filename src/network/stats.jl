@@ -107,7 +107,7 @@ end
 """
 	`plotStats`: plot stat evolution from list of NetworkStats objects
 """
-function plotStats(stats::Vector{RealGeoStats}, statName::AbstractString; args...)
+function plotStats(stats::Vector{NetworkStats}, statName::AbstractString)
 	# check if stat is valid and if timebounds are same
 	for so in stats
 		if !(statName in collect(keys(so.sdict)))
