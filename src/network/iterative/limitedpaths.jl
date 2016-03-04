@@ -15,9 +15,12 @@ type LimitedPaths <: IterativeState
     trips::Vector{NetworkTrip}
     paths::Vector{Vector{Vector{Int}}}  # for each trip, a vector of paths
 
-    pathsPerTrip::Int64           # maxNumber of paths per trip
-    tripLength::Float64           # only trips longer than tripLength get extra paths
-    roadDistances::NetworkTimings # with distances, computed only once
+    "max number of paths per trip"
+    pathsPerTrip::Int64
+    "only trips longer than tripLength get extra paths"
+    tripLength::Float64
+    "distances of network, used to estimate trip length"
+    roadDistances::NetworkTimings
 end
 
 """
