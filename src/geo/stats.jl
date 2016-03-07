@@ -7,7 +7,6 @@
 `GeoStats` : abstract type that stores statistics about an algorithm run
 must implement attributes:
 - name : some information about the method used to generate this
-- times : road times after each iteration.
 - sdict : dictionary mapping stat names to relevant values
 must implement methods:
 - printStats : print a summary of statistics on the algorithm run
@@ -24,7 +23,6 @@ end
 """
 type RealGeoStats <: GeoStats
 	name::AbstractString
-	times::AbstractArray{Float64, 2}
 	sdict::Dict{AbstractString, Union{Float64, Array{Float64,1}}}
 
 	"array containing upper bounds for time breakdown of stats"
@@ -33,7 +31,6 @@ type RealGeoStats <: GeoStats
 		timeBound::Vector{Float64} = [270., 450., 720., 900., 100_000.])
 		obj = new()
 		obj.name = name
-		obj.times = gt.timings.times
 		obj.timeBound = timeBound
 		obj.sdict = Dict{AbstractString, Union{Float64, Array{Float64,1}}}(
 			"testTripsMAE" => 100 * testTripsMAE(gt, ds),
@@ -147,7 +144,7 @@ end
 """
 	`plotStats`: plot relevant statistic, identified by statName, stored in given GeoStats object
 """
-function plotStats(stats::Vector{RealGeoStats}, statName::AbstractString; args...)
+function plotStats(stats::Vector{RealGeoStats}, statName::AbstractString)
 	COLORS = ["red", "blue", "green", "orange", "black"]
 	LABELS = ["<4min30s", "<7min30s", "<12min", "<15min", ">15 min"]
 	# check if stat is valid and if timebounds are same
@@ -168,7 +165,7 @@ function plotStats(stats::Vector{RealGeoStats}, statName::AbstractString; args..
 			stat = [stats[j].sdict[statName][i] for j=eachindex(stats)]
 			plot(x, stat, "o", color = COLORS[i % 5 + 1], label = LABELS[i])
 		end
-		legend(args...)
+		legend(loc="best")
 	else
 		plot(x, [so.sdict[statName] for so in stats], "o", color = "red")
 	end
