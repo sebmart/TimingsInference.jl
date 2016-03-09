@@ -16,7 +16,7 @@ must implement methods:
 abstract NetworkStats
 function Base.show(io::IO, ns::NetworkStats)
 	typeName = split(string(typeof(ns)),".")[end]
-	println(io, "$(typeName): $(so.name)")
+	println(io, "$(typeName): $(ns.name)")
 end
 
 """
@@ -62,7 +62,7 @@ type VirtNetworkStats <: NetworkStats
 			"allPathsRMS" => 100 * allPathsRMS(timingsRef, timingsNew),
 			"allPathsBias" => allPathsBias(timingsRef, timingsNew),
 			"roadTimeMAE" => 100 * roadTimeMAE(timingsRef, timingsNew),
-			"roadTimeRMS" => 100 * roadTimeRMS(timingsRef, timingsNew)
+			"roadTimeRMS" => 100 * roadTimeRMS(timingsRef, timingsNew),
 			"roadTimeBias" => roadTimeBias(timingsRef, timingsNew))
 		return obj
 	end
@@ -117,7 +117,6 @@ function plotStats(stats::Vector{NetworkStats}, statName::AbstractString)
 	x = collect(eachindex(stats))
 	xlabels = [so.name for so in stats]
 	plot(x, [so.sdict[statName] for so in stats], "o", color = "red")
-	end
 	xticks(x, xlabels)
 	xlabel("Method used")
 	ylabel(statName)
