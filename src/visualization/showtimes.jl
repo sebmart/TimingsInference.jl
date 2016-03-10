@@ -61,7 +61,7 @@ end
 ShowTimes(n::Network,time::AbstractArray{Float64,2}; args...) = ShowTimes(n,AbstractArray{Float64,2}[time],args...)
 ShowTimes(n::Network,timing::NetworkTimings; args...) = ShowTimes(n,AbstractArray{Float64,2}[timing.times],args...)
 ShowTimes(n::Network,timings::Vector{NetworkTimings}; args...) = ShowTimes(n,AbstractArray{Float64,2}[t.times for t in timings],args...)
-ShowTimes(n::Network,stats::Vector{GeoStats}; args...) = ShowTimes(n, AbstractArray{Float64,2}[so.times for so in stats],args...)
+ShowTimes(n::Network,stats::Vector{NetworkStats}; args...) = ShowTimes(n, AbstractArray{Float64,2}[s.times for s in stats],args...)
 
 function visualInit(v::ShowTimes)
     #Change the road colors to the first timing set

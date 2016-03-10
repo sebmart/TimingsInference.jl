@@ -22,7 +22,8 @@ export IterativeState, doIteration!, LimitedPaths, updateState!, lpTimes, lp2Tim
 #geo data
 export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
 export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, LocSplit, trainSet
-export testSet, GeoStats, RealGeoStats, printStats, plotStats
+export testSet, GeoStats, RealGeoStats, NetworkStats, RealNetworkStats, VirtNetworkStats
+export printStats, plotStats
 #projectors
 export NetworkProjector, NearestNode, AvgRadius
 #geo-timings
@@ -34,6 +35,7 @@ include("network/networktypes.jl")
 include("network/statistics.jl")
 include("network/virtualdata.jl")
 include("network/virtualtimings.jl")
+include("network/stats.jl")
 
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")

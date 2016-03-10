@@ -81,6 +81,23 @@ function allPathsMAE(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
 end
 
 """
+    `allPathsBias`: compute bias of timings for all paths
+    - `timingsRef`: reference times
+    - `timingsNew`: times to compare with
+"""
+function allPathsBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
+    tt1 = getPathTimes(timingsRef)
+    tt2 = getPathTimes(timingsNew)
+
+    res = tt2-tt1
+    #remove NAN where o==d
+    for i in 1:size(tt1)[1]
+        res[i,i] = 0.
+    end
+    return sum(res)/(length(tt1)-size(tt1)[1])
+end
+
+"""
     `roadTimeRMS`: compute standard deviation of road time error percentage
     - `timingsRef`: reference times
     - `timingsNew`: times to compare with
@@ -95,8 +112,6 @@ function roadTimeRMS(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     end
     return sqrt(error/ne(g))
 end
-
-
 
 """
     `roadTimeMAE`: compute Mean Absolute Error of road time error percentage
@@ -113,3 +128,34 @@ function roadTimeMAE(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     end
     return error/ne(g)
 end
+
+"""
+    `roadTimeBias`: compute bias of road times
+    - `timingsRef`: reference times
+    - `timingsNew`: times to compare with
+"""
+function roadTimeBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
+    g = timingsRef.network.graph
+    t1 = timingsRef.times
+    t2 = timingsNew.times
+    error = 0.
+    for o in vertices(g), d in out_neighbors(g,o)
+        error += t2[o,d]-t1[o,d]
+    end
+    return error/ne(g)
+end
+
+"""
+    `networkTripsMAE`: compute MAE on NetworkTrips inside NetworkData
+"""
+networkTripsMAE(timings::NetworkTimings, nd::NetworkData) = tripsMAE(timings, nd.trips)
+
+"""
+    `networkTripsRMS`: compute RMS on NetworkTrips inside NetworkData
+"""
+networkTripsRMS(timings::NetworkTimings, nd::NetworkData) = tripsRMS(timings, nd.trips)
+
+"""
+    `networkTripsBias`: compute bias on NetworkTrips inside NetworkData
+"""
+networkTripsBias(timings::NetworkTimings, nd::NetworkData) = tripsBias(timings, nd.trips)
