@@ -44,7 +44,7 @@ end
 LimitedPaths(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
     LimitedPaths(data, NetworkTimings(data.network, initTimes); args...)
 
-HeuristicPaths(data::NetworkData; maxTrip::Int=1000) = LimitedPaths(data, uniformTimes(data.network, speed=15.0), pathsPerTrip=1, maxTrip=maxTrip)
+HeuristicPaths(data::NetworkData; maxTrip::Int=1000) = LimitedPaths(data, uniformTimes(data.network, 15.0), pathsPerTrip=1, maxTrip=maxTrip)
 
 """
     Update paths of LimitedPaths object given new times

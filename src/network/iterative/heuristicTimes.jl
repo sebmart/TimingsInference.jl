@@ -34,7 +34,7 @@ function heuristicTimes(s::IterativeState)
     end
     # set initial value for k
     k = 1.2
-    times = spzeros(nNodes(g), nNodes(g))
+    times = spzeros(nNodes(s.data.network), nNodes(s.data.network))
     # use offsets go update road times
     while true
     	# update roadTimes
@@ -74,11 +74,15 @@ function heuristicTimes(s::IterativeState)
         maxIndex = 0
         for (i, roadKey) in enumerate(unknownRoads)
             isct = 0
-    		for neighbor in RoutingNetworks.in_neighbors(g, key[1])
-                !((neighbor, key[1]) in unknownRoads) && isct += 1
+    		for neighbor in RoutingNetworks.in_neighbors(g, roadKey[1])
+                if !((neighbor, roadKey[1]) in unknownRoads)
+                    isct += 1
+                end
             end
-            for neighbor in RoutingNetworks.out_neighbors(g, key[2])
-                !((key[2], neighbor) in unknownRoads) && isct += 1
+            for neighbor in RoutingNetworks.out_neighbors(g, roadKey[2])
+                if !((roadKey[2], neighbor) in unknownRoads)
+                    isct += 1
+                end
             end
             if isct > maxIsct
                 maxIsct = isct
@@ -96,7 +100,7 @@ function heuristicTimes(s::IterativeState)
         end
         for neighbor in RoutingNetworks.out_neighbors(g, newRoad[2])
             if !((newRoad[2], neighbor) in unknownRoads)
-                neighborV += times[newRoad[2], neighbor]/roads[(newRoad[1], neighbor)].distance
+                neighborV += times[newRoad[2], neighbor]/roads[(newRoad[2], neighbor)].distance
                 count += 1
             end
         end
