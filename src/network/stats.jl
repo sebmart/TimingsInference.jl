@@ -87,7 +87,7 @@ end
 """
 	`printStats`: print stat evolution from list of NetworkStats objects
 """
-function printStats(stats::Vector{NetworkStats}, statName::AbstractString)
+function printStats{T <: NetworkStats}(stats::Vector{T}, statName::AbstractString)
 	# check if stat is valid and if timebounds are same
 	for so in stats
 		if !(statName in collect(keys(so.sdict)))
@@ -107,7 +107,7 @@ end
 """
 	`plotStats`: plot stat evolution from list of NetworkStats objects
 """
-function plotStats(stats::Vector{NetworkStats}, statName::AbstractString)
+function plotStats{T <: NetworkStats}(stats::Vector{T}, statName::AbstractString)
 	# check if stat is valid and if timebounds are same
 	for so in stats
 		if !(statName in collect(keys(so.sdict)))
