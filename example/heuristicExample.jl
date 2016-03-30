@@ -13,7 +13,7 @@ nwstats = RealNetworkStats[]
 push!(geostats, RealGeoStats("start", gt, ds))
 push!(nwstats, RealNetworkStats("start", NetworkTimings(s), pb, pbTest))
 
-for i = 1:5
+for i = 1:20
 	doIteration!(s, method="heuristic")
 	gt = TimingsFromNetwork(NetworkTimings(s), proj)
 	push!(geostats, RealGeoStats("iter$i", gt, ds))
