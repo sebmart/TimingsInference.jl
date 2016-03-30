@@ -54,6 +54,7 @@ function heuristicTimes(s::IterativeState)
     		end
     		newErr += abs(trip.time - estTime)/trip.time
     	end
+        newErr = newErr/length(tripData)
     	if newErr < relErr
     		break
     	else
@@ -61,54 +62,62 @@ function heuristicTimes(s::IterativeState)
     		k < 1.0001 && break
     	end
     end
+    if k < 1.0001
+        println("Convergence obtained")
+    end
     # compute times for roads that did not appear in any path
     println("We have $(length(roads)-length(offset)) roads that did not appear in any path.")
-    unknownRoads = Tuple{Int,Int}[]
-    for key in keys(roads)
-    	!(haskey(offset, key)) && push!(unknownRoads, key)
+    unknownRoads = Dict{Tuple{Int,Int}, Int}()
+    for (key, road) in roads
+    	if !(haskey(offset, key))
+            unknownRoads[key] = 0
+        end
+    end
+    for key in keys(unknownRoads) 
+        for neighbor in RoutingNetworks.in_neighbors(g, key[1])
+            if !((neighbor, key[1]) in keys(unknownRoads))
+                unknownRoads[key] += 1
+            end
+        end
+        for neighbor in RoutingNetworks.out_neighbors(g, key[2])
+            if !((key[2], neighbor) in keys(unknownRoads))
+                unknownRoads[key] += 1
+            end
+        end
     end
 
     # find most connected road, update its time and repeat
     while length(unknownRoads) > 0
-        maxIsct = 0
-        maxIndex = 0
-        for (i, roadKey) in enumerate(unknownRoads)
-            isct = 0
-    		for neighbor in RoutingNetworks.in_neighbors(g, roadKey[1])
-                if !((neighbor, roadKey[1]) in unknownRoads)
-                    isct += 1
-                end
-            end
-            for neighbor in RoutingNetworks.out_neighbors(g, roadKey[2])
-                if !((roadKey[2], neighbor) in unknownRoads)
-                    isct += 1
-                end
-            end
-            if isct > maxIsct
-                maxIsct = isct
-                maxIndex = i
+        maxValue = 0
+        maxKey = 0
+        for (key, value) in unknownRoads
+            if value > maxValue
+                maxValue = value
+                maxKey = key
             end
     	end
-        newRoad = unknownRoads[maxIndex]
+        newRoad = maxKey
         neighborV = 0.
         count = 0
         for neighbor in RoutingNetworks.in_neighbors(g, newRoad[1])
-            if !((neighbor, newRoad[1]) in unknownRoads)
+            if (neighbor, newRoad[1]) in keys(unknownRoads)
+                unknownRoads[(neighbor, newRoad[1])] += 1
+            else
                 neighborV += times[neighbor, newRoad[1]]/roads[(neighbor, newRoad[1])].distance
                 count += 1
             end
         end
         for neighbor in RoutingNetworks.out_neighbors(g, newRoad[2])
-            if !((newRoad[2], neighbor) in unknownRoads)
+            if (newRoad[2], neighbor) in keys(unknownRoads)
+                unknownRoads[(newRoad[2], neighbor)] += 1
+            else
                 neighborV += times[newRoad[2], neighbor]/roads[(newRoad[2], neighbor)].distance
                 count += 1
             end
         end
+        neighborV = neighborV/count
         times[newRoad[1], newRoad[2]] = roads[newRoad].distance/neighborV
-        splice!(unknownRoads, maxIndex)
-    end
-    if k < 1.0001
-        println("Convergence obtained")
+        delete!(unknownRoads, newRoad)
     end
     return times
 end
