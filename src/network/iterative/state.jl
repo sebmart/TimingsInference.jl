@@ -35,11 +35,13 @@ NetworkTimings(it::IterativeState) = it.timings
 """
 function doIteration!(it::IterativeState; method::AbstractString="lp2", solverArgs...)
     if method=="lp"
-        updateState!(it, lpTimes(it), solverArgs...)
+        updateState!(it, lpTimes(it, solverArgs...))
     elseif method=="lp2"
-        updateState!(it, lp2Times(it), solverArgs...)
+        updateState!(it, lp2Times(it, solverArgs...))
     elseif method=="mip"
-        updateState!(it, mipTimes(it), solverArgs...)
+        updateState!(it, mipTimes(it, solverArgs...))
+    elseif method == "heuristic"
+        updateState!(it, heuristicTimes(it))
     else
         error("Unknown optimizer")
     end
