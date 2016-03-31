@@ -37,7 +37,7 @@ type RealNetworkStats <: NetworkStats
 			"trNetworkTripsRMS" => 100 * networkTripsRMS(timings, trainingData),
 			"testNetworkTripsRMS" => 100 * networkTripsRMS(timings, testingData),
 			"trNetworkTripsBias" => networkTripsBias(timings, trainingData),
-			"testNetworkTripsBias" => networkTripsBias(timings, trainingData))
+			"testNetworkTripsBias" => networkTripsBias(timings, testingData))
 		return obj
 	end
 end
