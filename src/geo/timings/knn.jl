@@ -43,6 +43,8 @@ type KnnTimings <: GeoTimings
         println("Creating KDTree...")
         dataPos = Array(Float64,(4, length(trainSet)))
         for (k,i) in enumerate(trainSet)
+            if (k % 100_000) == 0
+                @printf("\r%.2f%% trips loaded     ",100*k/length(trainSet))
             px, py = toENU(trips[i].pLon, trips[i].pLat, gt.center)
             dx, dy = toENU(trips[i].dLon, trips[i].dLat, gt.center)
             dataPos[1, k] = px
@@ -50,6 +52,7 @@ type KnnTimings <: GeoTimings
             dataPos[3, k] = dx
             dataPos[4, k] = dy
         end
+        println("\r100.00% trips loaded      ")
         gt.tree = KDTree(dataPos)
 
         return gt
