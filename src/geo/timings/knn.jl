@@ -45,6 +45,7 @@ type KnnTimings <: GeoTimings
         for (k,i) in enumerate(trainSet)
             if (k % 100_000) == 0
                 @printf("\r%.2f%% trips loaded     ",100*k/length(trainSet))
+            end
             px, py = toENU(trips[i].pLon, trips[i].pLat, gt.center)
             dx, dy = toENU(trips[i].dLon, trips[i].dLat, gt.center)
             dataPos[1, k] = px
