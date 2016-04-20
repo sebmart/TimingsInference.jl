@@ -43,7 +43,7 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", solverArg
     elseif method == "heuristic"
         updateState!(it, heuristicTimes(it))
     elseif method == "redlp"
-        updateState!(it, redlptimes(it, solverArgs...))
+        updateState!(it, redlpTimes(it, solverArgs...))
     else
         error("Unknown optimizer")
     end
