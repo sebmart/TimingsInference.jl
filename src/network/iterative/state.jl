@@ -33,7 +33,7 @@ NetworkTimings(it::IterativeState) = it.timings
 """
     `doIteration!`, shortcut to update state with optimizer's output
 """
-function doIteration!(it::IterativeState; method::AbstractString="lp2", solverArgs...)
+function doIteration!(it::IterativeState; method::AbstractString="lp", solverArgs...)
     if method=="lp"
         updateState!(it, lpTimes(it, solverArgs...))
     elseif method=="lp2"
@@ -42,6 +42,8 @@ function doIteration!(it::IterativeState; method::AbstractString="lp2", solverAr
         updateState!(it, mipTimes(it, solverArgs...))
     elseif method == "heuristic"
         updateState!(it, heuristicTimes(it))
+    elseif method = "redlp"
+        updateState!(it, redlptimes(it, solverArgs...))
     else
         error("Unknown optimizer")
     end
