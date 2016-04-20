@@ -8,7 +8,7 @@
     lpTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
-function lpTimes(s::IterativeState; args...)
+function redlpTimes(s::IterativeState; args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
