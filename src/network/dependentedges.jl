@@ -65,3 +65,11 @@ function random2DBits(freqOnes::Float64, n::Int)
 	end
 	return ar
 end
+
+function evaluateTime(dependency::Dict{Tuple{Int,Int},Float64}, times::AbstractArray{Float64,2})
+	result = 0.
+	for (i,j) in keys(dependency)
+		result += dependency[(i,j)] * times[i,j]
+	end
+	return result
+end

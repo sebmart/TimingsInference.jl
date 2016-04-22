@@ -28,27 +28,25 @@ function redlpTimes(s::IterativeState; args...)
     @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
+    # change path representation
+    srand(1992)
+    independent = random2DBits(0.1, nNodes(s.data.network))
+    dep = findNetworkDependence(s.data.network, independent, 10000)
+    simplifiedPaths = [[simplifyPath(paths[d][i]) for i = 1:length(paths[d])] for d = eachindex(tripData)]
+
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time >=
+        sum{t[i,j] * simplifiedPaths[(i,j)], (i,j)=keys(simplifiedPaths[d][1])} - tripData[d].time >=
         - epsilon[d])
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time <=
+        sum{t[i,j] * simplifiedPaths[(i,j)], (i,j)=keys(simplifiedPaths[d][1])} - tripData[d].time <=
         epsilon[d])
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[paths[d][p+1][i], paths[d][p+1][i+1]], i=1:(length(paths[d][p+1])-1)} >=
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)}
+        sum{t[i,j] * simplifiedPaths[(i,j)], (i,j)=keys(simplifiedPaths[d][p+1])} >=
+        sum{t[i,j] * simplifiedPaths[(i,j)], (i,j)=keys(simplifiedPaths[d][1])}
         )
-
-    # edge constraints
-    srand(1992)
-    for i = vertices(g), j = out_neighbors(g,i)
-        if rand() > 0.5
-            @addConstraint(m, t[i,j]/roads[i,j].distance - 1/(length(in_neighbors(g,i)) + length(out_neighbors(g,j))) * (sum{1/roads[j,k].distance * t[j,k], k = out_neighbors(g,j)} + sum{1/roads[h,i].distance * t[h,i], h=in_neighbors(g,i)}) == 0)
-        end
-    end
 
     # SOLVE LP
     status = solve(m)
@@ -57,7 +55,14 @@ function redlpTimes(s::IterativeState; args...)
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
     for i in vertices(g), j in out_neighbors(g,i)
-        result[i,j] = times[i,j]
+        if independent[i,j]
+            result[i,j] = times[i,j]
+        end
+    end
+    for i in vertices(g), j in out_neighbors(g,i)
+        if !independent[i,j]
+            result[i,j] = evaluateTime(dep[(i,j)], result)
+        end
     end
 
     return result
