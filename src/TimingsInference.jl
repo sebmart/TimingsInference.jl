@@ -17,6 +17,7 @@ import RoutingNetworks: visualInit, visualEvent, inPolygon
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export tripsRMS, tripsMAE, allPathsRMS, allPathsMAE, roadTimeRMS, roadTimeMAE
+export findNetworkDependence, simplifyPath, random2DBits
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, updateState!, lpTimes, lp2Times, redlpTimes, mipTimes, heuristicTimes
 #geo data
@@ -36,6 +37,7 @@ include("network/statistics.jl")
 include("network/virtualdata.jl")
 include("network/virtualtimings.jl")
 include("network/stats.jl")
+include("network/dependentedges.jl")
 
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
