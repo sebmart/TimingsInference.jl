@@ -6,17 +6,21 @@
 function findNetworkDependence(n::Network, independent::BitArray{2}, k::Int)
 	# initialize independent edges
 	roads = n.roads
-	dependencies = Dict{Tuple{Int,Int}, Dict{Tuple{Int,Int},Float64}}()
+	dependencies = Dict{Tuple{Int,Int}, Vector{Float}}()
 	independentEdges = Tuple{Int,Int}[]
 	for (orig,dest) in keys(roads)
 		if independent[orig,dest]
 			push!(independentEdges, (orig,dest))
-			dependencies[orig,dest] = Dict{Tuple{Int,Int}, Float64}((orig,dest) => 1.0)
+			dependencies[orig,dest] = zeros(length(independentEdges))
+			dependencies[orig,dest][length()]
 		end
 	end
 	for (orig,dest) in keys(roads)
-		if !(independent[orig,dest])
-			dependencies[orig,dest] = Dict{Tuple{Int,Int}, Float64}([indepEdge => roads[(orig,dest)].distance/(length(independentEdges) * roads[indepEdge].distance) for indepEdge in independentEdges])
+		if independent[orig,dest]
+			dependencies[orig,dest] = zeros(length(independentEdges))
+			dependencies[orig,dest][findfirst(independentEdges), (orig, dest)] = 1.0
+		else
+			dependencies[orig,dest] = [roads[(orig,dest)].distance/(length(independentEdges) * roads[indepEdge].distance) for indepEdge in independentEdges]
 		end
 	end
 	for j = 1:k
@@ -26,32 +30,20 @@ function findNetworkDependence(n::Network, independent::BitArray{2}, k::Int)
 				append!(nearEdges, [(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
 				nearEdges = Set(nearEdges)
 				nNearEdges = length(nearEdges)
-				dependencies[orig,dest] = Dict{Tuple{Int,Int}, Float64}()
+				dependencies[orig,dest] = zeros(length(independentEdges))
 				for edge in nearEdges
-					for neighbor in keys(dependencies[edge])
-						if neighbor in keys(dependencies[orig,dest])
-							dependencies[orig,dest][neighbor] += dependencies[edge][neighbor] * roads[(orig,dest)].distance/(nNearEdges * roads[neighbor].distance)
-						else
-							dependencies[orig,dest][neighbor] = dependencies[edge][neighbor] * roads[(orig,dest)].distance/(nNearEdges * roads[neighbor].distance)
-						end
-					end
+					dependencies[orig,dest].+=dependencies[edge].*(roads[orig,dest].distance/(nNearEdges*roads[edge].distance))
 				end
 			end
 		end
 	end
-	return dependencies
+	return dependencies, independentEdges
 end
 
-function simplifyPath(path::Vector{Int}, dependencies::Dict{Tuple{Int,Int}, Dict{Tuple{Int,Int},Float64}})
-	newPath = Dict{Tuple{Int,Int},Float64}()
+function simplifyPath(path::Vector{Int}, dependencies::Dict{Tuple{Int,Int}, Vector{Float}})
+	newPath = zeros(dependencies[(path[1], path[2])])
 	for i = 1:(length(path)-1)
-		for edge in keys(dependencies[path[i], path[i+1]])
-			if edge in keys(newPath)
-				newPath[edge] += dependencies[path[i], path[i+1]][edge]
-			else
-				newPath[edge] = dependencies[path[i], path[i+1]][edge]
-			end
-		end
+		newPath .+= dependencies[(path[i], path[i+1])]
 	end
 	return newPath
 end
@@ -66,10 +58,6 @@ function random2DBits(freqOnes::Float64, n::Int)
 	return ar
 end
 
-function evaluateTime(dependency::Dict{Tuple{Int,Int},Float64}, times::AbstractArray{Float64,2})
-	result = 0.
-	for (i,j) in keys(dependency)
-		result += dependency[(i,j)] * times[i,j]
-	end
-	return result
+function evaluateTime(dependency::Vector{Float64}, times::Vector{Float64})
+	return dot(dependency, times)
 end
