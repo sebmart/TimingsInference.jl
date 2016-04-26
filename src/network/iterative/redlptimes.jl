@@ -54,10 +54,11 @@ function redlpTimes(s::IterativeState; args...)
     status = solve(m)
     times = getValue(t)
 
+    timesArray = [times[i] for i=eachindex(independent)]
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
     for i in vertices(g), j in out_neighbors(g,i)
-        result[i,j] = evaluateTime(dep[:,emap[(i,j)]], times)
+        result[i,j] = evaluateTime(dep[:,emap[(i,j)]], timesArray)
     end
 
     return result
