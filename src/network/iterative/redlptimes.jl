@@ -14,7 +14,7 @@ function redlpTimes(s::IterativeState; args...)
     tripData = s.trips
     roads = s.data.network.roads
 
-    edgeList = sort(collect(keys(n.roads)))
+    edgeList = sort(collect(keys(roads)))
     srand(1992)
     independent, dependent = pickIndepEdges(0.05, s.data.network)
     dep, emap = findNetworkDependence(s.data.network, independent, dependent)
