@@ -17,7 +17,7 @@ import RoutingNetworks: visualInit, visualEvent, inPolygon
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export tripsRMS, tripsMAE, allPathsRMS, allPathsMAE, roadTimeRMS, roadTimeMAE
-export findNetworkDependence, simplifyPath, random2DBits
+export findNetworkDependence, simplifyPath, pickIndepEdges, evaluateTime
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, updateState!, lpTimes, lp2Times, redlpTimes, mipTimes, heuristicTimes
 #geo data
