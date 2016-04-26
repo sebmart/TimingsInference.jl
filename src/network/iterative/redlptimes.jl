@@ -36,18 +36,18 @@ function redlpTimes(s::IterativeState; args...)
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        sum{t[i] * simplifiedPaths[d][1][i], i=eachindex(edges)} - tripData[d].time >=
+        sum{t[i] * simplifiedPaths[d][1][i], i=eachindex(independent)} - tripData[d].time >=
         - epsilon[d]
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[i] * simplifiedPaths[d][1][i], i=eachindex(edges)} - tripData[d].time <=
+        sum{t[i] * simplifiedPaths[d][1][i], i=eachindex(independent)} - tripData[d].time <=
         epsilon[d]
         )
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[i] * simplifiedPaths[d][p+1][i], i=eachindex(edges)} >=
-        sum{t[i] * simplifiedPaths[d][1][i], i=eachindex(edges)}
+        sum{t[i] * simplifiedPaths[d][p+1][i], i=eachindex(independent)} >=
+        sum{t[i] * simplifiedPaths[d][1][i], i=eachindex(independent)}
         )
 
     # SOLVE LP
