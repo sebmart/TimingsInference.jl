@@ -3,7 +3,6 @@
 ## LP that finds new traveltimes to optimize cost function
 ###################################################
 
-
 """
     lpTimes :
     optimize travel times to minimize L1 error from data with given paths
@@ -16,7 +15,7 @@ function redlpTimes(s::IterativeState; args...)
 
     edgeList = sort(collect(keys(roads)))
     srand(1992)
-    independent, dependent = pickIndepEdges(0.05, s.data.network)
+    independent, dependent = pickIndepEdges(0.9, s.data.network)
     dep, emap = findNetworkDependence(s.data.network, independent, dependent)
     simplifiedPaths = [[simplifyPath(paths[d][i], dep, emap) for i = 1:length(paths[d])] for d = eachindex(tripData)]
 
@@ -52,6 +51,10 @@ function redlpTimes(s::IterativeState; args...)
 
     # SOLVE LP
     status = solve(m)
+    if status == :Infeasible
+        buildInternalModel(m)
+        print_iis_gurobi(m)
+    end
     times = getValue(t)
 
     timesArray = [times[i] for i=eachindex(independent)]
@@ -62,4 +65,40 @@ function redlpTimes(s::IterativeState; args...)
     end
 
     return result
+end
+
+function print_iis_gurobi(m::Model)
+    """
+    Taken from JuMP examples online. Given a LP instance, uses Gurobi to troubleshoot infeasibility.
+    Outputs IIS to find "bad" constraints.
+    """
+    grb = MathProgBase.getrawsolver(getInternalModel(m))
+    Gurobi.computeIIS(grb)
+    numconstr = Gurobi.num_constrs(grb)
+    numvar = Gurobi.num_vars(grb)
+
+    iisconstr = Gurobi.get_intattrarray(grb, "IISConstr", 1, numconstr)
+    iislb = Gurobi.get_intattrarray(grb, "IISLB", 1, numvar)
+    iisub = Gurobi.get_intattrarray(grb, "IISUB", 1, numvar)
+
+    println("Irreducible Inconsistent Subsystem (IIS)")
+    println("Variable bounds:")
+    for i in 1:numvar
+        v = Variable(m, i)
+        if iislb[i] != 0 && iisub[i] != 0
+            println(getLower(v), " <= ", getName(v), " <= ", getUpper(v))
+        elseif iislb[i] != 0
+            println(getName(v), " >= ", getLower(v))
+        elseif iisub[i] != 0
+            println(getName(v), " <= ", getUpper(v))
+        end
+    end
+
+    println("Constraints:")
+    for i in 1:numconstr
+        if iisconstr[i] != 0
+            println(m.linconstr[i])
+        end
+    end
+    println("End of IIS")
 end

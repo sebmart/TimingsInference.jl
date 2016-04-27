@@ -44,7 +44,7 @@ end
 function simplifyPath(path::Vector{Int}, dependencies::Array{Float64,2}, edgeMap::Dict{Tuple{Int,Int}, Int})
 	newPath = zeros(size(dependencies)[1])
 	for i = 1:(length(path)-1)
-		newPath .+= dependencies[edgeMap[path[i], path[i+1]]]
+		newPath += dependencies[:,edgeMap[path[i], path[i+1]]]
 	end
 	return newPath
 end
