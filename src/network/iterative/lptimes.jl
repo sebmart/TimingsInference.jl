@@ -20,21 +20,24 @@ function lpTimes(s::IterativeState; args...)
 
     # DECISION VARIABLES
     # Road times
-    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
+    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= 0)
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
+    @defVar(m, y >= 0)
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
+    @setObjective(m, Min, sum{tripData[d].weight * epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time >=
-        - epsilon[d])
+        epsilon[d] >=
+        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - y * tripData[d].time
+        )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time <=
-        epsilon[d])
+        epsilon[d] >= 
+        - sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + y * tripData[d].time
+        )
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
@@ -42,14 +45,29 @@ function lpTimes(s::IterativeState; args...)
         sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)}
         )
 
+    # fractional programming constraint
+    @addConstraint(m, fracProgram,
+        sum{t[paths[d][1][i], paths[d][1][i+1]], d=eachindex(tripData), i=1:(length(paths[d][1]) -1)}
+        + y * sum([tripData[d].time for d=eachindex(tripData)]) == 1
+        )
+
+    # new bounds on edge velocities
+    @addConstraint(m, speedLimits[i=vertices(g), j=out_neighbors(g,i)],
+        t[i,j] >= s.data.minTimes[i,j] * y)
+
     # SOLVE LP
     status = solve(m)
+    if status == :Infeasible
+        buildInternalModel(m)
+        print_iis_gurobi(m)
+    end
     times = getValue(t)
+    yVal = getValue(y)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
     for i in vertices(g), j in out_neighbors(g,i)
-        result[i,j] = times[i,j]
+        result[i,j] = times[i,j] / yVal
     end
 
     return result

@@ -51,10 +51,6 @@ function redlpTimes(s::IterativeState; args...)
 
     # SOLVE LP
     status = solve(m)
-    if status == :Infeasible
-        buildInternalModel(m)
-        print_iis_gurobi(m)
-    end
     times = getValue(t)
 
     timesArray = [times[i] for i=eachindex(independent)]
