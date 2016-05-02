@@ -60,3 +60,17 @@ end
 function evaluateTime(dependency::Vector{Float64}, times::Vector{Float64})
 	return dot(dependency, times)
 end
+
+function fakeTimes(n::Network, independent::Vector{Int}, edgeMap::Dict{Tuple{Int,Int}, Int})
+	times = uniformTimes(n);
+	for i = 1:nNodes(n), j = out_neighbors(n.graph, i)
+		if times[i,j] > 0
+			if edgeMap[(i,j)] in independent
+				times[i,j] = n.roads[(i,j)].distance/1000
+			else
+				times[i,j] = n.roads[(i,j)].distance
+			end
+		end
+	end
+	return times
+end
