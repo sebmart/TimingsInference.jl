@@ -35,14 +35,14 @@ type RealGeoStats <: GeoStats
 		obj.sdict = Dict{AbstractString, Union{Float64, Array{Float64,1}}}(
 			"testTripsMAE" => 100 * testTripsMAE(gt, ds),
 			"trTripsMAE" => 100 * trTripsMAE(gt, ds),
-			"testTripsRMS" => 100 * testTripsRMS(gt, ds),
-			"trTripsRMS" => 100 * trTripsRMS(gt, ds),
+			"testTripsLogError" => 100 * testTripsLogError(gt, ds),
+			"trTripsLogError" => 100 * trTripsLogError(gt, ds),
 			"testTripsBias" => testTripsBias(gt, ds),
 			"trTripsBias" => trTripsBias(gt, ds),
 			"testTripsMAEbt" => 100 * testTripsMAEbyTime(gt, ds, obj.timeBound),
 			"trTripsMAEbt" => 100 * trTripsMAEbyTime(gt, ds, obj.timeBound),
-			"testTripsRMSbt" => 100 * testTripsRMSbyTime(gt, ds, obj.timeBound),
-			"trTripsRMSbt" => 100 * trTripsRMSbyTime(gt, ds, obj.timeBound),
+			"testTripsLogErrorbt" => 100 * testTripsLogErrorByTime(gt, ds, obj.timeBound),
+			"trTripsLogErrorbt" => 100 * trTripsLogErrorByTime(gt, ds, obj.timeBound),
 			"testTripsBiasbt" => testTripsBiasByTime(gt, ds, obj.timeBound),
 			"trTripsBiasbt" => trTripsBiasByTime(gt, ds, obj.timeBound))
 		return obj

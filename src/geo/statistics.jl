@@ -31,6 +31,25 @@ testTripsMAE(gt::GeoTimings, ds::DataSplit) = tripsMAE(gt, testSet(ds))
 trTripsMAE(gt::GeoTimings, ds::DataSplit) = tripsMAE(gt, trainSet(ds))
 
 """
+	`tripsLogError`: compute log error on passed set of indices
+"""
+function tripsLogError(gt::GeoTimings, IDlist::Vector{Int})
+	error = 0.
+	counter = 0
+	for ID in IDlist
+		timing = estimateTime(gt, ID)
+		if !isnan(timing)
+			error += abs(log(timing/gt.trips[ID].time))
+			counter += 1
+		end
+	end
+	error = error/counter
+	return error
+end
+trTripsLogError(gt::GeoTimings, ds::DataSplit) = tripsLogError(gt, trainSet(ds))
+testTripsLogError(gt::GeoTimings, ds::DataSplit) = tripsLogError(gt, testSet(ds))
+
+"""
 	`tripsRMS`: compute RMS on whatever set of indices is passed
 """
 function tripsRMS(gt::GeoTimings, IDlist::Vector{Int})
@@ -132,6 +151,30 @@ function tripsRMSbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Fl
 end
 trTripsRMSbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsRMSbyTime(gt, trainSet(ds), timeBound)
 testTripsRMSbyTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsRMSbyTime(gt, testSet(ds), timeBound)
+
+"""
+	`tripsLogErrorByTime`: returns RMS on indicated subset of GeoData, subsetting errors in different time buckets
+"""
+function tripsLogErrorByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [270., 450., 720., 900., 100_000.])
+	numBins = length(timeBound)
+	error = 0. * collect(1:numBins)
+	numInBin = 0 * collect(1:numBins)
+	for ID in IDlist
+		idx = 1
+		timing = estimateTime(gt, ID)
+		while timing > timeBound[idx]
+			idx += 1
+		end
+		if !isnan(timing)
+			error[idx] += abs(log(timing/gt.trips[ID].time))
+			numInBin[idx] += 1
+		end
+	end
+	error = error ./ numInBin
+	return error
+end
+trTripsLogErrorByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsLogErrorByTime(gt, trainSet(ds), timeBound)
+testTripsLogErrorByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsLogErrorByTime(gt, testSet(ds), timeBound)
 
 """
 	`tripsBiasByTime`: returns bias on indicated subset of GeoData, subsetting errors in different time buckets
