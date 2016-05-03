@@ -16,21 +16,25 @@ function socpTimes(s::IterativeState; args...)
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, Crossover=0, Method=3, BarConvTol=1e-6; args...))
+    m = Model(solver = GurobiSolver(TimeLimit=10000; args...))
 
     # DECISION VARIABLES
     # Road times
     @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
+    @defVar(m, T[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
     @setObjective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
+    # big T constraints
+    @addConstraint(m, pathTime[d=eachindex(tripData)],
+        T[d] == sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)})
     # second order cone constraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        norm([2 * sqrt(tripData[d].time), sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - epsilon[d]])
+        norm([2 * sqrt(tripData[d].time), T[d] - epsilon[d]])
         <= sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + epsilon[d]
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
