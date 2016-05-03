@@ -210,4 +210,4 @@ networkTripsBias(timings::NetworkTimings, nd::NetworkData) = tripsBias(timings, 
 """
     `networkTripsLogError`: compute log error on NetworkTrips inside NetworkData
 """
-networkTripsBias(timings::NetworkTimings, nd::NetworkData) = tripsLogError(timings, nd.trips)
+networkTripsLogError(timings::NetworkTimings, nd::NetworkData) = tripsLogError(timings, nd.trips)
