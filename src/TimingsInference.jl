@@ -5,7 +5,7 @@
 
 module TimingsInference
 
-using RoutingNetworks, JuMP, Gurobi, MathProgBase, LightGraphs, Distributions, SFML
+using RoutingNetworks, JuMP, Gurobi, Mosek, MathProgBase, LightGraphs, Distributions, SFML
 using Base.Dates, NearestNeighbors
 using PyPlot
 
