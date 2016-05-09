@@ -43,34 +43,6 @@ function lp2Times(s::IterativeState; args...) #args is solver args
     # SOLVE LP
     status = solve(m)
     times = getValue(t)
-    objective = getObjectiveValue(m)
-
-    # SET UP SECOND STEP
-    # objective function variables
-    @defVar(m, delta2[i=vertices(g), j=out_neighbors(g,i)] >= 0)
-
-    # CONSTRAINTS
-    # for objective
-	@addConstraint(m, objConstrLower[i=vertices(g), j=out_neighbors(g,i)],
-		-1 * t[i,j]/roads[i,j].distance + 1/(length(in_neighbors(g, i)) + length(out_neighbors(g,j))) * (sum{1/roads[j,k].distance * t[j,k], k = out_neighbors(g,j)} + sum{1/roads[h,i].distance * t[h,i], h=in_neighbors(g,i)}) <=
-		delta2[i,j]
-		)
-	@addConstraint(m, objConstrUpper[i=vertices(g), j=out_neighbors(g,i)],
-		t[i,j]/roads[i,j].distance - 1/(length(in_neighbors(g,i)) + length(out_neighbors(g,j))) * (sum{1/roads[j,k].distance * t[j,k], k = out_neighbors(g,j)} + sum{1/roads[h,i].distance * t[h,i], h=in_neighbors(g,i)}) <=
-		delta2[i,j]
-		)
-	# fix objective from first step
-	@addConstraint(m, fixObjective,
-		sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)} <=
-		1.02 * objective
-		)
-
-	# OBJECTIVE
-	@setObjective(m, Min, sum{delta2[i,j], i=vertices(g), j=out_neighbors(g,i)})
-
-	# SOLVE SECOND LP
-	status = solve(m)
-	times = getValue(t)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
