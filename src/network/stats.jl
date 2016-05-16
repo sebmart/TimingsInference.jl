@@ -37,7 +37,9 @@ type RealNetworkStats <: NetworkStats
 			"trNetworkTripsLogError" => 100 * networkTripsLogError(timings, trainingData),
 			"testNetworkTripsLogError" => 100 * networkTripsLogError(timings, testingData),
 			"trNetworkTripsBias" => networkTripsBias(timings, trainingData),
-			"testNetworkTripsBias" => networkTripsBias(timings, testingData))
+			"testNetworkTripsBias" => networkTripsBias(timings, testingData)),
+			"trNetworkTripsLogBias" => networkTripsLogBias(timings, trainingData),
+			"testNetworkTripsLogBias" => networkTripsLogBias(timings, testingData))
 		return obj
 	end
 end
@@ -58,12 +60,15 @@ type VirtNetworkStats <: NetworkStats
 			"tripsMAE" => 100 * networkTripsMAE(timingsNew, data),
 			"tripsLogError" => 100 * networkTripsLogError(timingsNew, data),
 			"tripsBias" => networkTripsBias(timingsNew, data),
+			"tripsLogBias" => networkTripsLogBias(timingsNew, data),
 			"allPathsMAE" => 100 * allPathsMAE(timingsRef, timingsNew),
 			"allPathsLogError" => 100 * allPathsLogError(timingsRef, timingsNew),
 			"allPathsBias" => allPathsBias(timingsRef, timingsNew),
+			"allPathsLogBias" => allPathsLogBias(timingsRef, timingsNew),
 			"roadTimeMAE" => 100 * roadTimeMAE(timingsRef, timingsNew),
 			"roadTimeLogError" => 100 * roadTimeLogError(timingsRef, timingsNew),
-			"roadTimeBias" => roadTimeBias(timingsRef, timingsNew))
+			"roadTimeBias" => roadTimeBias(timingsRef, timingsNew)),
+			"roadTimeLogBias" => roadTimeLogBias(timingsRef, timingsNew))
 		return obj
 	end
 end
@@ -74,7 +79,7 @@ end
 function printStats(so::NetworkStats)
 	println(so)
 	for statName in sort(collect(keys(so.sdict)))
-		if contains(lowercase(statName), "bias")
+		if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 			print(statName, ":\t")
 			@printf("%.2f s\n", so.sdict[statName])
 		else
@@ -96,7 +101,7 @@ function printStats{T <: NetworkStats}(stats::Vector{T}, statName::AbstractStrin
 	end
 	println(statName)
 	for so in stats
-		if contains(lowercase(statName), "bias")
+		if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 			@printf("%s\t%.0fs\n", so.name, so.sdict[statName])
 		else
 			@printf("%s\t%.2f%%\n", so.name, so.sdict[statName])
