@@ -11,10 +11,8 @@ function tripsMAE(gt::GeoTimings, IDlist::Vector{Int})
 	counter = 0
 	for ID in IDlist
 		timing = estimateTime(gt, ID)
-		if !isnan(timing)
-			error += abs(timing - gt.trips[ID].time)/gt.trips[ID].time
-			counter += 1
-		end
+		error += abs(timing - gt.trips[ID].time)/gt.trips[ID].time
+		counter += 1
 	end
 	error = error / counter
 	return error
@@ -38,10 +36,8 @@ function tripsLogError(gt::GeoTimings, IDlist::Vector{Int})
 	counter = 0
 	for ID in IDlist
 		timing = estimateTime(gt, ID)
-		if !isnan(timing)
-			error += abs(log(timing/gt.trips[ID].time))
-			counter += 1
-		end
+		error += abs(log(timing/gt.trips[ID].time))
+		counter += 1
 	end
 	error = error/counter
 	return error
@@ -57,10 +53,8 @@ function tripsRMS(gt::GeoTimings, IDlist::Vector{Int})
 	counter = 0
 	for ID in IDlist
 		timing = estimateTime(gt, ID)
-		if !isnan(timing)
-			error += ((timing - gt.trips[ID].time)/gt.trips[ID].time)^2
-			counter += 1
-		end
+		error += ((timing - gt.trips[ID].time)/gt.trips[ID].time)^2
+		counter += 1
 	end
 	error = sqrt(error/counter)
 	return error
@@ -85,10 +79,8 @@ function tripsBias(gt::GeoTimings, IDlist::Vector{Int})
 	counter = 0
 	for ID in IDlist
 		timing = estimateTime(gt, ID)
-		if !isnan(timing)
-			bias += (timing - gt.trips[ID].time)
-			counter += 1
-		end
+		bias += (timing - gt.trips[ID].time)
+		counter += 1
 	end
 	bias = bias / length(IDlist)
 	return bias
@@ -113,10 +105,8 @@ function tripsLogBias(gt::GeoTimings, IDlist::Vector{Int})
 	counter = 0
 	for ID in IDlist
 		timing = estimateTime(gt, ID)
-		if !isnan(timing)
-			bias += (log(timing) - log(gt.trips[ID].time))
-			counter += 1
-		end
+		bias += (log(timing) - log(gt.trips[ID].time))
+		counter += 1
 	end
 	bias = bias / length(IDlist)
 	return bias
@@ -145,10 +135,8 @@ function tripsMAEbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Fl
 		while timing > timeBound[idx]
 			idx += 1
 		end
-		if !isnan(timing)
-			error[idx] += abs(timing - gt.trips[ID].time)/gt.trips[ID].time
-			numInBin[idx] += 1
-		end
+		error[idx] += abs(timing - gt.trips[ID].time)/gt.trips[ID].time
+		numInBin[idx] += 1
 	end
 	error = error ./ numInBin
 	return error
@@ -169,10 +157,8 @@ function tripsRMSbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Fl
 		while timing > timeBound[idx]
 			idx += 1
 		end
-		if !isnan(timing)
-			error[idx] += ((timing - gt.trips[ID].time)/gt.trips[ID].time)^2
-			numInBin[idx] += 1
-		end
+		error[idx] += ((timing - gt.trips[ID].time)/gt.trips[ID].time)^2
+		numInBin[idx] += 1
 	end
 	error = sqrt(error ./ numInBin)
 	return error
@@ -193,10 +179,8 @@ function tripsLogErrorByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Arr
 		while timing > timeBound[idx]
 			idx += 1
 		end
-		if !isnan(timing)
-			error[idx] += abs(log(timing/gt.trips[ID].time))
-			numInBin[idx] += 1
-		end
+		error[idx] += abs(log(timing/gt.trips[ID].time))
+		numInBin[idx] += 1
 	end
 	error = error ./ numInBin
 	return error
@@ -217,10 +201,8 @@ function tripsBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{F
 		while timing > timeBound[idx]
 			idx += 1
 		end
-		if !isnan(timing)
-			error[idx] += (timing - gt.trips[ID].time)
-			numInBin[idx] += 1
-		end
+		error[idx] += (timing - gt.trips[ID].time)
+		numInBin[idx] += 1
 	end
 	error = error ./ numInBin
 	return error
@@ -241,10 +223,8 @@ function tripsLogBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Arra
 		while timing > timeBound[idx]
 			idx += 1
 		end
-		if !isnan(timing)
-			error[idx] += (log(timing) - log(gt.trips[ID].time))
-			numInBin[idx] += 1
-		end
+		error[idx] += (log(timing) - log(gt.trips[ID].time))
+		numInBin[idx] += 1
 	end
 	error = error ./ numInBin
 	return error
