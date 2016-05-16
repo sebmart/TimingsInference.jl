@@ -105,6 +105,34 @@ testTripsBias(gt::GeoTimings, ds::DataSplit) = tripsBias(gt, testSet(ds))
 trTripsBias(gt::GeoTimings, ds::DataSplit) = tripsBias(gt, trainSet(ds))
 
 """
+	`tripsLogBias`: compute log bias on trips for whatever set of indices is passed
+	Log bias is defined as (log predicted time - log real time)
+"""
+function tripsLogBias(gt::GeoTimings, IDlist::Vector{Int})
+	bias = 0.
+	counter = 0
+	for ID in IDlist
+		timing = estimateTime(gt, ID)
+		if !isnan(timing)
+			bias += (log(timing) - log(gt.trips[ID].time))
+			counter += 1
+		end
+	end
+	bias = bias / length(IDlist)
+	return bias
+end
+
+"""
+	`testTripsLogBias`: compute Log Bias on testing set
+"""
+testTripsLogBias(gt::GeoTimings, ds::DataSplit) = tripsLogBias(gt, testSet(ds))
+
+"""
+	`trTripsLogBias`: compute Log Bias on training set
+"""
+trTripsLogBias(gt::GeoTimings, ds::DataSplit) = tripsLogBias(gt, trainSet(ds))
+
+"""
 	`tripsMAEbyTime`: returns MAE on indicated subset of GeoData, subsetting errors in different time buckets
 """
 function tripsMAEbyTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [270., 450., 720., 900., 100_000.])
@@ -199,3 +227,27 @@ function tripsBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{F
 end
 trTripsBiasByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsBiasByTime(gt, trainSet(ds), timeBound)
 testTripsBiasByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsBiasByTime(gt, testSet(ds), timeBound)
+
+"""
+	`tripsLogBiasByTime`: returns log bias on indicated subset of GeoData, subsetting errors in different time buckets
+"""
+function tripsLogBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Array{Float64,1} = [270.,450., 720., 900., 100_000.])
+	numBins = length(timeBound)
+	error = 0. * collect(1:numBins)
+	numInBin = 0 * collect(1:numBins)
+	for ID in IDlist
+		idx = 1
+		timing = estimateTime(gt, ID)
+		while timing > timeBound[idx]
+			idx += 1
+		end
+		if !isnan(timing)
+			error[idx] += (log(timing) - log(gt.trips[ID].time))
+			numInBin[idx] += 1
+		end
+	end
+	error = error ./ numInBin
+	return error
+end
+trTripsLogBiasByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsLogBiasByTime(gt, trainSet(ds), timeBound)
+testTripsLogBiasByTime(gt::GeoTimings, ds::DataSplit, timeBound::Array{Float64, 1} = [270., 450., 720., 900., 100_000.]) = tripsLogBiasByTime(gt, testSet(ds), timeBound)
