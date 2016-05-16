@@ -37,7 +37,7 @@ type RealNetworkStats <: NetworkStats
 			"trNetworkTripsLogError" => 100 * networkTripsLogError(timings, trainingData),
 			"testNetworkTripsLogError" => 100 * networkTripsLogError(timings, testingData),
 			"trNetworkTripsBias" => networkTripsBias(timings, trainingData),
-			"testNetworkTripsBias" => networkTripsBias(timings, testingData)),
+			"testNetworkTripsBias" => networkTripsBias(timings, testingData),
 			"trNetworkTripsLogBias" => networkTripsLogBias(timings, trainingData),
 			"testNetworkTripsLogBias" => networkTripsLogBias(timings, testingData))
 		return obj
@@ -67,7 +67,7 @@ type VirtNetworkStats <: NetworkStats
 			"allPathsLogBias" => allPathsLogBias(timingsRef, timingsNew),
 			"roadTimeMAE" => 100 * roadTimeMAE(timingsRef, timingsNew),
 			"roadTimeLogError" => 100 * roadTimeLogError(timingsRef, timingsNew),
-			"roadTimeBias" => roadTimeBias(timingsRef, timingsNew)),
+			"roadTimeBias" => roadTimeBias(timingsRef, timingsNew),
 			"roadTimeLogBias" => roadTimeLogBias(timingsRef, timingsNew))
 		return obj
 	end
