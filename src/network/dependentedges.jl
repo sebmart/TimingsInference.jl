@@ -3,6 +3,17 @@
 ## find dependence relations between edges
 ###################################################
 
+"""
+	`findNetworkDependence`: express independent edges as sum of dependent edges
+	Args:
+		n 			: 	the network 
+		independent : 	list of independent edges (corresponding indices in the ordered list of edges in the network),
+		dependent   : 	list of the remaining (dependent) edges
+	Returns:
+		dependencies:	a m by n matrix, where m is the number of independent edges and n is the total number of edges
+						 each column corresponds to the weights of each independent edge in each edge
+		edgeMap		:	dictionary, where keys are (orig, dest) pairs and values are the indices in the sorted list of edges
+"""
 function findNetworkDependence(n::Network, independent::Vector{Int}, dependent::Vector{Int})
 	# initialize independent edges
 	edgeList = sort(collect(keys(n.roads)))
@@ -30,6 +41,7 @@ function findNetworkDependence(n::Network, independent::Vector{Int}, dependent::
 			end
 		end
 	end
+	# perform matrix inversion
 	Ainv = (eye(size(A)[1]) - A) ^ (-1)
 	for (row, idx) in enumerate(independent)
 		dependencies[row, idx] = 1.0
@@ -41,6 +53,15 @@ function findNetworkDependence(n::Network, independent::Vector{Int}, dependent::
 	return dependencies, edgeMap
 end
 
+"""
+	`simplifyPath`: represent path as vector, where each element is the weight of the corresponding independent edge
+	Args:
+		path 		:	path as list of nodes
+		dependencies:	matrix returned by findNetworkDependence
+		edgeMap		:	dictionary, where keys are (orig, dest) pairs and values are the indices in the sorted list of edges
+	Returns:
+		newPath		: a vector of length the number independent edges
+"""
 function simplifyPath(path::Vector{Int}, dependencies::Array{Float64,2}, edgeMap::Dict{Tuple{Int,Int}, Int})
 	newPath = zeros(size(dependencies)[1])
 	for i = 1:(length(path)-1)
@@ -49,6 +70,15 @@ function simplifyPath(path::Vector{Int}, dependencies::Array{Float64,2}, edgeMap
 	return newPath
 end
 
+"""
+	`pickIndepEdges`: pick random independent edges in the graph
+	Args:
+		frac		:	fraction of independent edges
+		n 			: 	the network
+	Returns:
+		independent	:	list of independent edges
+		dependent 	: 	list of dependent edges
+"""
 function pickIndepEdges(frac::Float64, n::Network)
 	edges = collect(1:length(n.roads))
 	shuf = shuffle(edges)
@@ -57,10 +87,17 @@ function pickIndepEdges(frac::Float64, n::Network)
 	return independent, dependent
 end
 
+"""
+	`evaluateTime` : given time values for independent edges (times), return time of dependent edge (specified by dependency)
+"""
 function evaluateTime(dependency::Vector{Float64}, times::Vector{Float64})
 	return dot(dependency, times)
 end
 
+"""
+	`fakeTimes`	:	this is a temporary fix to plot independent/dependent edges using ShowTimes
+	Keep it in for now, but the objective is to have this be deprecated by the next PR
+"""
 function fakeTimes(n::Network, independent::Vector{Int}, edgeMap::Dict{Tuple{Int,Int}, Int})
 	times = uniformTimes(n);
 	for i = 1:nNodes(n), j = out_neighbors(n.graph, i)

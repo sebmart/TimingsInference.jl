@@ -1,5 +1,5 @@
 ###################################################
-## network/iterative/lptimes.jl
+## network/iterative/redlptimes.jl
 ## LP that finds new traveltimes to optimize cost function
 ###################################################
 

@@ -36,8 +36,8 @@ NetworkTimings(it::IterativeState) = it.timings
 function doIteration!(it::IterativeState; method::AbstractString="lp", solverArgs...)
     if method=="lp"
         updateState!(it, lpTimes(it, solverArgs...))
-    elseif method=="lp2"
-        updateState!(it, lp2Times(it, solverArgs...))
+    elseif method=="fraclp"
+        updateState!(it, fraclpTimes(it, solverArgs...))
     elseif method=="mip"
         updateState!(it, mipTimes(it, solverArgs...))
     elseif method == "heuristic"
