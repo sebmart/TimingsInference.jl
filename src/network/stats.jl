@@ -32,12 +32,10 @@ type RealNetworkStats <: NetworkStats
 		obj.times = timings.times
 		obj.name = name
 		obj.sdict = Dict{AbstractString, Float64}(
-			"trNetworkTripsMAE" => 100 * networkTripsMAE(timings, trainingData),
-			"testNetworkTripsMAE" => 100 * networkTripsMAE(timings, testingData),
-			"trNetworkTripsRMS" => 100 * networkTripsRMS(timings, trainingData),
-			"testNetworkTripsRMS" => 100 * networkTripsRMS(timings, testingData),
-			"trNetworkTripsBias" => networkTripsBias(timings, trainingData),
-			"testNetworkTripsBias" => networkTripsBias(timings, testingData))
+			"trNetworkTripsLogError" => 100 * networkTripsLogError(timings, trainingData),
+			"testNetworkTripsLogError" => 100 * networkTripsLogError(timings, testingData),
+			"trNetworkTripsLogBias" => 100 * networkTripsLogBias(timings, trainingData),
+			"testNetworkTripsLogBias" => 100 * networkTripsLogBias(timings, testingData))
 		return obj
 	end
 end
@@ -55,15 +53,12 @@ type VirtNetworkStats <: NetworkStats
 		obj.times = timingsNew.times
 		obj.name = name
 		obj.sdict = Dict{AbstractString, Float64}(
-			"tripsMAE" => 100 * networkTripsMAE(timingsNew, data),
-			"tripsRMS" => 100 * networkTripsRMS(timingsNew, data),
-			"tripsBias" => networkTripsBias(timingsNew, data),
-			"allPathsMAE" => 100 * allPathsMAE(timingsRef, timingsNew),
-			"allPathsRMS" => 100 * allPathsRMS(timingsRef, timingsNew),
-			"allPathsBias" => allPathsBias(timingsRef, timingsNew),
-			"roadTimeMAE" => 100 * roadTimeMAE(timingsRef, timingsNew),
-			"roadTimeRMS" => 100 * roadTimeRMS(timingsRef, timingsNew),
-			"roadTimeBias" => roadTimeBias(timingsRef, timingsNew))
+			"tripsLogError" => 100 * networkTripsLogError(timingsNew, data),
+			"tripsLogBias" => 100 * networkTripsLogBias(timingsNew, data),
+			"allPathsLogError" => 100 * allPathsLogError(timingsRef, timingsNew),
+			"allPathsLogBias" => 100 * allPathsLogBias(timingsRef, timingsNew),
+			"roadTimeLogError" => 100 * roadTimeLogError(timingsRef, timingsNew),
+			"roadTimeLogBias" => 100 * roadTimeLogBias(timingsRef, timingsNew))
 		return obj
 	end
 end
@@ -74,7 +69,7 @@ end
 function printStats(so::NetworkStats)
 	println(so)
 	for statName in sort(collect(keys(so.sdict)))
-		if contains(lowercase(statName), "bias")
+		if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 			print(statName, ":\t")
 			@printf("%.2f s\n", so.sdict[statName])
 		else
@@ -96,7 +91,7 @@ function printStats{T <: NetworkStats}(stats::Vector{T}, statName::AbstractStrin
 	end
 	println(statName)
 	for so in stats
-		if contains(lowercase(statName), "bias")
+		if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 			@printf("%s\t%.0fs\n", so.name, so.sdict[statName])
 		else
 			@printf("%s\t%.2f%%\n", so.name, so.sdict[statName])

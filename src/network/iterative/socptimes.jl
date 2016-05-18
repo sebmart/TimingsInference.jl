@@ -1,38 +1,46 @@
 ###################################################
-## network/iterative/lptimes.jl
-## More advanced two-LP method for travel time inference
+## network/iterative/socptimes.jl
+## SOCP that finds new traveltimes to optimize cost function
 ###################################################
 
+
 """
-    `lpTimes`, optimize travel times to minimize L1 error from data with given paths
+    socpTimes :
+    optimize travel times to minimize L1 error from data with given paths
 """
-function lpTimes(s::IterativeState; args...) #args is solver args
+function socpTimes(s::IterativeState; args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
-    roads = s.data.network.roads
+
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, Crossover = 0, Method=2, BarConvTol=1e-8; args...))
+    m = Model(solver = MosekSolver(MSK_DPAR_OPTIMIZER_MAX_TIME=10000.; args...))
 
     # DECISION VARIABLES
     # Road times
     @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
+    @defVar(m, T[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
+    @setObjective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
-    # absolute values contraints (define epsilon), equal to time of first path
+    # big T constraints
+    @addConstraint(m, pathTime[d=eachindex(tripData)],
+        T[d] == sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)})
+    # second order cone constraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time >=
-        - epsilon[d])
+        norm([2 * sqrt(tripData[d].time), T[d] - epsilon[d]])
+        <= sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + epsilon[d]
+        )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time <=
-        epsilon[d])
+        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} <=
+        epsilon[d] * tripData[d].time
+        )
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
@@ -40,7 +48,7 @@ function lpTimes(s::IterativeState; args...) #args is solver args
         sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)}
         )
 
-    # SOLVE LP
+    # SOLVE SOCP
     status = solve(m)
     times = getValue(t)
 

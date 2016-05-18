@@ -33,18 +33,14 @@ type RealGeoStats <: GeoStats
 		obj.name = name
 		obj.timeBound = timeBound
 		obj.sdict = Dict{AbstractString, Union{Float64, Array{Float64,1}}}(
-			"testTripsMAE" => 100 * testTripsMAE(gt, ds),
-			"trTripsMAE" => 100 * trTripsMAE(gt, ds),
-			"testTripsRMS" => 100 * testTripsRMS(gt, ds),
-			"trTripsRMS" => 100 * trTripsRMS(gt, ds),
-			"testTripsBias" => testTripsBias(gt, ds),
-			"trTripsBias" => trTripsBias(gt, ds),
-			"testTripsMAEbt" => 100 * testTripsMAEbyTime(gt, ds, obj.timeBound),
-			"trTripsMAEbt" => 100 * trTripsMAEbyTime(gt, ds, obj.timeBound),
-			"testTripsRMSbt" => 100 * testTripsRMSbyTime(gt, ds, obj.timeBound),
-			"trTripsRMSbt" => 100 * trTripsRMSbyTime(gt, ds, obj.timeBound),
-			"testTripsBiasbt" => testTripsBiasByTime(gt, ds, obj.timeBound),
-			"trTripsBiasbt" => trTripsBiasByTime(gt, ds, obj.timeBound))
+			"testTripsLogError" => 100 * testTripsLogError(gt, ds),
+			"trTripsLogError" => 100 * trTripsLogError(gt, ds),
+			"testTripsLogBias" => 100 * testTripsLogBias(gt, ds),
+			"trTripsLogBias" => 100 * trTripsLogBias(gt, ds),
+			"testTripsLogErrorbt" => 100 * testTripsLogErrorByTime(gt, ds, obj.timeBound),
+			"trTripsLogErrorbt" => 100 * trTripsLogErrorByTime(gt, ds, obj.timeBound),
+			"testTripsLogBiasbt" => 100 * testTripsLogBiasByTime(gt, ds, obj.timeBound),
+			"trTripsLogBiasbt" => 100 * trTripsLogBiasByTime(gt, ds, obj.timeBound))
 		return obj
 	end
 end
@@ -60,13 +56,13 @@ function printStats(so::RealGeoStats; outputFileName = "")
 			if contains(statName, "bt")
 				println(statName, ":")
 				for (i,time) in enumerate(so.timeBound)
-					if contains(lowercase(statName), "bias")
+					if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 						@printf("\t\tTime < %.0f s:\t%.0fs\n", time, so.sdict[statName][i])
 					else
 						@printf("\t\tTime < %.0f s:\t%.2f%%\n", time, so.sdict[statName][i])
 					end
 				end
-			elseif contains(lowercase(statName), "bias")
+			elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 				print(statName, ":\t")
 				@printf("%.2f s\n", so.sdict[statName])
 			else
@@ -80,13 +76,13 @@ function printStats(so::RealGeoStats; outputFileName = "")
 		for statName in sort(collect(keys(so.sdict)))
 			if contains(statName, "bt")
 				for (i,time) in enumerate(so.timeBound)
-					if contains(lowercase(statName), "bias")
+					if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 						@printf(f, "\t\tTime < %.0f s:\t%.0fs\n", time, so.sdict[statName][i])
 					else
 						@printf(f, "\t\tTime < %.0f s:\t%.2f%%\n", time, so.sdict[statName][i])
 					end
 				end
-			elseif contains(lowercase(statName), "bias")
+			elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 				write(f, string(statName, ":\t"))
 				@printf(f, "%.0fs\n", so.sdict[statName])
 			else
@@ -126,14 +122,14 @@ function printStats(stats::Vector{RealGeoStats}, statName::AbstractString)
 		if contains(statName, "bt")
 			print(so.name, "\t")
 			for (i,time) in enumerate(so.timeBound)
-				if contains(lowercase(statName), "bias")
+				if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 					@printf("%.0fs\t", so.sdict[statName][i])
 				else
 					@printf("%.2f%%\t", so.sdict[statName][i])
 				end
 			end
 			print("\n")
-		elseif contains(lowercase(statName), "bias")
+		elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 			@printf("%s\t\t%.0fs\n", so.name, so.sdict[statName])
 		else
 			@printf("%s\t\t%.2f%%\n", so.name, so.sdict[statName])

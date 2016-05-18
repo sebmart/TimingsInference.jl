@@ -87,3 +87,32 @@ function estimateTime(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float3
     end
 end #inbounds
 end
+
+function estimateTimeWithDistance(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)
+@inbounds begin
+    px, py = toENU(pLon, pLat, gt.center)
+    dx, dy = toENU(dLon, dLat, gt.center)
+    idxs, dists = knn(gt.tree, [px, py, dx, dy], gt.k)
+    if gt.weighted
+        num = 0.
+        denum = 0.
+        for i in eachindex(idxs)
+            if dists[i] == 0.
+                return gt.trips[gt.trainset[idxs[i]]].time
+            else
+                num += gt.trips[gt.trainset[idxs[i]]].time / dists[i]
+                denum += 1./dists[i]
+            end
+        end
+        return num/denum
+    else
+        mean = 0.
+        for id in idxs
+            mean += gt.trips[gt.trainset[id]].time
+        end
+        return mean / length(idxs), sum(dists)/length(dists)
+    end
+end #inbounds
+end
+
+estimateTimeWithDistance(gt::KnnTimings, tripID::Int) = estimateTimeWithDistance(gt, gt.trips[tripID].pLon, gt.trips[tripID].pLat, gt.trips[tripID].dLon, gt.trips[tripID].dLat)

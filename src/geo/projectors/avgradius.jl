@@ -5,6 +5,7 @@
 
 """
     `AvgRadius` : Projects trips to nodes within given radius, give the associated prediction
+    If no available nodes within radius, projects to (at most) 3 nearest neighbors
 """
 type AvgRadius <: NetworkProjector
     # compulsory attributes
@@ -66,6 +67,9 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
         dX, dY = toENU(t.dLon, t.dLat, ar.network)
         tripLocation = [pX, pY, dX, dY]
         nodePairs = inrange(ar.tree, tripLocation, ar.radius)
+        if length(nodePairs) == 0
+            nodePairs, dists = knn(ar.tree, tripLocation, 3)
+        end
         nodePairs = [decipherNodePairIndex(node, length(ar.network.nodes)) for node in nodePairs]
         ar.nodeList[i] = nodePairs[map(isValidNodePair, nodePairs)]
     end
