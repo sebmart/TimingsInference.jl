@@ -76,11 +76,9 @@ trTripsRMS(gt::GeoTimings, ds::DataSplit) = tripsRMS(gt, trainSet(ds))
 """
 function tripsBias(gt::GeoTimings, IDlist::Vector{Int})
 	bias = 0.
-	counter = 0
 	for ID in IDlist
 		timing = estimateTime(gt, ID)
 		bias += (timing - gt.trips[ID].time)
-		counter += 1
 	end
 	bias = bias / length(IDlist)
 	return bias
@@ -102,11 +100,9 @@ trTripsBias(gt::GeoTimings, ds::DataSplit) = tripsBias(gt, trainSet(ds))
 """
 function tripsLogBias(gt::GeoTimings, IDlist::Vector{Int})
 	bias = 0.
-	counter = 0
 	for ID in IDlist
 		timing = estimateTime(gt, ID)
-		bias += (log(timing) - log(gt.trips[ID].time))
-		counter += 1
+		bias += log(timing) - log(gt.trips[ID].time)
 	end
 	bias = bias / length(IDlist)
 	return bias
