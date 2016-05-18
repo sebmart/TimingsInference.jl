@@ -43,6 +43,7 @@ function findNetworkDependence(n::Network, independent::Vector{Int}, dependent::
 	end
 	# perform matrix inversion
 	Ainv = (eye(size(A)[1]) - A) ^ (-1)
+	# create dependency matrix
 	for (row, idx) in enumerate(independent)
 		dependencies[row, idx] = 1.0
 		dependencies[row, dependent] = Ainv * B[:, row] .* 1/n.roads[edgeList[idx]].distance

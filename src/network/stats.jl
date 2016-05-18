@@ -32,12 +32,8 @@ type RealNetworkStats <: NetworkStats
 		obj.times = timings.times
 		obj.name = name
 		obj.sdict = Dict{AbstractString, Float64}(
-			"trNetworkTripsMAE" => 100 * networkTripsMAE(timings, trainingData),
-			"testNetworkTripsMAE" => 100 * networkTripsMAE(timings, testingData),
 			"trNetworkTripsLogError" => 100 * networkTripsLogError(timings, trainingData),
 			"testNetworkTripsLogError" => 100 * networkTripsLogError(timings, testingData),
-			"trNetworkTripsBias" => networkTripsBias(timings, trainingData),
-			"testNetworkTripsBias" => networkTripsBias(timings, testingData),
 			"trNetworkTripsLogBias" => 100 * networkTripsLogBias(timings, trainingData),
 			"testNetworkTripsLogBias" => 100 * networkTripsLogBias(timings, testingData))
 		return obj
@@ -57,17 +53,11 @@ type VirtNetworkStats <: NetworkStats
 		obj.times = timingsNew.times
 		obj.name = name
 		obj.sdict = Dict{AbstractString, Float64}(
-			"tripsMAE" => 100 * networkTripsMAE(timingsNew, data),
 			"tripsLogError" => 100 * networkTripsLogError(timingsNew, data),
-			"tripsBias" => networkTripsBias(timingsNew, data),
 			"tripsLogBias" => 100 * networkTripsLogBias(timingsNew, data),
-			"allPathsMAE" => 100 * allPathsMAE(timingsRef, timingsNew),
 			"allPathsLogError" => 100 * allPathsLogError(timingsRef, timingsNew),
-			"allPathsBias" => allPathsBias(timingsRef, timingsNew),
 			"allPathsLogBias" => 100 * allPathsLogBias(timingsRef, timingsNew),
-			"roadTimeMAE" => 100 * roadTimeMAE(timingsRef, timingsNew),
 			"roadTimeLogError" => 100 * roadTimeLogError(timingsRef, timingsNew),
-			"roadTimeBias" => roadTimeBias(timingsRef, timingsNew),
 			"roadTimeLogBias" => 100 * roadTimeLogBias(timingsRef, timingsNew))
 		return obj
 	end
