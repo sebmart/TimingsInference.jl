@@ -1,5 +1,5 @@
 ###################################################
-## network/iterative/socptimes.jl
+## network/solvers/socptimes.jl
 ## SOCP that finds new traveltimes to optimize cost function
 ###################################################
 

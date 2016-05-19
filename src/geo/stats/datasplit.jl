@@ -1,5 +1,5 @@
 ###################################################
-## geo/datasplit.jl
+## geo/stats/datasplit.jl
 ## split data into training/testing subsets
 ###################################################
 

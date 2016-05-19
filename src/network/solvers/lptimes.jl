@@ -1,5 +1,5 @@
 ###################################################
-## network/iterative/lptimes.jl
+## network/solvers/lptimes.jl
 ## More advanced two-LP method for travel time inference
 ###################################################
 

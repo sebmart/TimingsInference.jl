@@ -40,29 +40,29 @@ include("network/dependentedges.jl")
 
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
-include("network/iterative/lptimes.jl")
-include("network/iterative/socptimes.jl")
-include("network/iterative/fraclptimes.jl")
-include("network/iterative/redlptimes.jl")
-include("network/iterative/miptimes.jl")
-include("network/iterative/heuristicTimes.jl")
+
+include("network/solvers/lptimes.jl")
+include("network/solvers/socptimes.jl")
+include("network/solvers/fraclptimes.jl")
+include("network/solvers/redlptimes.jl")
+include("network/solvers/miptimes.jl")
+include("network/solvers/heuristicTimes.jl")
 
 include("geo/trips.jl")
-include("geo/nyctaxi.jl")
-include("geo/datafilters.jl")
-
+include("geo/data/nyctaxi.jl")
+include("geo/data/filters.jl")
 
 include("geo/projectors/networkprojector.jl")
 include("geo/projectors/nearestnode.jl")
 include("geo/projectors/avgradius.jl")
-include("geo/datasplit.jl")
 
 include("geo/timings/geotimings.jl")
 include("geo/timings/fromnetwork.jl")
 include("geo/timings/knn.jl")
 
-include("geo/statistics.jl")
-include("geo/stats.jl")
+include("geo/stats/datasplit.jl")
+include("geo/stats/statistics.jl")
+include("geo/stats/stats.jl")
 
 include("visualization/showtimes.jl")
 

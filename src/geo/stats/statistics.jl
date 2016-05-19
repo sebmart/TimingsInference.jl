@@ -1,5 +1,5 @@
 ###################################################
-## geo/statistics.jl
+## geo/stats/statistics.jl
 ## define methods to calculate errors on GeoTrips using DataSplits
 ###################################################
 
