@@ -24,7 +24,6 @@ function socpTimes(s::IterativeState; args...)
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
     @defVar(m, T[d=eachindex(tripData)] >= 0)
-    @defVar(m, fixedTime >= 0)
 
     # OBJECTIVE
     @setObjective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
@@ -32,14 +31,14 @@ function socpTimes(s::IterativeState; args...)
     # CONSTRAINTS
     # big T constraints
     @addConstraint(m, pathTime[d=eachindex(tripData)],
-        T[d] == sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + fixedTime)
+        T[d] == sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)})
     # second order cone constraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
         norm([2 * sqrt(tripData[d].time), T[d] - epsilon[d]])
-        <= sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + fixedTime + epsilon[d]
+        <= sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + epsilon[d]
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + fixedTime <=
+        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} <=
         epsilon[d] * tripData[d].time
         )
 

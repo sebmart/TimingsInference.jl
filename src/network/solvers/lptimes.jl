@@ -1,6 +1,6 @@
 ###################################################
 ## network/solvers/lptimes.jl
-## More advanced two-LP method for travel time inference
+## Simple LP method for travel time inference
 ###################################################
 
 """
@@ -21,7 +21,6 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
-    @defVar(m, fixedTime >= 0)
 
     # OBJECTIVE
     @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
@@ -29,10 +28,10 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        fixedTime + sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time >=
+        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time >=
         - epsilon[d])
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        fixedTime + sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time <=
+        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time <=
         epsilon[d])
 
     # inequality constraints

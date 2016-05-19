@@ -1,6 +1,6 @@
 ###################################################
-## network/solvers/lptimes.jl
-## LP that finds new traveltimes to optimize cost function
+## network/solvers/fraclptimes.jl
+## Fractional LP (symmetric cost function) that finds new traveltimes
 ###################################################
 
 
