@@ -14,7 +14,7 @@
 						 each column corresponds to the weights of each independent edge in each edge
 		edgeMap		:	dictionary, where keys are (orig, dest) pairs and values are the indices in the sorted list of edges
 """
-function findNetworkDependence(n::Network, independent::Vector{Int}, dependent::Vector{Int})
+function findNetworkDependence(n::Network, independent::Vector{Int}, dependent::Vector{Int}; numDeps::Int = length(independent))
 	# initialize independent edges
 	edgeList = sort(collect(keys(n.roads)))
 	edgeMap = [edgeList[i] => i for i=eachindex(edgeList)]
@@ -46,12 +46,36 @@ function findNetworkDependence(n::Network, independent::Vector{Int}, dependent::
 	# create dependency matrix
 	for (row, idx) in enumerate(independent)
 		dependencies[row, idx] = 1.0
-		dependencies[row, dependent] = Ainv * B[:, row] .* 1/n.roads[edgeList[idx]].distance
+		dependencies[row, dependent] = Ainv * B[:, row]
+	end
+	# sparsify dependency matrix
+	for idx in dependent
+		dependencies[:, idx] = sparsify(dependencies[:,idx], numDeps)
+	end
+	# Multiply and divide by appropriate distances to transform velocity relations to time relations
+	for (row, idx) in enumerate(independent)
+		dependencies[row, dependent] = dependencies[row, dependent] .* 1/n.roads[edgeList[idx]].distance
 	end
 	for idx in dependent
 		dependencies[:, idx] = dependencies[:,idx] .* n.roads[edgeList[idx]].distance
 	end
 	return dependencies, edgeMap
+end
+
+"""
+	`sparsify` : given a vector of dependences summing to 1, identify main components, reduce all others to 0 and renormalize
+	Args:
+		dependency 	:	vector summing to 1
+		numDeps	  	:	number of components to keep
+"""
+function sparsify(dependency::Vector{Float64}, numDeps::Int)
+	p = reverse(sortperm(dependency))
+	newDependency = zeros(length(dependency))
+	total = sum(dependency[p[1:numDeps]])
+	for i = 1:numDeps
+		newDependency[p[i]] = dependency[p[i]]/total
+	end
+	return newDependency
 end
 
 """
@@ -61,7 +85,7 @@ end
 		dependencies:	matrix returned by findNetworkDependence
 		edgeMap		:	dictionary, where keys are (orig, dest) pairs and values are the indices in the sorted list of edges
 	Returns:
-		newPath		: a vector of length the number independent edges
+		newPath		: a vector of length the number of independent edges
 """
 function simplifyPath(path::Vector{Int}, dependencies::Array{Float64,2}, edgeMap::Dict{Tuple{Int,Int}, Int})
 	newPath = zeros(size(dependencies)[1])
