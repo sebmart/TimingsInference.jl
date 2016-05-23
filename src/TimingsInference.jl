@@ -56,11 +56,12 @@ include("geo/projectors/networkprojector.jl")
 include("geo/projectors/nearestnode.jl")
 include("geo/projectors/avgradius.jl")
 
+include("geo/timings/geotimings.jl")
+
 include("geo/stats/datasplit.jl")
 include("geo/stats/statistics.jl")
 include("geo/stats/stats.jl")
 
-include("geo/timings/geotimings.jl")
 include("geo/timings/fromnetwork.jl")
 include("geo/timings/knn.jl")
 

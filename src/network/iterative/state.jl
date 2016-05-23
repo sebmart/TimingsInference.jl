@@ -35,7 +35,8 @@ NetworkTimings(it::IterativeState) = it.timings
 """
 function doIteration!(it::IterativeState; method::AbstractString="lp", solverArgs...)
     if method=="lp"
-        updateState!(it, lpTimes(it, solverArgs...))
+        times, fixedTime = lpTimes(it, solverArgs...)
+        updateState!(it, times, fixedTime)
     elseif method=="fraclp"
         updateState!(it, fraclpTimes(it, solverArgs...))
     elseif method=="mip"
@@ -45,7 +46,8 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", solverArg
     elseif method == "redlp"
         updateState!(it, redlpTimes(it, solverArgs...))
     elseif method == "socp"
-        updateState!(it, socpTimes(it, solverArgs...))
+        times, fixedTime = socpTimes(it, solverArgs...)
+        updateState!(it, times, fixedTime)
     else
         error("Unknown optimizer")
     end

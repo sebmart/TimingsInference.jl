@@ -21,6 +21,7 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
+    @defVar(m, fixedTime >= 0)
 
     # OBJECTIVE
     @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
@@ -28,10 +29,10 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time >=
+        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + fixedTime - tripData[d].time >=
         - epsilon[d])
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - tripData[d].time <=
+        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + fixedTime - tripData[d].time <=
         epsilon[d])
 
     # inequality constraints
@@ -43,6 +44,7 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     # SOLVE LP
     status = solve(m)
     times = getValue(t)
+    fixedTime = getValue(fixedTime)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
@@ -50,5 +52,5 @@ function lpTimes(s::IterativeState; args...) #args is solver args
         result[i,j] = times[i,j]
     end
 
-    return result
+    return result, fixedTime
 end
