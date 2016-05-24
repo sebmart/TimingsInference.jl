@@ -52,7 +52,7 @@ function socpTimes(s::IterativeState; args...)
     # SOLVE SOCP
     status = solve(m)
     times = getValue(t)
-    fixedTime = getValue(fixedTime)
+    fixedTime = max(getValue(fixedTime), 0.)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))

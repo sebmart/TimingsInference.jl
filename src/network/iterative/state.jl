@@ -38,7 +38,8 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", solverArg
         times, fixedTime = lpTimes(it, solverArgs...)
         updateState!(it, times, fixedTime)
     elseif method=="fraclp"
-        updateState!(it, fraclpTimes(it, solverArgs...))
+        times, fixedTime = lpTimes(it, solverArgs...)
+        updateState!(it, times, fixedTime)
     elseif method=="mip"
         updateState!(it, mipTimes(it, solverArgs...))
     elseif method == "heuristic"

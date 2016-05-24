@@ -24,6 +24,7 @@ function fraclpTimes(s::IterativeState; args...)
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
     @defVar(m, y >= 0)
+    @defVar(m, fixedTime >= 0)
 
     # OBJECTIVE
     @setObjective(m, Min, sum{tripData[d].weight * epsilon[d], d=eachindex(tripData)})
@@ -32,11 +33,11 @@ function fraclpTimes(s::IterativeState; args...)
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
         epsilon[d] >=
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - y * tripData[d].time
+        fixedTime + sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - y * tripData[d].time
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
         epsilon[d] >= 
-        - sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + y * tripData[d].time
+        - fixedTime - sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + y * tripData[d].time
         )
 
     # inequality constraints
@@ -47,7 +48,7 @@ function fraclpTimes(s::IterativeState; args...)
 
     # fractional programming constraint
     @addConstraint(m, fracProgram,
-        sum{t[paths[d][1][i], paths[d][1][i+1]], d=eachindex(tripData), i=1:(length(paths[d][1]) -1)}
+        fixedTime * sum([length(paths[d]) for d=eachindex(tripData)]) + sum{t[paths[d][1][i], paths[d][1][i+1]], d=eachindex(tripData), i=1:(length(paths[d][1]) -1)}
         + y * sum([tripData[d].time for d=eachindex(tripData)]) == 1
         )
 
@@ -63,6 +64,7 @@ function fraclpTimes(s::IterativeState; args...)
     end
     times = getValue(t)
     yVal = getValue(y)
+    fixedTime = max(getValue(fixedTime), 0.) / yVal
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
@@ -70,5 +72,5 @@ function fraclpTimes(s::IterativeState; args...)
         result[i,j] = times[i,j] / yVal
     end
 
-    return result
+    return result, fixedTime
 end

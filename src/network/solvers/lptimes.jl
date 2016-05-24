@@ -44,7 +44,7 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     # SOLVE LP
     status = solve(m)
     times = getValue(t)
-    fixedTime = getValue(fixedTime)
+    fixedTime = max(getValue(fixedTime), 0.)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
