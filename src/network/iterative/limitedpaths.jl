@@ -21,7 +21,7 @@ type LimitedPaths <: IterativeState
     tripLength::Float64
     "distances of network, used to estimate trip length"
     roadDistances::NetworkTimings
-    "fixedTime"
+    "fixed time added to every ride"
     fixedTime::Float64
 end
 

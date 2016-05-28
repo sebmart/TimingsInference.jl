@@ -12,6 +12,7 @@
     - `timings::NetworkTimings`    the current timings solution
     - `trips::Vector{NetworkTrip}` trips that we currently optimize on
     - `paths::Vector{Vector{Vector{Int}}}` path subset for each current trip datapoint
+    - `fixedTime::Float64` extra fixed time for all rides, in seconds
     Must implement:
     - `updateState!` updates the state when new link-times are computed
 """
@@ -29,6 +30,7 @@ function Base.show(io::IO, s::IterativeState)
 end
 
 NetworkTimings(it::IterativeState) = it.timings
+fixedTime(it::IterativeState) = it.fixedTime
 
 """
     `doIteration!`, shortcut to update state with optimizer's output

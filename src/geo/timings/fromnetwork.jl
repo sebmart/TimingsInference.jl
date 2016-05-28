@@ -13,7 +13,7 @@ type TimingsFromNetwork <: GeoTimings
     timings::NetworkTimings
     "Projector that links network timings to continuous timings"
     proj::NetworkProjector
-    "fixedTime"
+    "fixed time added to every ride"
     fixedTime::Float64
 
     function TimingsFromNetwork(nt::NetworkTimings, proj::NetworkProjector, ft::Float64 = 0.)
