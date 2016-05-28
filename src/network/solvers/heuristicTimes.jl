@@ -23,8 +23,8 @@ function heuristicTimes(s::IterativeState)
     # compute offset for each road
     offset = Dict{Tuple{Int, Int}, Float64}()
     for (i,trip) in enumerate(tripData)
-    	for j = 1:(length(paths[i][1])-1)
-    		key = (paths[i][1][j], paths[i][1][j+1])
+    	for j = eachindex(paths[i][1])
+    		key = (src(paths[i][1][j]), dst(paths[i][1][j]))
     		if haskey(offset, key)
     			offset[key] += (et[trip.orig, trip.dest] - trip.time) * trip.weight
     		else
@@ -49,8 +49,8 @@ function heuristicTimes(s::IterativeState)
     	newErr = 0.
     	for (i, trip) in enumerate(tripData)
     		estTime = 0.
-    		for j = 1:(length(paths[i][1])-1)
-    			estTime += times[paths[i][1][j], paths[i][1][j+1]]
+    		for j = eachindex(paths[i][1])
+    			estTime += times[src(paths[i][1][j]), dst(paths[i][1][j])]
     		end
     		newErr += abs(trip.time - estTime)/trip.time
     	end

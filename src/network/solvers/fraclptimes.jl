@@ -33,22 +33,22 @@ function fraclpTimes(s::IterativeState; args...)
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
         epsilon[d] >=
-        fixedTime + sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - y * tripData[d].time
+        fixedTime + sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])} - y * tripData[d].time
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
         epsilon[d] >= 
-        - fixedTime - sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + y * tripData[d].time
+        - fixedTime - sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])} + y * tripData[d].time
         )
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[paths[d][p+1][i], paths[d][p+1][i+1]], i=1:(length(paths[d][p+1])-1)} >=
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)}
+        sum{t[src(paths[d][p+1][i]), dst(paths[d][p+1][i])], i=eachindex(paths[d][p+1])} >=
+        sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])}
         )
 
     # fractional programming constraint
     @addConstraint(m, fracProgram,
-        fixedTime * sum([length(paths[d]) for d=eachindex(tripData)]) + sum{t[paths[d][1][i], paths[d][1][i+1]], d=eachindex(tripData), i=1:(length(paths[d][1]) -1)}
+        fixedTime * sum([length(paths[d]) for d=eachindex(tripData)]) + sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], d=eachindex(tripData), i=eachindex(paths[d][1])}
         + y * sum([tripData[d].time for d=eachindex(tripData)]) == 1
         )
 
