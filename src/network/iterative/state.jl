@@ -23,10 +23,8 @@ function Base.show(io::IO, s::IterativeState)
     typeName = split(string(typeof(s)),".")[end]
     nTrips = length(s.trips)
     nPaths = sum([length(paths) for paths in s.paths])
-    mae = tripsMAE(s.timings, s.trips)
     println(io,"Iterative heuristic: $(typeName)")
     println(io,"Optimizing on $nTrips trips and $nPaths paths")
-    @printf(io,"MAE on current trips: %.2f%%\n", mae*100)
 end
 
 NetworkTimings(it::IterativeState) = it.timings
