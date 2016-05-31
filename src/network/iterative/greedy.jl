@@ -29,6 +29,8 @@ type GreedyEdges <: IterativeState
     dependencies::SparseMatrixCSC{Float64,Int}
     "edge map"
     edgeMap::Dict{Edge,Int}
+    "number of edges to remove"
+    numEdges::Int
 end
 
 """
@@ -36,7 +38,7 @@ end
     takes in NetworkData object, initial timings (as link times or full timings),
     and max number of paths per trip as integer
 """
-function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000)
+function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10)
     if pathsPerTrip < 1
         error("Must have at least one path per trip")
     end
@@ -49,7 +51,7 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
     dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = 3)
-    return GreedyEdges(data,startSolution,trips,paths,0.,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap)
+    return GreedyEdges(data,startSolution,trips,paths,0.,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges)
 end
 
 GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -64,7 +66,7 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2}, fixedTim
     newTimes = evaluateTimes(s.data.network, s.dependencies, times, s.independent, s.edgeMap)
     s.timings = NetworkTimings(s.data.network, newTimes)
     # update independent set and dependencies
-    s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, 10)
+    s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges)
     s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = 3)
     # update paths 
     for (d,t) in enumerate(s.trips)
