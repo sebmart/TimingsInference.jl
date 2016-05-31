@@ -36,21 +36,21 @@ function socpTimes(s::IterativeState, ft::Bool; args...)
     # CONSTRAINTS
     # big T constraints
     @addConstraint(m, pathTime[d=eachindex(tripData)],
-        T[d] == fixedTime + sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])})
+        T[d] == fixedTime + sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])})
     # second order cone constraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
         norm([2 * sqrt(tripData[d].time), T[d] - epsilon[d]])
-        <= fixedTime + sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])} + epsilon[d]
+        <= fixedTime + sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + epsilon[d]
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime <=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime <=
         epsilon[d] * tripData[d].time
         )
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])}
+        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+        sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
     # SOLVE SOCP

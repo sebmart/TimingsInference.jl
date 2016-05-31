@@ -42,11 +42,11 @@ function mipTimes(s::IterativeState, args...)
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][p])} >= T[d] )
+        sum{paths[d][p][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p])} >= T[d] )
 
     # "minimum equality" contraints
     @addConstraint(m, equalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][p])} - M[d]*(1 - minP[d,p]) <= T[d])
+        sum{paths[d][p][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p])} - M[d]*(1 - minP[d,p]) <= T[d])
 
     # integer constraints
     @addConstraint(m, equalityPath[d=eachindex(tripData)], sum{minP[d,p], p = eachindex(paths[d])} == 1)

@@ -33,16 +33,16 @@ function lpTimes(s::IterativeState, ft::Bool; args...) #args is solver args
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime - tripData[d].time >=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime - tripData[d].time >=
         - epsilon[d])
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime - tripData[d].time <=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime - tripData[d].time <=
         epsilon[d])
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
-        sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])}
+        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
     # SOLVE LP
