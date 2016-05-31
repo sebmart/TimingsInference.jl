@@ -134,8 +134,6 @@ function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}},indep
 	for pathVector in paths, path in pathVector, edge in keys(path)
 		totalWeight[indices[edge]] += path[edge]
 	end
-	println(independent)
-	println(totalWeight)
 	# fgind lowest weighted edges
 	p = sortperm(totalWeight)
 	newIndependent = independent[p[(numEdges+1):end]]
