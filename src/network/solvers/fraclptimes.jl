@@ -8,7 +8,7 @@
     lpTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
-function fraclpTimes(s::IterativeState; args...)
+function fraclpTimes(s::IterativeState, ft::Bool; args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -24,7 +24,11 @@ function fraclpTimes(s::IterativeState; args...)
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
     @defVar(m, y >= 0)
-    @defVar(m, fixedTime >= 0)
+    if ft
+        @defVar(m, fixedTime >= 0)
+    else
+        @defVar(m, fixedTime == 0)
+    end
 
     # OBJECTIVE
     @setObjective(m, Min, sum{tripData[d].weight * epsilon[d], d=eachindex(tripData)})
@@ -33,22 +37,22 @@ function fraclpTimes(s::IterativeState; args...)
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
         epsilon[d] >=
-        fixedTime + sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])} - y * tripData[d].time
+        fixedTime + sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - y * tripData[d].time
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
         epsilon[d] >= 
-        - fixedTime - sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])} + y * tripData[d].time
+        - fixedTime - sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + y * tripData[d].time
         )
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[src(paths[d][p+1][i]), dst(paths[d][p+1][i])], i=eachindex(paths[d][p+1])} >=
-        sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])}
+        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
     # fractional programming constraint
     @addConstraint(m, fracProgram,
-        fixedTime * sum([length(paths[d]) for d=eachindex(tripData)]) + sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], d=eachindex(tripData), i=eachindex(paths[d][1])}
+        fixedTime * length(tripData) + sum{paths[d][1][edge] * t[src(edge), dst(edge)], d=eachindex(tripData), edge=keys(paths[d][1])}
         + y * sum([tripData[d].time for d=eachindex(tripData)]) == 1
         )
 

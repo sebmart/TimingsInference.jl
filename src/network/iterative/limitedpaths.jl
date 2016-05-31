@@ -13,7 +13,8 @@ type LimitedPaths <: IterativeState
     data::NetworkData
     timings::NetworkTimings
     trips::Vector{NetworkTrip}
-    paths::Vector{Vector{Vector{Edge}}}  # for each trip, a vector of paths
+    paths::Vector{Vector{Dict{Edge, Float64}}}  # for each trip, a vector of paths
+    fixedTime::Float64
 
     "max number of paths per trip"
     pathsPerTrip::Int64
@@ -21,8 +22,6 @@ type LimitedPaths <: IterativeState
     tripLength::Float64
     "distances of network, used to estimate trip length"
     roadDistances::NetworkTimings
-    "fixed time added to every ride"
-    fixedTime::Float64
 end
 
 """
@@ -38,9 +37,9 @@ function LimitedPaths(data::NetworkData, startSolution::NetworkTimings; pathsPer
     srand(1991)
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
-    paths = [Vector{Edge}[getPathEdges(startSolution, t.orig, t.dest)] for t in trips]
+    paths = [Dict{Edge,Float64}[[edge => 1. for edge in getPathEdges(startSolution, t.orig, t.dest)]] for t in trips]
     roadDistances = NetworkTimings(data.network)
-    return LimitedPaths(data,startSolution,trips,paths,pathsPerTrip,tripLength,roadDistances,0.)
+    return LimitedPaths(data,startSolution,trips,paths,0.,pathsPerTrip,tripLength,roadDistances)
 end
 
 LimitedPaths(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -57,7 +56,7 @@ function updateState!(s::LimitedPaths, times::AbstractArray{Float64, 2}, fixedTi
     s.timings = NetworkTimings(s.data.network, times)
 
     for (d,t) in enumerate(s.trips)
-        sp = getPathEdges(s.timings, t.orig, t.dest)
+        sp = [edge => 1. for edge in getPathEdges(s.timings, t.orig, t.dest)]
         if s.pathsPerTrip == 1 || traveltime(s.roadDistances, t.orig, t.dest) < s.tripLength # short trips get one path
             s.paths[d][1] = sp
         else
@@ -67,7 +66,7 @@ function updateState!(s::LimitedPaths, times::AbstractArray{Float64, 2}, fixedTi
             elseif length(s.paths[d]) < s.pathsPerTrip # if not, and if enough room to add, add it in first position
                 unshift!(s.paths[d], sp)
             else        # replace least useful path
-                worstIndex = indmax([pathEdgesTime(s.timings, p) for p in s.paths[d]])
+                worstIndex = indmax([pathEdgesTime(s.timings, collect(keys(p))) for p in s.paths[d]])
                 s.paths[d][worstIndex] = s.paths[d][1]
                 s.paths[d][1] = sp
             end

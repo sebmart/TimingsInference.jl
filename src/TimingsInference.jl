@@ -16,9 +16,9 @@ import RoutingNetworks: visualInit, visualEvent, inPolygon
 #network
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
-export findNetworkDependence, simplifyPath, pickIndepEdges, evaluateTime
+export findNetworkDependence, simplifyPath, evaluateTimes
 #iterative
-export IterativeState, doIteration!, LimitedPaths, heuristicPaths, updateState!, lpTimes, fraclpTimes, redlpTimes, mipTimes, heuristicTimes, socpTimes
+export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!, lpTimes, fraclpTimes, redlpTimes, mipTimes, heuristicTimes, socpTimes
 #geo data
 export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
 export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, LocSplit, trainSet
@@ -40,6 +40,7 @@ include("network/dependentedges.jl")
 
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
+include("network/iterative/greedy.jl")
 
 include("network/solvers/lptimes.jl")
 include("network/solvers/socptimes.jl")

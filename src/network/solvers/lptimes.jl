@@ -6,7 +6,7 @@
 """
     `lpTimes`, optimize travel times to minimize L1 error from data with given paths
 """
-function lpTimes(s::IterativeState; args...) #args is solver args
+function lpTimes(s::IterativeState, ft::Bool; args...) #args is solver args
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -21,7 +21,11 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
-    @defVar(m, fixedTime >= 0)
+    if ft
+        @defVar(m, fixedTime >= 0)
+    else
+        @defVar(m, fixedTime == 0)
+    end
 
     # OBJECTIVE
     @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
@@ -29,16 +33,16 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])} + fixedTime - tripData[d].time >=
+        sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime - tripData[d].time >=
         - epsilon[d])
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])} + fixedTime - tripData[d].time <=
+        sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime - tripData[d].time <=
         epsilon[d])
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[src(paths[d][p+1][i]), dst(paths[d][p+1][i])], i=eachindex(paths[d][p+1])} >=
-        sum{t[src(paths[d][1][i]), dst(paths[d][1][i])], i=eachindex(paths[d][1])}
+        sum{t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+        sum{t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
     # SOLVE LP
