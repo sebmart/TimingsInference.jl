@@ -18,7 +18,7 @@ export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export findNetworkDependence, simplifyPath, evaluateTimes
 #iterative
-export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!, lpTimes, fraclpTimes, redlpTimes, mipTimes, heuristicTimes, socpTimes
+export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!, lpTimes, fraclpTimes, mipTimes, heuristicTimes, socpTimes
 #geo data
 export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
 export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, LocSplit, trainSet
@@ -45,7 +45,6 @@ include("network/iterative/greedy.jl")
 include("network/solvers/lptimes.jl")
 include("network/solvers/socptimes.jl")
 include("network/solvers/fraclptimes.jl")
-include("network/solvers/redlptimes.jl")
 include("network/solvers/miptimes.jl")
 include("network/solvers/heuristicTimes.jl")
 
