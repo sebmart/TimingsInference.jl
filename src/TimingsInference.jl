@@ -32,10 +32,10 @@ export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 export ShowTimes
 
 include("network/networktypes.jl")
-include("network/statistics.jl")
+include("network/stats/statistics.jl")
+include("network/stats/stats.jl")
 include("network/virtualdata.jl")
 include("network/virtualtimings.jl")
-include("network/stats.jl")
 include("network/dependentedges.jl")
 
 include("network/iterative/state.jl")
