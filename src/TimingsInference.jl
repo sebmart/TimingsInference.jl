@@ -34,9 +34,10 @@ export ShowTimes
 include("network/networktypes.jl")
 include("network/stats/statistics.jl")
 include("network/stats/stats.jl")
-include("network/virtualdata.jl")
-include("network/virtualtimings.jl")
-include("network/dependentedges.jl")
+
+include("network/tools/virtualdata.jl")
+include("network/tools/virtualtimings.jl")
+include("network/tools/dependentedges.jl")
 
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
