@@ -30,6 +30,8 @@ type GreedyEdges <: IterativeState
     edgeMap::Dict{Edge,Int}
     "number of edges to remove"
     numEdges::Int
+    "number of iterations before removal"
+    numIter::Int
 end
 
 """
@@ -37,7 +39,7 @@ end
     takes in NetworkData object, initial timings (as link times or full timings),
     and max number of paths per trip as integer
 """
-function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10)
+function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3)
     if pathsPerTrip < 1
         error("Must have at least one path per trip")
     end
@@ -50,7 +52,7 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
     dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = 3)
-    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges)
+    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter)
 end
 
 GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -64,8 +66,10 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
     newTimes = evaluateTimes(s.data.network, s.dependencies, times, s.independent, s.edgeMap)
     s.timings = NetworkTimings(s.data.network, newTimes)
     # update independent set and dependencies
-    s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges)
-    s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = 3)
+    if rand() < 1/numIter
+        s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges)
+        s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = 3)
+    end
     # update paths 
     for (d,t) in enumerate(s.trips)
         sp = getPathEdges(s.timings, t.orig, t.dest)
