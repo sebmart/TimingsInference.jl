@@ -14,7 +14,6 @@ type LimitedPaths <: IterativeState
     timings::NetworkTimings
     trips::Vector{NetworkTrip}
     paths::Vector{Vector{Dict{Edge, Float64}}}  # for each trip, a vector of paths
-    fixedTime::Float64
 
     "max number of paths per trip"
     pathsPerTrip::Int64
@@ -39,7 +38,7 @@ function LimitedPaths(data::NetworkData, startSolution::NetworkTimings; pathsPer
     # One path per trip: the initial shortest path
     paths = [Dict{Edge,Float64}[[edge => 1. for edge in getPathEdges(startSolution, t.orig, t.dest)]] for t in trips]
     roadDistances = NetworkTimings(data.network)
-    return LimitedPaths(data,startSolution,trips,paths,0.,pathsPerTrip,tripLength,roadDistances)
+    return LimitedPaths(data,startSolution,trips,paths,pathsPerTrip,tripLength,roadDistances)
 end
 
 LimitedPaths(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -50,8 +49,7 @@ heuristicPaths(data::NetworkData; maxTrip::Int=1000) = LimitedPaths(data, unifor
 """
     Update paths of LimitedPaths object given new times
 """
-function updateState!(s::LimitedPaths, times::AbstractArray{Float64, 2}, fixedTime = 0.)
-    s.fixedTime = fixedTime
+function updateState!(s::LimitedPaths, times::AbstractArray{Float64, 2})
     # update the timings and compute shortest paths
     s.timings = NetworkTimings(s.data.network, times)
 

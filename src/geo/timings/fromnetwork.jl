@@ -16,19 +16,17 @@ type TimingsFromNetwork <: GeoTimings
     "fixed time added to every ride"
     fixedTime::Float64
 
-    function TimingsFromNetwork(nt::NetworkTimings, proj::NetworkProjector, ft::Float64 = 0.)
+    function TimingsFromNetwork(nt::NetworkTimings, proj::NetworkProjector)
         gt = new()
         gt.trips = proj.trips
         gt.timings = nt
         gt.proj  = proj
-        gt.fixedTime = ft
-        println("Fixed time is: ", ft)
         return gt
     end
 end
 
 estimateTime(gt::TimingsFromNetwork, pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)=
-    getTripTiming(gt.proj, gt.timings, pLon, pLat, dLon, dLat) + gt.fixedTime
+    getTripTiming(gt.proj, gt.timings, pLon, pLat, dLon, dLat)
 
 estimateTime(gt::TimingsFromNetwork, tId::Int) =
-    getTripTiming(gt.proj, gt.timings, tId) + gt.fixedTime
+    getTripTiming(gt.proj, gt.timings, tId)

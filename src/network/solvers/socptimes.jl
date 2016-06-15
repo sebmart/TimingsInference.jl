@@ -8,7 +8,7 @@
     socpTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
-function socpTimes(s::IterativeState, ft::Bool; args...)
+function socpTimes(s::IterativeState; args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -24,11 +24,6 @@ function socpTimes(s::IterativeState, ft::Bool; args...)
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
     @defVar(m, T[d=eachindex(tripData)] >= 0)
-    if ft
-        @defVar(m, fixedTime >= 0)
-    else
-        @defVar(m, fixedTime == 0)
-    end
 
     # OBJECTIVE
     @setObjective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
@@ -36,14 +31,14 @@ function socpTimes(s::IterativeState, ft::Bool; args...)
     # CONSTRAINTS
     # big T constraints
     @addConstraint(m, pathTime[d=eachindex(tripData)],
-        T[d] == fixedTime + sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])})
+        T[d] == sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])})
     # second order cone constraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
         norm([2 * sqrt(tripData[d].time), T[d] - epsilon[d]])
-        <= fixedTime + sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + epsilon[d]
+        <= sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + epsilon[d]
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime <=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} <=
         epsilon[d] * tripData[d].time
         )
 
@@ -56,7 +51,6 @@ function socpTimes(s::IterativeState, ft::Bool; args...)
     # SOLVE SOCP
     status = solve(m)
     times = getValue(t)
-    fixedTime = max(getValue(fixedTime), 0.)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
@@ -64,5 +58,5 @@ function socpTimes(s::IterativeState, ft::Bool; args...)
         result[i,j] = times[i,j]
     end
 
-    return result, fixedTime
+    return result
 end

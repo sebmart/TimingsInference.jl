@@ -12,7 +12,6 @@
     - `timings::NetworkTimings`    the current timings solution
     - `trips::Vector{NetworkTrip}` trips that we currently optimize on
     - `paths::Vector{Vector{Dict{Edge, Float64}}}` path subset for each current trip datapoint
-    - `fixedTime::Float64` extra fixed time for all rides, in seconds
     Must implement:
     - `updateState!` updates the state when new link-times are computed
 """
@@ -28,18 +27,15 @@ function Base.show(io::IO, s::IterativeState)
 end
 
 NetworkTimings(it::IterativeState) = it.timings
-fixedTime(it::IterativeState) = it.fixedTime
 
 """
     `doIteration!`, shortcut to update state with optimizer's output
 """
-function doIteration!(it::IterativeState; method::AbstractString="lp", ft::Bool = false, solverArgs...)
+function doIteration!(it::IterativeState; method::AbstractString="lp", solverArgs...)
     if method=="lp"
-        times, fixedTime = lpTimes(it, ft, solverArgs...)
-        updateState!(it, times, fixedTime)
+        updateState!(it, lpTimes(it, solverArgs...))
     elseif method=="fraclp"
-        times, fixedTime = fraclpTimes(it, ft, solverArgs...)
-        updateState!(it, times, fixedTime)
+        updateState!(it, fraclpTimes(it, solverArgs...))
     elseif method=="mip"
         updateState!(it, mipTimes(it, solverArgs...))
     elseif method == "heuristic"
@@ -47,8 +43,7 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", ft::Bool 
     elseif method == "redlp"
         updateState!(it, redlpTimes(it, solverArgs...))
     elseif method == "socp"
-        times, fixedTime = socpTimes(it, ft, solverArgs...)
-        updateState!(it, times, fixedTime)
+        updateState!(it, socpTimes(it, solverArgs...))
     else
         error("Unknown optimizer")
     end

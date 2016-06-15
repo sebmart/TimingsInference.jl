@@ -15,7 +15,6 @@ type GreedyEdges <: IterativeState
     timings::NetworkTimings
     trips::Vector{NetworkTrip}
     paths::Vector{Vector{Dict{Edge,Float64}}}  # for each trip, a vector of paths
-    fixedTime::Float64
 
     "max number of paths per trip"
     pathsPerTrip::Int64
@@ -51,7 +50,7 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
     dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = 3)
-    return GreedyEdges(data,startSolution,trips,paths,0.,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges)
+    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges)
 end
 
 GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -60,8 +59,7 @@ GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
 """
     Update paths of GreedyEdges object given new times
 """
-function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2}, fixedTime = 0.)
-    s.fixedTime = fixedTime
+function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
     # update the timings and compute shortest paths
     newTimes = evaluateTimes(s.data.network, s.dependencies, times, s.independent, s.edgeMap)
     s.timings = NetworkTimings(s.data.network, newTimes)

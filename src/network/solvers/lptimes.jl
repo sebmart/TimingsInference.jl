@@ -6,7 +6,7 @@
 """
     `lpTimes`, optimize travel times to minimize L1 error from data with given paths
 """
-function lpTimes(s::IterativeState, ft::Bool; args...) #args is solver args
+function lpTimes(s::IterativeState; args...) #args is solver args
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -21,11 +21,6 @@ function lpTimes(s::IterativeState, ft::Bool; args...) #args is solver args
     @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
-    if ft
-        @defVar(m, fixedTime >= 0)
-    else
-        @defVar(m, fixedTime == 0)
-    end
 
     # OBJECTIVE
     @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
@@ -33,10 +28,10 @@ function lpTimes(s::IterativeState, ft::Bool; args...) #args is solver args
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime - tripData[d].time >=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - tripData[d].time >=
         - epsilon[d])
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + fixedTime - tripData[d].time <=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - tripData[d].time <=
         epsilon[d])
 
     # inequality constraints
@@ -48,7 +43,6 @@ function lpTimes(s::IterativeState, ft::Bool; args...) #args is solver args
     # SOLVE LP
     status = solve(m)
     times = getValue(t)
-    fixedTime = max(getValue(fixedTime), 0.)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
@@ -56,5 +50,5 @@ function lpTimes(s::IterativeState, ft::Bool; args...) #args is solver args
         result[i,j] = times[i,j]
     end
 
-    return result, fixedTime
+    return result
 end
