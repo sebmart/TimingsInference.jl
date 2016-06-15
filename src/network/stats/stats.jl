@@ -1,5 +1,5 @@
 ###################################################
-## network/stats.jl
+## network/stats/stats.jl
 ## Data type to save networktrip stats
 ###################################################
 
