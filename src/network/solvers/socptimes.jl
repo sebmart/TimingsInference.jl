@@ -50,6 +50,13 @@ function socpTimes(s::IterativeState; args...)
 
     # SOLVE SOCP
     status = solve(m)
+
+    if status == :Infeasible
+        println("This model was infeasible")
+        println(length(s.independent))
+        println(length(s.dependent))
+    end
+
     times = getValue(t)
 
     # Export result as sparse matrix
