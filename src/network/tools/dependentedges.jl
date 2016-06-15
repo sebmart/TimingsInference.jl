@@ -1,5 +1,5 @@
 ###################################################
-## network/dependentedges.jl
+## network/tools/dependentedges.jl
 ## find dependence relations between edges
 ###################################################
 

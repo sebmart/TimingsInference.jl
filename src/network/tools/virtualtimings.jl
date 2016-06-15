@@ -1,5 +1,5 @@
 ###################################################
-## network/virtualtimings.jl
+## network/tools/virtualtimings.jl
 ## Create virtual timings in a network
 ###################################################
 
