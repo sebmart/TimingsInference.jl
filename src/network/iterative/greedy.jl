@@ -66,7 +66,7 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
     newTimes = evaluateTimes(s.data.network, s.dependencies, times, s.independent, s.edgeMap)
     s.timings = NetworkTimings(s.data.network, newTimes)
     # update independent set and dependencies
-    if rand() < 1/numIter
+    if rand() < 1/s.numIter
         s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges)
         s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = 3)
     end
