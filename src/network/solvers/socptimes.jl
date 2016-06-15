@@ -53,9 +53,9 @@ function socpTimes(s::IterativeState; args...)
 
     if status == :Infeasible
         println("This model was infeasible")
-        println(length(s.independent))
-        println(length(s.dependent))
     end
+    println(length(s.independent))
+    println(length(s.dependent))
 
     times = getValue(t)
 

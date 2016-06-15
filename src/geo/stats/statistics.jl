@@ -46,7 +46,7 @@ function tripsLogErrorByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Arr
 	for ID in IDlist
 		idx = 1
 		timing = estimateTime(gt, ID)
-		while timing > timeBound[idx]
+		while timing > timeBound[idx] && idx < length(timeBound)
 			idx += 1
 		end
 		error[idx] += abs(log(timing/gt.trips[ID].time))
@@ -68,7 +68,7 @@ function tripsLogBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, timeBound::Arra
 	for ID in IDlist
 		idx = 1
 		timing = estimateTime(gt, ID)
-		while timing > timeBound[idx]
+		while timing > timeBound[idx] && idx < length(timeBound)
 			idx += 1
 		end
 		error[idx] += (log(timing) - log(gt.trips[ID].time))
