@@ -1,5 +1,5 @@
 ###################################################
-## statistics.jl
+## network/stats/statistics.jl
 ## Statistic computations on results (errors...)
 ###################################################
 

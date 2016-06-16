@@ -1,5 +1,5 @@
 ###################################################
-## network/iterative/socptimes.jl
+## network/solvers/socptimes.jl
 ## SOCP that finds new traveltimes to optimize cost function
 ###################################################
 
@@ -16,7 +16,7 @@ function socpTimes(s::IterativeState; args...)
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = MosekSolver(MSK_DPAR_OPTIMIZER_MAX_TIME=10000.; args...))
+    m = Model(solver = MosekSolver(MSK_DPAR_OPTIMIZER_MAX_TIME=10000., MSK_IPAR_INFEAS_REPORT_AUTO = MSK_ON; args...))
 
     # DECISION VARIABLES
     # Road times
@@ -31,21 +31,21 @@ function socpTimes(s::IterativeState; args...)
     # CONSTRAINTS
     # big T constraints
     @addConstraint(m, pathTime[d=eachindex(tripData)],
-        T[d] == sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)})
+        T[d] == sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])})
     # second order cone constraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
         norm([2 * sqrt(tripData[d].time), T[d] - epsilon[d]])
-        <= sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + epsilon[d]
+        <= sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + epsilon[d]
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} <=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} <=
         epsilon[d] * tripData[d].time
         )
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[paths[d][p+1][i], paths[d][p+1][i+1]], i=1:(length(paths[d][p+1])-1)} >=
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)}
+        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+        sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
     # SOLVE SOCP

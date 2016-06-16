@@ -1,5 +1,5 @@
 ###################################################
-## network/virtualdata.jl
+## network/tools/virtualdata.jl
 ## generate "virtual" network data
 ###################################################
 

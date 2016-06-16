@@ -11,7 +11,7 @@
     - `data::NetworkData`          timing data in the network
     - `timings::NetworkTimings`    the current timings solution
     - `trips::Vector{NetworkTrip}` trips that we currently optimize on
-    - `paths::Vector{Vector{Vector{Int}}}` path subset for each current trip datapoint
+    - `paths::Vector{Vector{Dict{Edge, Float64}}}` path subset for each current trip datapoint
     Must implement:
     - `updateState!` updates the state when new link-times are computed
 """
@@ -22,10 +22,8 @@ function Base.show(io::IO, s::IterativeState)
     typeName = split(string(typeof(s)),".")[end]
     nTrips = length(s.trips)
     nPaths = sum([length(paths) for paths in s.paths])
-    mae = tripsMAE(s.timings, s.trips)
     println(io,"Iterative heuristic: $(typeName)")
     println(io,"Optimizing on $nTrips trips and $nPaths paths")
-    @printf(io,"MAE on current trips: %.2f%%\n", mae*100)
 end
 
 NetworkTimings(it::IterativeState) = it.timings

@@ -1,6 +1,6 @@
 ###################################################
-## network/iterative/lptimes.jl
-## LP that finds new traveltimes to optimize cost function
+## network/solvers/fraclptimes.jl
+## Fractional LP (symmetric cost function) that finds new traveltimes
 ###################################################
 
 
@@ -32,22 +32,22 @@ function fraclpTimes(s::IterativeState; args...)
     # absolute values contraints (define epsilon), equal to time of first path
     @addConstraint(m, epsLower[d=eachindex(tripData)],
         epsilon[d] >=
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} - y * tripData[d].time
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - y * tripData[d].time
         )
     @addConstraint(m, epsUpper[d=eachindex(tripData)],
         epsilon[d] >= 
-        - sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)} + y * tripData[d].time
+        - sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + y * tripData[d].time
         )
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{t[paths[d][p+1][i], paths[d][p+1][i+1]], i=1:(length(paths[d][p+1])-1)} >=
-        sum{t[paths[d][1][i], paths[d][1][i+1]], i=1:(length(paths[d][1])-1)}
+        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
     # fractional programming constraint
     @addConstraint(m, fracProgram,
-        sum{t[paths[d][1][i], paths[d][1][i+1]], d=eachindex(tripData), i=1:(length(paths[d][1]) -1)}
+        sum{paths[d][1][edge] * t[src(edge), dst(edge)], d=eachindex(tripData), edge=keys(paths[d][1])}
         + y * sum([tripData[d].time for d=eachindex(tripData)]) == 1
         )
 

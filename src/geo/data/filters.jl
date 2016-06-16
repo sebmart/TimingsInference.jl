@@ -1,5 +1,5 @@
 ###################################################
-## geo/datafilters.jl
+## geo/data/filters.jl
 ## Filtering geo-trips
 ###################################################
 
@@ -22,8 +22,8 @@ function isRegular(t::GeoTrip)
         return false
     end
     d = tripDistance(t)
-    #trips should be > 200m and < 200km
-    if d <= 200. || d >= 200_000
+    #trips should be > 250m and < 200km
+    if d <= 250. || d >= 200_000
         return false
     end
     #  direct speed <= 110 km/h, >= 2km/h
