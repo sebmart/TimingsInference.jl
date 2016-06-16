@@ -140,7 +140,7 @@ end
 """
 	`plotStats`: plot relevant statistic, identified by statName, stored in given GeoStats object
 """
-function plotStats(stats::Vector{RealGeoStats}, statName::AbstractString)
+function plotStats(stats::Vector{RealGeoStats}, statName::AbstractString; color::AbstractString="red")
 	COLORS = ["red", "blue", "green", "orange", "black"]
 	LABELS = ["<4min30s", "<7min30s", "<12min", "<15min", ">15 min"]
 	# check if stat is valid and if timebounds are same
@@ -163,9 +163,9 @@ function plotStats(stats::Vector{RealGeoStats}, statName::AbstractString)
 		end
 		legend(loc="best")
 	else
-		plot(x, [so.sdict[statName] for so in stats], "o", color = "red")
+		plot(x, [so.sdict[statName] for so in stats], "o", color = color)
 	end
-	xticks(x, xlabels)
+	xticks(x, xlabels, rotation = "vertical")
 	xlabel("Method used")
 	ylabel(statName)
 	title("$(statName)")
