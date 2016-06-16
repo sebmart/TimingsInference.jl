@@ -128,7 +128,12 @@ end
 """
 	`updateIndependentEdges`	: given set of paths, update independent set of edges
 """
-function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}},independent::Vector{Edge},dependent::Vector{Edge},numEdges::Int = 10)
+function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}},independent::Vector{Edge},dependent::Vector{Edge},numEdges::Int = 10, minIndep::Int = 100)
+	# check if edges can still be removed
+	numToRemove = min(numEdges, length(independent) - minIndep)
+	if numToRemove == 0
+		return independent, dependent
+	end
 	indices = [independent[i] => i for i=eachindex(independent)]
 	totalWeight = zeros(length(independent))
 	for pathVector in paths, path in pathVector, edge in keys(path)
@@ -136,9 +141,9 @@ function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}},indep
 	end
 	# fgind lowest weighted edges
 	p = sortperm(totalWeight)
-	newIndependent = independent[p[(numEdges+1):end]]
+	newIndependent = independent[p[(numToRemove+1):end]]
 	newDependent = dependent
-	append!(newDependent, independent[p[1:numEdges]])
+	append!(newDependent, independent[p[1:numToRemove]])
 	sort!(newDependent)
 	return newIndependent, newDependent
 end

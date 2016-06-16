@@ -16,7 +16,7 @@ type GreedyEdges <: IterativeState
     trips::Vector{NetworkTrip}
     paths::Vector{Vector{Dict{Edge,Float64}}}  # for each trip, a vector of paths
 
-    "max number of paths per trip"
+    "max number of paths per trip" #temporarily cannot be more than 1
     pathsPerTrip::Int64
     "independent edges"
     independent::Vector{Edge}
@@ -32,6 +32,8 @@ type GreedyEdges <: IterativeState
     numEdges::Int
     "number of iterations before removal"
     numIter::Int
+    "minimum number of independent edges"
+    minIndep::Int
 end
 
 """
@@ -39,9 +41,12 @@ end
     takes in NetworkData object, initial timings (as link times or full timings),
     and max number of paths per trip as integer
 """
-function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3)
+function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep = 100)
     if pathsPerTrip < 1
         error("Must have at least one path per trip")
+    end
+    if pathsPerTrip > 1
+        error("More than one path per trip is currently not supported")
     end
     # randomly select the trips
     srand(1991)
@@ -52,7 +57,7 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
     dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = 3)
-    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter)
+    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter, minIndep)
 end
 
 GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -67,7 +72,7 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
     s.timings = NetworkTimings(s.data.network, newTimes)
     # update independent set and dependencies
     if rand() < 1/s.numIter
-        s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges)
+        s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges, s.minIndep)
         s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = 3)
     end
     # update paths 
