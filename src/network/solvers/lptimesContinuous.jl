@@ -52,7 +52,7 @@ function lpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.5; args
         for i in vertices(g), j in out_neighbors(g,i)
             result[i,j] = times[i,j]
         end
-        continuous = true
+        counter = 0
         for i in vertices(g), j in out_neighbors(g,i)
             for edge in findNearEdges(s.data.network, Edge(i,j))
                 p = src(edge)
@@ -63,9 +63,14 @@ function lpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.5; args
                         <= velocityBound)
                     @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
                         >= -velocityBound)
-                    continuous = false
+                    counter += 1
                 end
             end
+        end
+        if counter > 500
+            continuous = false
+        else
+            continuous = true
         end
     end
     return result
