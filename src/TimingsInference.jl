@@ -48,6 +48,7 @@ include("network/solvers/socptimes.jl")
 include("network/solvers/fraclptimes.jl")
 include("network/solvers/miptimes.jl")
 include("network/solvers/heuristicTimes.jl")
+include("network/solvers/lptimesContinuous.jl")
 
 include("geo/trips.jl")
 include("geo/data/nyctaxi.jl")

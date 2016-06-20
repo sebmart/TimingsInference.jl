@@ -44,6 +44,8 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", solverArg
         updateState!(it, redlpTimes(it, solverArgs...))
     elseif method == "socp"
         updateState!(it, socpTimes(it, solverArgs...))
+    elseif method == "lpCo"
+        updateState!(it, lpTimesContinuous(it, solverArgs...))
     else
         error("Unknown optimizer")
     end
