@@ -29,14 +29,7 @@ function findNetworkDependence(n::Network, independent::Vector{Edge}, dependent:
 	A = zeros(length(dependent), length(dependent))
 	B = zeros(length(dependent), length(independent))
 	for (row, edge) in enumerate(dependent)
-		orig = src(edge)
-		dest = dst(edge)
-		nearEdges = [Edge(dest, newDest) for newDest in out_neighbors(n.graph, dest)]
-		append!(nearEdges, [Edge(orig, newDest) for newDest in out_neighbors(n.graph, orig)])
-		append!(nearEdges, [Edge(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
-		append!(nearEdges, [Edge(newOrig, dest) for newOrig in in_neighbors(n.graph, dest)])
-		nearEdges = Set(nearEdges)
-		delete!(nearEdges, Edge(orig, dest))
+		nearEdges = findNearEdges(n, edge)
 		nNearEdges = length(nearEdges)
 		for edge in nearEdges
 			if edge in independent
@@ -146,4 +139,19 @@ function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}},indep
 	append!(newDependent, independent[p[1:numToRemove]])
 	sort!(newDependent)
 	return newIndependent, newDependent
+end
+
+"""
+	`findNearEdges` : find all edges that share a vertex with input e in network n, as a set of edges
+"""
+function findNearEdges(n::Network, e::Edge)
+	orig = src(e)
+	dest = dst(e)
+	nearEdges = [Edge(dest, newDest) for newDest in out_neighbors(n.graph, dest)]
+	append!(nearEdges, [Edge(orig, newDest) for newDest in out_neighbors(n.graph, orig)])
+	append!(nearEdges, [Edge(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
+	append!(nearEdges, [Edge(newOrig, dest) for newOrig in in_neighbors(n.graph, dest)])
+	nearEdges = Set(nearEdges)
+	delete!(nearEdges, Edge(orig, dest))
+	return nearEdges
 end
