@@ -45,8 +45,11 @@ function lpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.5; args
     result = spzeros(Float64, nv(g), nv(g))
 
     continuous = false
+    a = 0
     while !continuous
         # SOLVE LP
+        a += 1
+        println("Optimize round $a")
         status = solve(m)
         times = getValue(t)
         for i in vertices(g), j in out_neighbors(g,i)
