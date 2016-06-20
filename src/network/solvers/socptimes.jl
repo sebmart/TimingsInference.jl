@@ -8,7 +8,7 @@
     socpTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
-function socpTimes(s::IterativeState; args...)
+function socpTimes(s::IterativeState; inequalityConstraints::Bool = true, args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -43,13 +43,19 @@ function socpTimes(s::IterativeState; args...)
         )
 
     # inequality constraints
-    @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} + 5. >=
-        sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
-        )
+    if inequalityConstraints
+        @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
+            sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+            sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
+            )
+    end
 
     # SOLVE SOCP
     status = solve(m)
+    # if infeasible, remove possible causes of infeasibility
+    if status == :Infeasible
+        return socpTimes(s, inequalityConstraints = false)
+    end
     times = getValue(t)
 
     # Export result as sparse matrix
