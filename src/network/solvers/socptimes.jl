@@ -44,7 +44,7 @@ function socpTimes(s::IterativeState; args...)
 
     # inequality constraints
     @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} + 5. >=
         sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
