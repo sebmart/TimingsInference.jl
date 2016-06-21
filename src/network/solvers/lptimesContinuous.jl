@@ -70,7 +70,7 @@ function lpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.5; args
                 end
             end
         end
-        if counter > 500
+        if counter > 2000
             continuous = false
         else
             continuous = true
