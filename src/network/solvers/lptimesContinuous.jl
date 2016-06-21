@@ -41,40 +41,29 @@ function lpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.5; args
         sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
-    # Export result as sparse matrix
-    result = spzeros(Float64, nv(g), nv(g))
-
-    continuous = false
-    a = 0
-    while !continuous
-        # SOLVE LP
-        a += 1
-        println("Optimize round $a")
-        status = solve(m)
-        times = getValue(t)
-        for i in vertices(g), j in out_neighbors(g,i)
-            result[i,j] = times[i,j]
-        end
-        counter = 0
-        for i in vertices(g), j in out_neighbors(g,i)
-            for edge in findNearEdges(s.data.network, Edge(i,j))
-                p = src(edge)
-                q = dst(edge)
-                if roads[i,j].roadType == roads[p, q].roadType &&
-                    abs(result[i,j]/roads[i,j].distance - result[p,q]/roads[p,q].distance) > velocityBound
-                    @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                        <= velocityBound)
-                    @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                        >= -velocityBound)
-                    counter += 1
-                end
+    # continuity constraints
+    for i in vertices(g), j in out_neighbors(g,i)
+        for edge in findNearEdges(s.data.network, Edge(i,j))
+            p = src(edge)
+            q = dst(edge)
+            if roads[i,j].roadType == roads[p,q].roadType
+                @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+                    <= velocityBound)
+                @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+                    >= -velocityBound)
             end
         end
-        if counter > 2000
-            continuous = false
-        else
-            continuous = true
-        end
     end
+
+    # SOLVE LP
+    status = solve(m)
+    times = getValue(t)
+
+    # Export result as sparse matrix
+    result = spzeros(Float64, nv(g), nv(g))
+    for i in vertices(g), j in out_neighbors(g,i)
+        result[i,j] = times[i,j]
+    end
+
     return result
 end
