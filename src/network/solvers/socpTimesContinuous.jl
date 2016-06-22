@@ -12,7 +12,7 @@ function socpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; ar
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
-
+    roads = s.data.network.roads
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
