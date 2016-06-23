@@ -36,6 +36,8 @@ type GreedyEdges <: IterativeState
     minIndep::Int
     "state variable, remembers whether or not to update"
     state::Int
+    "number of independent edges each dependent edge depends on"
+    numDeps::Int
 end
 
 """
@@ -43,7 +45,7 @@ end
     takes in NetworkData object, initial timings (as link times or full timings),
     and max number of paths per trip as integer
 """
-function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep = 100)
+function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep = 100, numDeps::Int = 3)
     if pathsPerTrip < 1
         error("Must have at least one path per trip")
     end
@@ -55,8 +57,8 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     origPaths = [Vector{Edge}[getPathEdges(startSolution, t.orig, t.dest)] for t in trips]
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
-    dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = 3)
-    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter, minIndep, 0)
+    dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = numDeps)
+    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter, minIndep, 0, numDeps)
 end
 
 GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -74,7 +76,7 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
     # update independent set and dependencies if necessary
     if s.state == s.numIter
         s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges, s.minIndep)
-        s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = 3)
+        s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = s.numDeps)
         s.state = 0
         s.origPaths = [Vector{Edge}[getPathEdges(s.timings, t.orig, t.dest)] for t in s.trips]
     else
