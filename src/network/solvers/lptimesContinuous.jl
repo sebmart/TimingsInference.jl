@@ -15,7 +15,7 @@ function lpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; args
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = GurobiSolver(TimeLimit=10000, Method=3, BarConvTol=1e-8; args...))
+    m = Model(solver = GurobiSolver(TimeLimit=10000, Method=2, Crossover=0, BarConvTol=1e-8; args...))
 
     # DECISION VARIABLES
     # Road times
