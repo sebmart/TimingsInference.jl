@@ -24,6 +24,8 @@ function socpTimesContinuous2(s::IterativeState, velocityBound::Float64 = 0.1; a
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
     @defVar(m, T[d=eachindex(tripData)] >= 0)
+    # continuity vars
+    @defVar(m, velocity[i=vertices(g), j=out_neighbors(g,i), p=vertices(g), q=out_neighbors(g,p)] >= 0)
 
     # OBJECTIVE
     @setObjective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
@@ -50,7 +52,6 @@ function socpTimesContinuous2(s::IterativeState, velocityBound::Float64 = 0.1; a
 
     # continuity constraints
     clusters = clusterEdges(s.data.network)
-    @defVar(velocity[i=vertices(g), j=out_neighbors(g,i), p=vertices(g), q=out_neighbors(g,p)] >= 0)
     for cluster in clusters
         for edge in cluster
             i=src(edge); j=dst(edge);

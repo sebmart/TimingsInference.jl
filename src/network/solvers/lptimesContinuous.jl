@@ -22,6 +22,8 @@ function lpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; args
     @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
+    # continuity vars
+    @defVar(m, velocity[i=vertices(g), j=out_neighbors(g,i), p=vertices(g), q=out_neighbors(g,p)] >= 0)
 
     # OBJECTIVE
     @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
@@ -42,15 +44,22 @@ function lpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; args
         )
 
     # continuity constraints
-    for i in vertices(g), j in out_neighbors(g,i)
-        for edge in findNearEdgesSameType(s.data.network, Edge(i,j))
-            p = src(edge)
-            q = dst(edge)
-            @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                <= velocityBound)
-            @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                >= -velocityBound)
+    clusters = clusterEdges(s.data.network)
+    for cluster in clusters
+        for edge in cluster
+            i=src(edge); j=dst(edge);
+            for nearEdge in findNearEdgesSameType(s.data.network, edge)
+                p=src(nearEdge); q=dst(nearEdge);
+                if roads[i,j].roadType == roads[p,q].roadType
+                    @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+                        <= velocity[i,j,p,q])
+                    @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+                        >= -velocity[i,j,p,q])
+                end
+            end
         end
+        vList = flatten([[(src(edge), dst(edge), src(nearEdge), dst(nearEdge)) for nearEdge in findNearEdgesSameType(s.data.network, edge)] for edge in cluster])
+        @addConstraint(m, sum{velocity[i,j,p,q], (i,j,p,q) in vList} <= length(vList) * velocityBound)
     end
 
     # SOLVE LP
