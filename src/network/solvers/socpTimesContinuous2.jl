@@ -53,7 +53,6 @@ function socpTimesContinuous2(s::IterativeState, velocityBound::Float64 = 0.1; a
     # continuity constraints
     clusters = clusterEdges(s.data.network)
     for (k, cluster) in enumerate(clusters)
-        println(k)
         for edge in cluster
             i=src(edge); j=dst(edge);
             for nearEdge in findNearEdgesSameType(s.data.network, edge)
