@@ -43,9 +43,11 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", velocityB
     elseif method == "socp"
         updateState!(it, socpTimes(it, solverArgs...))
     elseif method == "lpCo"
-        updateState!(it, lpTimesContinuous(it, velocityBound, solverArgs...))
+        updateState!(it, lpTimesCont(it, velocityBound, solverArgs...))
+    elseif method == "lpCoNbhd"
+        updateState!(it, lpTimesContNbhd(it, velocityBound, solverArgs...))
     elseif method == "socpCo"
-        updateState!(it, socpTimesContinuous(it, velocityBound, solverArgs...))
+        updateState!(it, socpTimesCont(it, velocityBound, solverArgs...))
     elseif method == "socpCoNbhd"
         updateState!(it, socpTimesContNbhd(it, velocityBound, solverArgs...))
     else

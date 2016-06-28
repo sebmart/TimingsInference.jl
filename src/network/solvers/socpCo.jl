@@ -5,10 +5,10 @@
 
 
 """
-    socpTimesContinuous :
+    socpTimesCont :
     optimize travel times to minimize L1 error from data with given paths
 """
-function socpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; args...)
+function socpTimesCont(s::IterativeState, velocityBound::Float64 = 0.1; args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips

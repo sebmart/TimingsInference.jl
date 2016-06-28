@@ -1,13 +1,13 @@
 ###################################################
-## network/solvers/lpCo.jl
+## network/solvers/lpCoNbhd.jl
 ## Simple LP method for travel time inference with continuity constraints
 ###################################################
 
 """
-    `lpTimesCont`, optimize travel times to minimize L1 error from data with given paths
+    `lpTimesContNbhd`, optimize travel times to minimize L1 error from data with given paths
     with additional continuity constraints
 """
-function lpTimesCont(s::IterativeState, velocityBound::Float64 = 0.1; args...) #args is solver args
+function lpTimesContNbhd(s::IterativeState, velocityBound::Float64 = 0.1; args...) #args is solver args
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -22,6 +22,8 @@ function lpTimesCont(s::IterativeState, velocityBound::Float64 = 0.1; args...) #
     @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @variable(m, epsilon[d=eachindex(tripData)] >= 0)
+    # continuity vars
+    @variable(m, velocity[(i,j,p,q) in flatten([[(src(edge), dst(edge), src(nearEdge), dst(nearEdge)) for nearEdge in findNearEdgesSameType(s.data.network, edge)] for edge in collect(edges(g))])] >= 0)
 
     # OBJECTIVE
     @objective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
@@ -42,15 +44,21 @@ function lpTimesCont(s::IterativeState, velocityBound::Float64 = 0.1; args...) #
         )
 
     # continuity constraints
-    for i in vertices(g), j in out_neighbors(g,i)
-        for edge in findNearEdgesSameType(s.data.network, Edge(i,j))
-            p = src(edge)
-            q = dst(edge)
-            @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                <= velocityBound)
-            @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                >= -velocityBound)
+    clusters = clusterEdges(s.data.network)
+    for (k, cluster) in enumerate(clusters)
+        println(k)
+        for edge in cluster
+            i=src(edge); j=dst(edge);
+            for nearEdge in findNearEdgesSameType(s.data.network, edge)
+                p=src(nearEdge); q=dst(nearEdge);
+                @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+                    <= velocity[(i,j,p,q)])
+                @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+                    >= -velocity[(i,j,p,q)])
+            end
         end
+        vList = flatten([[(src(edge), dst(edge), src(nearEdge), dst(nearEdge)) for nearEdge in findNearEdgesSameType(s.data.network, edge)] for edge in cluster])
+        @constraint(m, sum{velocity[(i,j,p,q)], (i,j,p,q) in vList} <= length(vList) * velocityBound)
     end
 
     # SOLVE LP
