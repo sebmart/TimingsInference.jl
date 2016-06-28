@@ -1,5 +1,5 @@
 ###################################################
-## network/tools/dependentedges.jl
+## network/tools/graphdep.jl
 ## find dependence relations between edges
 ###################################################
 
@@ -29,14 +29,7 @@ function findNetworkDependence(n::Network, independent::Vector{Edge}, dependent:
 	A = zeros(length(dependent), length(dependent))
 	B = zeros(length(dependent), length(independent))
 	for (row, edge) in enumerate(dependent)
-		orig = src(edge)
-		dest = dst(edge)
-		nearEdges = [Edge(dest, newDest) for newDest in out_neighbors(n.graph, dest)]
-		append!(nearEdges, [Edge(orig, newDest) for newDest in out_neighbors(n.graph, orig)])
-		append!(nearEdges, [Edge(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
-		append!(nearEdges, [Edge(newOrig, dest) for newOrig in in_neighbors(n.graph, dest)])
-		nearEdges = Set(nearEdges)
-		delete!(nearEdges, Edge(orig, dest))
+		nearEdges = findNearEdges(n, edge)
 		nNearEdges = length(nearEdges)
 		for edge in nearEdges
 			if edge in independent
@@ -78,6 +71,8 @@ end
 	Args:
 		dependency 	:	vector summing to 1
 		numDeps	  	:	number of components to keep, > 1
+	Returns:
+		newDependency : vector summing to 1, with only numDeps nonzeros
 """
 function sparsify(dependency::Vector{Float64}, numDeps::Int)
 	p = reverse(sortperm(dependency))
@@ -115,6 +110,14 @@ end
 
 """
 	`evaluateTime` : given time values for independent edges (times), return time of dependent edge (specified by dependency)
+	Args:
+		n 				: Network object we are working with
+		dependencies	: matrix returned by findNetworkDependence
+		times 			: array of edge times
+		independent 	: list of independent edges
+		edgeMap 		: dictionary, where keys are edges and values are the indices in the list of edges
+	Returns:
+		newTimes 		: array of edge times, where times of independent edges are the same as in input times, and times of dependent edges are calculated from independent edges
 """
 function evaluateTimes(n::Network, dependencies::AbstractArray{Float64,2}, times::AbstractArray{Float64,2}, independent::Vector{Edge}, edgeMap::Dict{Edge, Int})
 	edgeList = collect(edges(n.graph))
@@ -127,8 +130,16 @@ end
 
 """
 	`updateIndependentEdges`	: given set of paths, update independent set of edges
+	Args:
+		paths		:	vector of vector of paths as edge=> weight dictionaries
+		independent :	list of independent edges
+		dependent 	:	list of dependent edges
+		numEdges	:	number of edges to remove from independent set
+		minIndep	:	minimum number of edges that the independent set must always contain
+	Returns:
+		newIndependent, newDependent : new sets of independent and dependent edges
 """
-function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}},independent::Vector{Edge},dependent::Vector{Edge},numEdges::Int = 10, minIndep::Int = 100)
+function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}}, independent::Vector{Edge}, dependent::Vector{Edge}, numEdges::Int = 10, minIndep::Int = 100)
 	# check if edges can still be removed
 	numToRemove = min(numEdges, length(independent) - minIndep)
 	if numToRemove == 0
