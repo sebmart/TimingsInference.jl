@@ -19,11 +19,7 @@ end
     - returns a timing object with every edge having a randomly selected speed between 0 and 130 km/h
 """
 function randomTimings(n::Network)
-    g = n.graph
-    times = spzeros(nv(g), nv(g))
-    for ((o,d), r) in n.roads
-        times[o,d] = 3.6 * r.distance / (rand() * 130)
-    end
+    times = randomTimes(n)
     return NetworkTimings(n, times)
 end
 
@@ -51,6 +47,19 @@ function uniformTimes(n::Network, speed::Float64=90.)
     times = spzeros(nv(g),nv(g))
     for ((o,d),r) in n.roads
         times[o,d] = 3.6*r.distance/speed
+    end
+    return times
+end
+
+"""
+    `randomTimes`
+    - returns road times corresponding to random speed (sparse array) between 0 and 130 km/h
+"""
+function randomTimes(n::Network)
+    g = n.graph
+    times = spzeros(nv(g), nv(g))
+    for ((o,d), r) in n.roads
+        times[o,d] = 3.6 * r.distance / (rand() * 130)
     end
     return times
 end
