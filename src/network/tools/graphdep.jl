@@ -1,5 +1,5 @@
 ###################################################
-## network/tools/dependentedges.jl
+## network/tools/graphdep.jl
 ## find dependence relations between edges
 ###################################################
 
@@ -71,6 +71,8 @@ end
 	Args:
 		dependency 	:	vector summing to 1
 		numDeps	  	:	number of components to keep, > 1
+	Returns:
+		newDependency : vector summing to 1, with only numDeps nonzeros
 """
 function sparsify(dependency::Vector{Float64}, numDeps::Int)
 	p = reverse(sortperm(dependency))
@@ -108,6 +110,14 @@ end
 
 """
 	`evaluateTime` : given time values for independent edges (times), return time of dependent edge (specified by dependency)
+	Args:
+		n 				: Network object we are working with
+		dependencies	: matrix returned by findNetworkDependence
+		times 			: array of edge times
+		independent 	: list of independent edges
+		edgeMap 		: dictionary, where keys are edges and values are the indices in the list of edges
+	Returns:
+		newTimes 		: array of edge times, where times of independent edges are the same as in input times, and times of dependent edges are calculated from independent edges
 """
 function evaluateTimes(n::Network, dependencies::AbstractArray{Float64,2}, times::AbstractArray{Float64,2}, independent::Vector{Edge}, edgeMap::Dict{Edge, Int})
 	edgeList = collect(edges(n.graph))
@@ -120,8 +130,16 @@ end
 
 """
 	`updateIndependentEdges`	: given set of paths, update independent set of edges
+	Args:
+		paths		:	vector of vector of paths as edge=> weight dictionaries
+		independent :	list of independent edges
+		dependent 	:	list of dependent edges
+		numEdges	:	number of edges to remove from independent set
+		minIndep	:	minimum number of edges that the independent set must always contain
+	Returns:
+		newIndependent, newDependent : new sets of independent and dependent edges
 """
-function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}},independent::Vector{Edge},dependent::Vector{Edge},numEdges::Int = 10, minIndep::Int = 100)
+function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}}, independent::Vector{Edge}, dependent::Vector{Edge}, numEdges::Int = 10, minIndep::Int = 100)
 	# check if edges can still be removed
 	numToRemove = min(numEdges, length(independent) - minIndep)
 	if numToRemove == 0
@@ -140,92 +158,3 @@ function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}},indep
 	sort!(newDependent)
 	return newIndependent, newDependent
 end
-
-"""
-	`findNearEdges` : find all edges that share a vertex with input e in network n, as a set of edges
-"""
-function findNearEdges(n::Network, e::Edge)
-	orig = src(e)
-	dest = dst(e)
-	nearEdges = [Edge(dest, newDest) for newDest in out_neighbors(n.graph, dest)]
-	append!(nearEdges, [Edge(orig, newDest) for newDest in out_neighbors(n.graph, orig)])
-	append!(nearEdges, [Edge(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
-	append!(nearEdges, [Edge(newOrig, dest) for newOrig in in_neighbors(n.graph, dest)])
-	nearEdges = Set(nearEdges)
-	delete!(nearEdges, Edge(orig, dest))
-	return nearEdges
-end
-
-"""
-	`findNearEdgesSameType`	: find all edges that share a vertex with input e in network n and are of the same type, as a set of edges
-"""
-function findNearEdgesSameType(n::Network, e::Edge)
-	orig = src(e)
-	dest = dst(e)
-	nearEdges = [Edge(dest, newDest) for newDest in out_neighbors(n.graph, dest)]
-	append!(nearEdges, [Edge(orig, newDest) for newDest in out_neighbors(n.graph, orig)])
-	append!(nearEdges, [Edge(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
-	append!(nearEdges, [Edge(newOrig, dest) for newOrig in in_neighbors(n.graph, dest)])
-	nearEdges = Set(nearEdges)
-	delete!(nearEdges, Edge(orig, dest))
-	for edge in nearEdges
-		if n.roads[src(e),dst(e)].roadType != n.roads[src(edge),dst(edge)].roadType
-			delete!(nearEdges, edge)
-		end
-	end
-	return nearEdges
-end
-
-"""
-	`clusterEdges` : group edges into rough clusters of neighbors
-"""
-function clusterEdges(n::Network, nNeighbors::Int=50)
-	# define lists of edges and other inputs and outputs
-	edgeList = collect(edges(n.graph))
-	edgesAssigned = falses(length(edgeList))
-	startingEdges = Set(Edge[])
-	clusters = [Edge[] for i=1:nNeighbors]
-	nodeMap = Dict{Int, Int}()
-	# define starting points of clusters
-	srand(2002)
-	for i = 1:nNeighbors
-		while true
-			idx = rand(eachindex(edgeList))
-			edge = edgeList[idx]
-			if !(edge in startingEdges) && !(src(edge) in keys(nodeMap)) && !(dst(edge) in keys(nodeMap))
-				push!(startingEdges, edge)
-				nodeMap[src(edge)] = i
-				nodeMap[dst(edge)] = i
-				edgesAssigned[idx] = true
-				clusters[i] = [edge]
-				break
-			end
-		end
-	end
-	while !all(edgesAssigned)
-		for idx in shuffle(collect(eachindex(edgeList)))
-			edge = edgeList[idx]
-			if !edgesAssigned[idx]
-				if src(edge) in keys(nodeMap)
-					push!(clusters[nodeMap[src(edge)]], edge)
-					edgesAssigned[idx] = true
-					if !(dst(edge) in keys(nodeMap))
-						nodeMap[dst(edge)] = nodeMap[src(edge)]
-					end
-				elseif dst(edge) in keys(nodeMap)
-					push!(clusters[nodeMap[dst(edge)]], edge)
-					edgesAssigned[idx] = true
-					if !(src(edge) in keys(nodeMap))
-						nodeMap[src(edge)] = nodeMap[dst(edge)]
-					end
-				end
-			end
-		end
-	end
-	return clusters
-end
-
-"""
-	`flatten` : recursively concatenate all vectors in a vector of vectors
-"""
-flatten{T}(a::Array{T,1}) = any(x->isa(x,Array),a)? flatten(vcat(map(flatten,a)...)): a

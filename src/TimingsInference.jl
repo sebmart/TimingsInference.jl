@@ -17,6 +17,7 @@ import RoutingNetworks: visualInit, visualEvent, inPolygon
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export findNetworkDependence, simplifyPath, evaluateTimes
+export findNearEdges, findNearEdgesSameType, clusterEdges
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!
 export lpTimes, fraclpTimes, mipTimes, heuristicTimes, socpTimes 
@@ -39,7 +40,8 @@ include("network/stats/stats.jl")
 
 include("network/tools/virtualdata.jl")
 include("network/tools/virtualtimings.jl")
-include("network/tools/dependentedges.jl")
+include("network/tools/edgeneighbors.jl")
+include("network/tools/graphdep.jl")
 
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
