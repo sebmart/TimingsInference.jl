@@ -1,5 +1,5 @@
 ###################################################
-## network/solvers/socptimes.jl
+## network/solvers/socp.jl
 ## SOCP that finds new traveltimes to optimize cost function
 ###################################################
 
@@ -8,7 +8,7 @@
     socpTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
-function socpTimes(s::IterativeState; args...)
+function socpTimes(s::IterativeState; inequalityConstraints::Bool = true, args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -20,37 +20,43 @@ function socpTimes(s::IterativeState; args...)
 
     # DECISION VARIABLES
     # Road times
-    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
+    @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
-    @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
-    @defVar(m, T[d=eachindex(tripData)] >= 0)
+    @variable(m, epsilon[d=eachindex(tripData)] >= 0)
+    @variable(m, T[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # big T constraints
-    @addConstraint(m, pathTime[d=eachindex(tripData)],
+    @constraint(m, pathTime[d=eachindex(tripData)],
         T[d] == sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])})
     # second order cone constraints (define epsilon), equal to time of first path
-    @addConstraint(m, epsLower[d=eachindex(tripData)],
+    @constraint(m, epsLower[d=eachindex(tripData)],
         norm([2 * sqrt(tripData[d].time), T[d] - epsilon[d]])
         <= sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + epsilon[d]
         )
-    @addConstraint(m, epsUpper[d=eachindex(tripData)],
+    @constraint(m, epsUpper[d=eachindex(tripData)],
         sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} <=
         epsilon[d] * tripData[d].time
         )
 
     # inequality constraints
-    @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
-        sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
-        )
+    if inequalityConstraints
+        @constraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
+            sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+            sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
+            )
+    end
 
     # SOLVE SOCP
     status = solve(m)
-    times = getValue(t)
+    # if infeasible, remove possible causes of infeasibility
+    if status == :Infeasible
+        return socpTimes(s, inequalityConstraints = false)
+    end
+    times = getvalue(t)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))

@@ -34,6 +34,10 @@ type GreedyEdges <: IterativeState
     numIter::Int
     "minimum number of independent edges"
     minIndep::Int
+    "state variable, remembers whether or not to update"
+    state::Int
+    "number of independent edges each dependent edge depends on"
+    numDeps::Int
 end
 
 """
@@ -41,12 +45,9 @@ end
     takes in NetworkData object, initial timings (as link times or full timings),
     and max number of paths per trip as integer
 """
-function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep = 100)
+function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep = 100, numDeps::Int = 3)
     if pathsPerTrip < 1
         error("Must have at least one path per trip")
-    end
-    if pathsPerTrip > 1
-        error("More than one path per trip is currently not supported")
     end
     # randomly select the trips
     srand(1991)
@@ -56,8 +57,8 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     origPaths = [Vector{Edge}[getPathEdges(startSolution, t.orig, t.dest)] for t in trips]
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
-    dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = 3)
-    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter, minIndep)
+    dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = numDeps)
+    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter, minIndep, 0, numDeps)
 end
 
 GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -67,29 +68,34 @@ GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
     Update paths of GreedyEdges object given new times
 """
 function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
+    # update state variable
+    s.state += 1
     # update the timings and compute shortest paths
     newTimes = evaluateTimes(s.data.network, s.dependencies, times, s.independent, s.edgeMap)
     s.timings = NetworkTimings(s.data.network, newTimes)
-    # update independent set and dependencies
-    if rand() < 1/s.numIter
+    # update independent set and dependencies if necessary
+    if s.state == s.numIter
         s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges, s.minIndep)
-        s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = 3)
-    end
-    # update paths 
-    for (d,t) in enumerate(s.trips)
-        sp = getPathEdges(s.timings, t.orig, t.dest)
-        if s.pathsPerTrip == 1
-            s.origPaths[d][1] = sp
-        else
-            index = findfirst(s.origPaths[d], sp)
-            if index != 0   # if so, put it in first position
-                s.origPaths[d][index], s.origPaths[d][1] = s.origPaths[d][1], s.origPaths[d][index] #swap
-            elseif length(s.origPaths[d]) < s.pathsPerTrip # if not, and if enough room to add, add it in first position
-                unshift!(s.origPaths[d], sp)
-            else        # replace least useful path
-                worstIndex = indmax([pathEdgesTime(s.timings, p) for p in s.origPaths[d]])
-                s.origPaths[d][worstIndex] = s.origPaths[d][1]
+        s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = s.numDeps)
+        s.state = 0
+        s.origPaths = [Vector{Edge}[getPathEdges(s.timings, t.orig, t.dest)] for t in s.trips]
+    else
+        # update paths normally
+        for (d,t) in enumerate(s.trips)
+            sp = getPathEdges(s.timings, t.orig, t.dest)
+            if s.pathsPerTrip == 1
                 s.origPaths[d][1] = sp
+            else
+                index = findfirst(s.origPaths[d], sp)
+                if index != 0   # if so, put it in first position
+                    s.origPaths[d][index], s.origPaths[d][1] = s.origPaths[d][1], s.origPaths[d][index] #swap
+                elseif length(s.origPaths[d]) < s.pathsPerTrip # if not, and if enough room to add, add it in first position
+                    unshift!(s.origPaths[d], sp)
+                else        # replace least useful path
+                    worstIndex = indmax([pathEdgesTime(s.timings, p) for p in s.origPaths[d]])
+                    s.origPaths[d][worstIndex] = s.origPaths[d][1]
+                    s.origPaths[d][1] = sp
+                end
             end
         end
     end

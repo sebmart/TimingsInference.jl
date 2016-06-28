@@ -15,6 +15,19 @@ function roadTypeTimings(n::Network)
 end
 
 """
+    `randomTimings`
+    - returns a timing object with every edge having a randomly selected speed between 0 and 130 km/h
+"""
+function randomTimings(n::Network)
+    g = n.graph
+    times = spzeros(nv(g), nv(g))
+    for ((o,d), r) in n.roads
+        times[o,d] = 3.6 * r.distance / (rand() * 130)
+    end
+    return NetworkTimings(n, times)
+end
+
+"""
     `maxSpeedTimes`
     - returns road times corresponding to maximum allowed speed (sparse array)
     - `maxspeed`: km/h maximum speeds for each road-type

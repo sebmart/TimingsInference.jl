@@ -1,5 +1,5 @@
 ###################################################
-## network/solvers/lptimes.jl
+## network/solvers/lp.jl
 ## Simple LP method for travel time inference
 ###################################################
 
@@ -18,31 +18,31 @@ function lpTimes(s::IterativeState; args...) #args is solver args
 
     # DECISION VARIABLES
     # Road times
-    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
+    @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
-    @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
+    @variable(m, epsilon[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
-    @addConstraint(m, epsLower[d=eachindex(tripData)],
+    @constraint(m, epsLower[d=eachindex(tripData)],
         sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - tripData[d].time >=
         - epsilon[d])
-    @addConstraint(m, epsUpper[d=eachindex(tripData)],
+    @constraint(m, epsUpper[d=eachindex(tripData)],
         sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - tripData[d].time <=
         epsilon[d])
 
     # inequality constraints
-    @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
+    @constraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
         sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
         sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
 
     # SOLVE LP
     status = solve(m)
-    times = getValue(t)
+    times = getvalue(t)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
