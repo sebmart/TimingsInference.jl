@@ -15,7 +15,7 @@ import RoutingNetworks: visualInit, visualEvent, inPolygon
 
 #network
 export NetworkTimings, NetworkTrip, NetworkData
-export roadTypeTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
+export roadTypeTimings, randomTimings, maxSpeedTimes, uniformTimes, noisyVirtualData
 export findNetworkDependence, simplifyPath, evaluateTimes
 export findNearEdges, findNearEdgesSameType, clusterEdges
 #iterative
