@@ -225,4 +225,7 @@ function clusterEdges(n::Network, nNeighbors::Int=50)
 	return clusters
 end
 
-flatten{T}(a::Array{T,1}) = any(map(x->isa(x,Array),a))? flatten(vcat(map(flatten,a)...)): a
+"""
+	`flatten` : recursively concatenate all vectors in a vector of vectors
+"""
+flatten{T}(a::Array{T,1}) = any(x->isa(x,Array),a)? flatten(vcat(map(flatten,a)...)): a
