@@ -1,18 +1,18 @@
 ###################################################
-## network/solvers/socptimesContinuous.jl
+## network/solvers/socp.jl
 ## SOCP that finds new traveltimes to optimize cost function
 ###################################################
 
 
 """
-    socpTimesContinuous :
+    socpTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
-function socpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; args...)
+function socpTimes(s::IterativeState; inequalityConstraints::Bool = true, args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
-    roads = s.data.network.roads
+
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
@@ -43,25 +43,19 @@ function socpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; ar
         )
 
     # inequality constraints
-    @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
-        sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
-        )
-
-    # continuity constraints
-    for i in vertices(g), j in out_neighbors(g,i)
-        for edge in findNearEdgesSameType(s.data.network, Edge(i,j))
-            p = src(edge)
-            q = dst(edge)
-            @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                <= velocityBound)
-            @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                >= -velocityBound)
-        end
+    if inequalityConstraints
+        @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
+            sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
+            sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
+            )
     end
 
     # SOLVE SOCP
     status = solve(m)
+    # if infeasible, remove possible causes of infeasibility
+    if status == :Infeasible
+        return socpTimes(s, inequalityConstraints = false)
+    end
     times = getValue(t)
 
     # Export result as sparse matrix

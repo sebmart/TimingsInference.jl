@@ -1,5 +1,5 @@
 ###################################################
-## network/solvers/lptimes.jl
+## network/solvers/lp.jl
 ## Simple LP method for travel time inference
 ###################################################
 

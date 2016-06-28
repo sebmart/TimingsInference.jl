@@ -1,5 +1,5 @@
 ###################################################
-## network/solvers/miptimes.jl
+## network/solvers/mip.jl
 ## MIP to select minimums
 ###################################################
 

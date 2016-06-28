@@ -1,14 +1,14 @@
 ###################################################
-## network/solvers/socptimesContinuous2.jl
+## network/solvers/socpCoNbhd.jl
 ## SOCP that finds new traveltimes to optimize cost function
 ###################################################
 
 
 """
-    socpTimesContinuous2 :
+    socpTimesContNbhd :
     optimize travel times to minimize L1 error from data with given paths
 """
-function socpTimesContinuous2(s::IterativeState, velocityBound::Float64 = 0.1; args...)
+function socpTimesContNbhd(s::IterativeState, velocityBound::Float64 = 0.1; args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips

@@ -1,5 +1,5 @@
 ###################################################
-## network/solvers/lptimesContinuous.jl
+## network/solvers/lpCo.jl
 ## Simple LP method for travel time inference with continuity constraints
 ###################################################
 

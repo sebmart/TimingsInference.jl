@@ -1,5 +1,5 @@
 ###################################################
-## network/solvers/heuristicTimes.jl
+## network/solvers/heuristic.jl
 ## Heuristic from MIT Senseable City Lab
 ###################################################
 

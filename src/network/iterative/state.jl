@@ -46,8 +46,8 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", velocityB
         updateState!(it, lpTimesContinuous(it, velocityBound, solverArgs...))
     elseif method == "socpCo"
         updateState!(it, socpTimesContinuous(it, velocityBound, solverArgs...))
-    elseif method == "socpCo2"
-        updateState!(it, socpTimesContinuous2(it, velocityBound, solverArgs...))
+    elseif method == "socpCoNbhd"
+        updateState!(it, socpTimesContNbhd(it, velocityBound, solverArgs...))
     else
         error("Unknown optimizer")
     end

@@ -1,11 +1,11 @@
 ###################################################
-## network/solvers/fraclptimes.jl
+## network/solvers/fraclp.jl
 ## Fractional LP (symmetric cost function) that finds new traveltimes
 ###################################################
 
 
 """
-    lpTimes :
+    fraclpTimes :
     optimize travel times to minimize L1 error from data with given paths
 """
 function fraclpTimes(s::IterativeState; args...)
