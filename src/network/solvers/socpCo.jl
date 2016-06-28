@@ -62,7 +62,7 @@ function socpTimesCont(s::IterativeState, velocityBound::Float64 = 0.1; args...)
 
     # SOLVE SOCP
     status = solve(m)
-    times = getValue(t)
+    times = getvalue(t)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))

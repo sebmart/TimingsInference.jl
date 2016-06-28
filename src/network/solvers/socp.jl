@@ -56,7 +56,7 @@ function socpTimes(s::IterativeState; inequalityConstraints::Bool = true, args..
     if status == :Infeasible
         return socpTimes(s, inequalityConstraints = false)
     end
-    times = getValue(t)
+    times = getvalue(t)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))

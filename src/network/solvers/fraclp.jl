@@ -61,8 +61,8 @@ function fraclpTimes(s::IterativeState; args...)
         buildInternalModel(m)
         print_iis_gurobi(m)
     end
-    times = getValue(t)
-    yVal = getValue(y)
+    times = getvalue(t)
+    yVal = getvalue(y)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
