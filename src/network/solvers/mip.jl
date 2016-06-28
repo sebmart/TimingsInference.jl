@@ -23,33 +23,33 @@ function mipTimes(s::IterativeState, args...)
 
     # DECISION VARIABLES
     # Road times
-    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
+    @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
-    @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
+    @variable(m, epsilon[d=eachindex(tripData)] >= 0)
     # Time of the trips
-    @defVar(m, T[d=eachindex(tripData)] >= 0)
+    @variable(m, T[d=eachindex(tripData)] >= 0)
     # Integer variables to decide which path is the shortest
-    @defVar(m, minP[d=eachindex(tripData),p=1:length(paths[d])], Bin)
+    @variable(m, minP[d=eachindex(tripData),p=1:length(paths[d])], Bin)
 
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
-    @addConstraint(m, epsLower[d=eachindex(tripData)], T[d] - tripData[d].time >= - epsilon[d])
-    @addConstraint(m, epsUpper[d=eachindex(tripData)], T[d] - tripData[d].time <=   epsilon[d])
+    @constraint(m, epsLower[d=eachindex(tripData)], T[d] - tripData[d].time >= - epsilon[d])
+    @constraint(m, epsUpper[d=eachindex(tripData)], T[d] - tripData[d].time <=   epsilon[d])
 
     # inequality constraints
-    @addConstraint(m, inequalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
+    @constraint(m, inequalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
         sum{paths[d][p][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p])} >= T[d] )
 
     # "minimum equality" contraints
-    @addConstraint(m, equalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
+    @constraint(m, equalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
         sum{paths[d][p][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p])} - M[d]*(1 - minP[d,p]) <= T[d])
 
     # integer constraints
-    @addConstraint(m, equalityPath[d=eachindex(tripData)], sum{minP[d,p], p = eachindex(paths[d])} == 1)
+    @constraint(m, equalityPath[d=eachindex(tripData)], sum{minP[d,p], p = eachindex(paths[d])} == 1)
 
     # SOLVE LP
     status = solve(m)

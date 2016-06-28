@@ -20,30 +20,30 @@ function socpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; ar
 
     # DECISION VARIABLES
     # Road times
-    @defVar(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
+    @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
-    @defVar(m, epsilon[d=eachindex(tripData)] >= 0)
-    @defVar(m, T[d=eachindex(tripData)] >= 0)
+    @variable(m, epsilon[d=eachindex(tripData)] >= 0)
+    @variable(m, T[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @setObjective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # big T constraints
-    @addConstraint(m, pathTime[d=eachindex(tripData)],
+    @constraint(m, pathTime[d=eachindex(tripData)],
         T[d] == sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])})
     # second order cone constraints (define epsilon), equal to time of first path
-    @addConstraint(m, epsLower[d=eachindex(tripData)],
+    @constraint(m, epsLower[d=eachindex(tripData)],
         norm([2 * sqrt(tripData[d].time), T[d] - epsilon[d]])
         <= sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + epsilon[d]
         )
-    @addConstraint(m, epsUpper[d=eachindex(tripData)],
+    @constraint(m, epsUpper[d=eachindex(tripData)],
         sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} <=
         epsilon[d] * tripData[d].time
         )
 
     # inequality constraints
-    @addConstraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
+    @constraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
         sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
         sum{paths[d][1][edge] * paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
         )
@@ -53,9 +53,9 @@ function socpTimesContinuous(s::IterativeState, velocityBound::Float64 = 0.1; ar
         for edge in findNearEdgesSameType(s.data.network, Edge(i,j))
             p = src(edge)
             q = dst(edge)
-            @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+            @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
                 <= velocityBound)
-            @addConstraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+            @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
                 >= -velocityBound)
         end
     end
