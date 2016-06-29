@@ -54,7 +54,6 @@ function clusterEdges(n::Network, nNeighbors::Int=div(nRoads(n), 180))
 	clusters = [Edge[] for i=1:nNeighbors]
 	nodeMap = Dict{Int, Int}()
 	# define starting points of clusters
-	srand(2002)
 	for i = 1:nNeighbors
 		while true
 			idx = rand(eachindex(edgeList))
