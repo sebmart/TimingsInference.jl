@@ -56,6 +56,7 @@ end
     - returns road times corresponding to random speed (sparse array) between 0 and 130 km/h
 """
 function randomTimes(n::Network)
+    srand(rand(1:1_000_000))
     g = n.graph
     times = spzeros(nv(g), nv(g))
     for ((o,d), r) in n.roads

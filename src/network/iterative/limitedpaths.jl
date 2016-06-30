@@ -33,6 +33,7 @@ function LimitedPaths(data::NetworkData, startSolution::NetworkTimings; pathsPer
         error("Must have at least one path per trip")
     end
     # randomly select the trips
+    srand(1991)
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
     paths = [Dict{Edge,Float64}[[edge => 1. for edge in getPathEdges(startSolution, t.orig, t.dest)]] for t in trips]
