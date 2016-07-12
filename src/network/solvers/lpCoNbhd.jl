@@ -26,7 +26,7 @@ function lpTimesContNbhd(s::IterativeState, velocityBound::Float64 = 0.1; args..
     @variable(m, velocity[(i,j,p,q) in flatten([[(src(edge), dst(edge), src(nearEdge), dst(nearEdge)) for nearEdge in findNearEdgesSameType(s.data.network, edge)] for edge in collect(edges(g))])] >= 0)
 
     # OBJECTIVE
-    @objective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum{ tripData[d].weight/tripData[d].time * epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path

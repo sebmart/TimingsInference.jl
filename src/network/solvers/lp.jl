@@ -23,7 +23,7 @@ function lpTimes(s::IterativeState; args...) #args is solver args
     @variable(m, epsilon[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @objective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum{ tripData[d].weight/tripData[d].time * epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
