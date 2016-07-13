@@ -143,7 +143,7 @@ function getNetworkTrips(nr::NearestRoad, tIds::AbstractArray{Int64,1})
         if pEdge == dEdge
             continue
         end
-        push!(netTrips, NetworkTrip((src(pEdge), dst(pEdge), pWeight), (src(dEdge), dst(dEdge), dWeight), t.time, 1., true)
+        push!(netTrips, NetworkTrip((src(pEdge), dst(pEdge), pWeight), (src(dEdge), dst(dEdge), dWeight), t.time, 1., true))
     end
     return netTrips
 end
