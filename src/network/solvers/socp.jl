@@ -26,7 +26,7 @@ function socpTimes(s::IterativeState; inequalityConstraints::Bool = true, args..
     @variable(m, T[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @objective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum{tripData[d].weight * epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # big T constraints

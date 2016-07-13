@@ -98,11 +98,49 @@ function roadTimeLogBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
 end
 
 """
-    `networkTripsLogError`: compute log error on NetworkTrips inside NetworkData
+    `nwTripsLogError`: compute log error on NetworkTrips inside NetworkData
 """
-networkTripsLogError(timings::NetworkTimings, nd::NetworkData) = tripsLogError(timings, nd.trips)
+nwTripsLogError(timings::NetworkTimings, nd::NetworkData) = tripsLogError(timings, nd.trips)
 
 """
-    `networkTripsLogBias`: compute log bias on NetworkTrips inside NetworkData
+    `nwTripsLogBias`: compute log bias on NetworkTrips inside NetworkData
 """
-networkTripsLogBias(timings::NetworkTimings, nd::NetworkData) = tripsLogBias(timings, nd.trips)
+nwTripsLogBias(timings::NetworkTimings, nd::NetworkData) = tripsLogBias(timings, nd.trips)
+
+"""
+    `tripsRealLogError` : computes log error on trips using their real times as computed from timingsRef
+    Used to see if method denoises input data.
+"""
+function tripsRealLogError(timingsRef::NetworkTimings, timingsNew::NetworkTimings, trips::Vector{NetworkTrip})
+    tt1 = getPathTimes(timingsRef)
+    tt2 = getPathTimes(timingsNew)
+    error = 0.
+    for t in trips
+        error += abs(log(tt1[t.orig,t.dest] / tt2[t.orig,t.dest]))
+    end
+    return error/length(trips)
+end
+
+"""
+    `tripsRealLogBias` : computes log bias on trips using their real times as computed from timingsRef
+    Used to see if method denoises input data. Bias is (predicted - real).
+"""
+function tripsRealLogBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings, trips::Vector{NetworkTrip})
+    tt1 = getPathTimes(timingsRef)
+    tt2 = getPathTimes(timingsNew)
+    error = 0.
+    for t in trips
+        error += log(tt2[t.orig,t.dest]) - log(tt1[t.orig,t.dest])
+    end
+    return error/length(trips)
+end
+
+"""
+    `networkTripsRealLogError`: compute log error on NetworkTrips inside NetworkData
+"""
+nwTripsRealLogError(timingsRef::NetworkTimings, timingsNew::NetworkTimings, nd::NetworkData) = tripsRealLogError(timingsRef, timingsNew, nd.trips)
+
+"""
+    `networkTripsRealLogBias`: compute log bias on NetworkTrips inside NetworkData
+"""
+nwTripsRealLogBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings, nd::NetworkData) = tripsRealLogBias(timingsRef, timingsNew, nd.trips)
