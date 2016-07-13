@@ -7,13 +7,18 @@
     Represents the data about the trip orig=>dest in the network
 """
 immutable NetworkTrip
-    orig::Int
-    dest::Int
+    orig::Tuple{Int,Int,Float64}
+    dest::Tuple{Int,Int,Float64}
     time::Float64
     weight::Float64
+    roadProj::Bool
 end
 function Base.show(io::IO, t::NetworkTrip)
-    @printf(io,"%d=>%d, w=%.2f, t=%.1fs",t.orig,t.dest,t.weight,t.time)
+    if roadProj
+        @printf(io,"(%d,%d)=>(%d,%d), w=%.1f, t=%.1fs",t.orig[1],t.orig[2],t.dest[1],t.dest[2],t.weight,t.time)
+    else
+        @printf(io,"%d=>%d, w=%.2f, t=%.1fs",t.orig[1],t.dest[1],t.weight,t.time)
+    end
 end
 
 """

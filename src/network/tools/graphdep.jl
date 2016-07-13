@@ -87,18 +87,18 @@ end
 """
 	`simplifyPath`: represent path as weighted sum of independent edges
 	Args:
-		path 		:	path as list of edges
+		path 		:	path as (Edge, Float) dictionary
 		independent : 	list of independent edges
 		dependencies:	matrix returned by findNetworkDependence
 		edgeMap		:	dictionary, where keys are edges and values are the indices in the list of edges
 	Returns:
 		newPath		: 	path as (Edge, Float) dictionary, where the keys are the independent edges and the values are their weights in the path
 """
-function simplifyPath(path::Vector{Edge}, independent::Vector{Edge}, dependencies::AbstractArray{Float64,2}, edgeMap::Dict{Edge, Int})
+function simplifyPath(path::Dict{Edge, Float64}, independent::Vector{Edge}, dependencies::AbstractArray{Float64,2}, edgeMap::Dict{Edge, Int})
 	newPath = Dict{Edge, Float64}()
 	dep = zeros(size(dependencies)[1])
-	for edge in path
-		dep += dependencies[:,edgeMap[edge]]
+	for edge in keys(path)
+		dep += path[edge] * dependencies[:,edgeMap[edge]]
 	end
 	for (i, weight) in enumerate(dep)
 		if weight > 0
@@ -157,4 +157,22 @@ function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}}, inde
 	append!(newDependent, independent[p[1:numToRemove]])
 	sort!(newDependent)
 	return newIndependent, newDependent
+end
+
+"""
+	`getFullPathEdges`	: given network timings and origin and destination, get path edges
+	Wrapper for RoutingNetworks.getPathEdges that deals with particular case of road projection
+	Args:
+		t 		: network trip
+		timings : current network timings
+	Returns:
+		Path for network trip as (Edge, Float) dictionary
+"""
+function getFullPathEdges(t::NetworkTrip, timings::NetworkTimings)
+	sp = Dict{Edge, Float64}[edge => 1. for edge in getPathEdges(timings, t.orig[2], t.dest[1])]
+    if t.roadProj
+        sp[Edge(t.orig[1], t.orig[2])] = t.orig[3]
+        sp[Edge(t.dest[1], t.dest[2])] = t.dest[3]
+    end
+    return sp
 end

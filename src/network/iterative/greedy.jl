@@ -53,8 +53,8 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     srand(1991)
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
-    paths = [Dict{Edge,Float64}[[edge => 1. for edge in getPathEdges(startSolution, t.orig, t.dest)]] for t in trips]
-    origPaths = [Vector{Edge}[getPathEdges(startSolution, t.orig, t.dest)] for t in trips]
+    paths = [Dict{Edge,Float64}[getFullPathEdges(t, startSolution)] for t in trips]
+    origPaths = [Dict{Edge,Float64}[getFullPathEdges(t, startSolution)] for t in trips]
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
     dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = numDeps)
@@ -78,11 +78,15 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
         s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges, s.minIndep)
         s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = s.numDeps)
         s.state = 0
-        s.origPaths = [Vector{Edge}[getPathEdges(s.timings, t.orig, t.dest)] for t in s.trips]
+        s.origPaths = [Dict{Edge,Float64}[getFullPathEdges(t, s.timings)] for t in s.trips]
     else
         # update paths normally
         for (d,t) in enumerate(s.trips)
-            sp = getPathEdges(s.timings, t.orig, t.dest)
+            sp = [edge => 1. for edge in getPathEdges(s.timings, t.orig[2], t.dest[1])]
+            if t.roadProj
+                sp[Edge(t.orig[1], t.orig[2])] = t.orig[3]
+                sp[Edge(t.dest[1], t.dest[2])] = t.dest[3]
+            end
             if s.pathsPerTrip == 1
                 s.origPaths[d][1] = sp
             else
@@ -92,7 +96,7 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
                 elseif length(s.origPaths[d]) < s.pathsPerTrip # if not, and if enough room to add, add it in first position
                     unshift!(s.origPaths[d], sp)
                 else        # replace least useful path
-                    worstIndex = indmax([pathEdgesTime(s.timings, p) for p in s.origPaths[d]])
+                    worstIndex = indmax([pathEdgesTime(s.timings, collect(keys(p))) for p in s.paths[d]])
                     s.origPaths[d][worstIndex] = s.origPaths[d][1]
                     s.origPaths[d][1] = sp
                 end

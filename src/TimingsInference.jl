@@ -16,7 +16,7 @@ import RoutingNetworks: visualInit, visualEvent, inPolygon
 #network
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, randomTimings, maxSpeedTimes, uniformTimes, randomTimes, noisyVirtualData
-export findNetworkDependence, simplifyPath, evaluateTimes
+export findNetworkDependence, simplifyPath, evaluateTimes, getFullPathEdges
 export findNearEdges, findNearEdgesSameType, clusterEdges
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!
@@ -28,7 +28,7 @@ export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit
 export testSet, GeoStats, RealGeoStats, NetworkStats, RealNetworkStats, VirtNetworkStats
 export printStats, plotStats
 #projectors
-export NetworkProjector, NearestNode, AvgRadius
+export NetworkProjector, NearestNode, AvgRadius, NearestRoad
 #geo-timings
 export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 #visualization
@@ -64,6 +64,7 @@ include("geo/data/filters.jl")
 include("geo/projectors/networkprojector.jl")
 include("geo/projectors/nearestnode.jl")
 include("geo/projectors/avgradius.jl")
+include("geo/projectors/nearestroad.jl")
 
 include("geo/timings/geotimings.jl")
 
