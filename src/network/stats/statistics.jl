@@ -10,9 +10,14 @@
 """
 function tripsLogError(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
+    times = timings.times
     error = 0.
     for t in trips
-        error += abs(log(t.time / tt[t.orig,t.dest]))
+        if t.roadProj
+            error += abs(log(t.time / (tt[t.orig[2], t.dest[1]] + t.orig[3] * times[t.orig[1], t.orig[2]] + t.dest[3] * times[t.dest[1], t.dest[2]])))
+        else
+            error += abs(log(t.time / tt[t.orig[2],t.dest[1]]))
+        end
     end
     return error/length(trips)
 end
@@ -26,7 +31,11 @@ function tripsLogBias(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
     bias = 0.
     for t in trips
-        bias += log(tt[t.orig, t.dest]) - log(t.time)
+        if t. roadProj
+            bias += log(tt[t.orig[2], t.dest[1]] + t.orig[3] * times[t.orig[1], t.orig[2]] + t.dest[3] * times[t.dest[1], t.dest[2]]) - log(t.time)
+        else
+            bias += log(tt[t.orig[2], t.dest[1]]) - log(t.time)
+        end
     end
     return bias/length(trips)
 end
@@ -113,10 +122,16 @@ nwTripsLogBias(timings::NetworkTimings, nd::NetworkData) = tripsLogBias(timings,
 """
 function tripsRealLogError(timingsRef::NetworkTimings, timingsNew::NetworkTimings, trips::Vector{NetworkTrip})
     tt1 = getPathTimes(timingsRef)
+    times1 = timingsRef.times
     tt2 = getPathTimes(timingsNew)
+    times2 = timingsNew.times
     error = 0.
     for t in trips
-        error += abs(log(tt1[t.orig,t.dest] / tt2[t.orig,t.dest]))
+        if t.roadProj
+            error += abs(log((tt1[t.orig[2], t.dest[1]] + t.orig[3] * times1[t.orig[1], t.orig[2]] + t.dest[3] * times1[t.dest[1], t.dest[2]])/(tt2[t.orig[2], t.dest[1]] + t.orig[3] * times2[t.orig[1], t.orig[2]] + t.dest[3] * times2[t.dest[1], t.dest[2]])))
+        else
+            error += abs(log(tt1[t.orig[2],t.dest[1]] / tt2[t.orig[2],t.dest[1]]))
+        end
     end
     return error/length(trips)
 end
@@ -130,7 +145,11 @@ function tripsRealLogBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings
     tt2 = getPathTimes(timingsNew)
     error = 0.
     for t in trips
-        error += log(tt2[t.orig,t.dest]) - log(tt1[t.orig,t.dest])
+        if t.roadProj
+            error += log(tt2[t.orig[2], t.dest[1]] + t.orig[3] * times2[t.orig[1], t.orig[2]] + t.dest[3] * times2[t.dest[1], t.dest[2]]) - log(tt1[t.orig[2], t.dest[1]] + t.orig[3] * times1[t.orig[1], t.orig[2]] + t.dest[3] * times1[t.dest[1], t.dest[2]])
+        else
+            error += log(tt2[t.orig[2],t.dest[1]]) - log(tt1[t.orig[2],t.dest[1]])
+        end
     end
     return error/length(trips)
 end
