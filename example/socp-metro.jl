@@ -7,10 +7,10 @@ using RoutingNetworks, TimingsInference, JLD
 
 n = urbanNetwork(8)
 trueTimings = roadTypeTimings(n)
-pb = noisyVirtualData(trueTimings, 0.4, timeStd = 40.)
+pb = noisyVirtualData(trueTimings, 0.4, timeStd = 20.)
 
 initialTimes = uniformTimes(n);
-s = LimitedPaths(pb, initialTimes, pathsPerTrip = 3, maxTrip = 5000)
+s = LimitedPaths(pb, initialTimes, pathsPerTrip = 3, maxTrip = 10000)
 
 nwstats = VirtNetworkStats[]
 push!(nwstats, VirtNetworkStats("start", NetworkTimings(s), trueTimings, pb))
