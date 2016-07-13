@@ -169,7 +169,7 @@ end
 		Path for network trip as (Edge, Float) dictionary
 """
 function getFullPathEdges(t::NetworkTrip, timings::NetworkTimings)
-	sp = Dict{Edge, Float64}[edge => 1. for edge in getPathEdges(timings, t.orig[2], t.dest[1])]
+	sp = [edge => 1. for edge in getPathEdges(timings, t.orig[2], t.dest[1])]
     if t.roadProj
         sp[Edge(t.orig[1], t.orig[2])] = t.orig[3]
         sp[Edge(t.dest[1], t.dest[2])] = t.dest[3]
