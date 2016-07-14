@@ -136,14 +136,14 @@ function getNetworkTrips(nr::NearestRoad, tIds::AbstractArray{Int64,1})
     end
     #Store result in array
     netTrips = Array(NetworkTrip, length(tIds))
-    for id in tIds
+    for (i,id) in enumerate(tIds)
         t = nr.trips[id]
         (pEdge, pWeight, dEdge, dWeight) = nr.proj[id]
         #if same origin/destination
         if pEdge == dEdge
             continue
         end
-        push!(netTrips, NetworkTrip((src(pEdge), dst(pEdge), pWeight), (src(dEdge), dst(dEdge), dWeight), t.time, 1., true))
+        netTrips[i] = NetworkTrip((src(pEdge), dst(pEdge), pWeight), (src(dEdge), dst(dEdge), dWeight), t.time, 1., true)
     end
     return netTrips
 end

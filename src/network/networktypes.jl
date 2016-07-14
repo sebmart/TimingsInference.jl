@@ -14,7 +14,7 @@ immutable NetworkTrip
     roadProj::Bool
 end
 function Base.show(io::IO, t::NetworkTrip)
-    if roadProj
+    if t.roadProj
         @printf(io,"(%d,%d)=>(%d,%d), w=%.1f, t=%.1fs",t.orig[1],t.orig[2],t.dest[1],t.dest[2],t.weight,t.time)
     else
         @printf(io,"%d=>%d, w=%.2f, t=%.1fs",t.orig[1],t.dest[1],t.weight,t.time)
