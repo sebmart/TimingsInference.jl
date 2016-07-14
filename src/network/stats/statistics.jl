@@ -29,6 +29,7 @@ end
 """
 function tripsLogBias(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
+    times = timings.times
     bias = 0.
     for t in trips
         if t. roadProj
@@ -142,7 +143,9 @@ end
 """
 function tripsRealLogBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings, trips::Vector{NetworkTrip})
     tt1 = getPathTimes(timingsRef)
+    times1 = timingsRef.times
     tt2 = getPathTimes(timingsNew)
+    times2 = timingsNew.times
     error = 0.
     for t in trips
         if t.roadProj
