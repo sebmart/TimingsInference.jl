@@ -30,8 +30,27 @@ function noisyVirtualData(t::NetworkTimings, density::Float64=0.2, frequency::Fl
         if rand() <= density && tt[orig,dest] >= 30.
             count = rand(geo) + 1.
             time  = max(20.,rand(Normal(tt[orig,dest],timeStd*sqrt(tt[orig,dest]/(count*60.)))))
-            push!(trips, NetworkTrip(orig,dest,time,count))
+            push!(trips, NetworkTrip((orig,orig,0.),(dest,dest,0.),time,count,false))
         end
     end
     return NetworkData(t.network,trips, maxSpeedTimes(t.network))
+end
+
+"""
+    `perfectVirtualData`
+    generates rides in a network
+    parameters:
+    - `t` is the timings object representing timings
+    Rides are only created if travel time exceeds 30s
+"""
+function perfectVirtualData(t::NetworkTimings)
+    g = t.network.graph
+    trips = NetworkTrip[]
+    tt = getPathTimes(t)
+    for orig in 1:nv(g), dest in 1:nv(g)
+        if tt[orig, dest] >= 30.
+            push!(trips, NetworkTrip((orig, orig, 0.), (dest, dest, 0.), tt[orig,dest], 1., false))
+        end
+    end
+    return NetworkData(t.network, trips, maxSpeedTimes(t.network))
 end

@@ -8,10 +8,11 @@
     Abstract type, represents all information of a state of path/timingscomputation
     in the iterative process
     Must contain:
-    - `data::NetworkData`          timing data in the network
-    - `timings::NetworkTimings`    the current timings solution
-    - `trips::Vector{NetworkTrip}` trips that we currently optimize on
+    - `data::NetworkData`           timing data in the network
+    - `timings::NetworkTimings`     the current timings solution
+    - `trips::Vector{NetworkTrip}`  trips that we currently optimize on
     - `paths::Vector{Vector{Dict{Edge, Float64}}}` path subset for each current trip datapoint
+    - pathDiff::Float64             measure of difference in paths from previous step
     Must implement:
     - `updateState!` updates the state when new link-times are computed
 """

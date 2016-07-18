@@ -65,22 +65,6 @@ function preloadData!(nr::NearestRoad, trips::GeoData)
 end
 
 """
-	`findEdges`	: find all edges that begin and end in the provided list of nodes
-"""
-function findEdges(n::Network, nodeList::Vector{Int})
-	nodeSet = Set(nodeList)
-	edges = Set(Edge[])
-	for node in nodeList
-		for neighbor in out_neighbors(n.graph, node)
-			if neighbor in nodeSet && n.roads[node, neighbor].roadType > 1
-				push!(edges, Edge(node, neighbor))
-			end
-		end
-	end
-	return edges
-end
-
-"""
 	`projectDist`	:	find distance of edge to point
 """
 function projectDist(n::Network, edge::Edge, x::Float64, y::Float64)

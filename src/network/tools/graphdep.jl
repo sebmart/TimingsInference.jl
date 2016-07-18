@@ -158,21 +158,3 @@ function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}}, inde
 	sort!(newDependent)
 	return newIndependent, newDependent
 end
-
-"""
-	`getFullPathEdges`	: given network timings and origin and destination, get path edges
-	Wrapper for RoutingNetworks.getPathEdges that deals with particular case of road projection
-	Args:
-		t 		: network trip
-		timings : current network timings
-	Returns:
-		Path for network trip as (Edge, Float) dictionary
-"""
-function getFullPathEdges(t::NetworkTrip, timings::NetworkTimings)
-	sp = [edge => 1. for edge in getPathEdges(timings, t.orig[2], t.dest[1])]
-    if t.roadProj
-        sp[Edge(t.orig[1], t.orig[2])] = t.orig[3]
-        sp[Edge(t.dest[1], t.dest[2])] = t.dest[3]
-    end
-    return sp
-end

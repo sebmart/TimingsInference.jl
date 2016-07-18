@@ -1,6 +1,6 @@
 ###################################################
-## network/tools/edgeneighbors.jl
-## functions to study local properties of edges
+## network/tools/edges.jl
+## functions to study properties of edges/paths
 ###################################################
 
 """
@@ -100,3 +100,37 @@ end
 	Useful helper function for neighborhood continuity
 """
 flatten{T}(a::Array{T,1}) = any(x->isa(x,Array),a)? flatten(vcat(map(flatten,a)...)): a
+
+"""
+	`findEdges`	: find all edges that begin and end in the provided list of nodes
+"""
+function findEdges(n::Network, nodeList::Vector{Int})
+	nodeSet = Set(nodeList)
+	edges = Set(Edge[])
+	for node in nodeList
+		for neighbor in out_neighbors(n.graph, node)
+			if neighbor in nodeSet && n.roads[node, neighbor].roadType > 1
+				push!(edges, Edge(node, neighbor))
+			end
+		end
+	end
+	return edges
+end
+
+"""
+	`getFullPathEdges`	: given network timings and origin and destination, get path edges
+	Wrapper for RoutingNetworks.getPathEdges that deals with particular case of road projection
+	Args:
+		t 		: network trip
+		timings : current network timings
+	Returns:
+		Path for network trip as (Edge, Float) dictionary
+"""
+function getFullPathEdges(t::NetworkTrip, timings::NetworkTimings)
+	sp = [edge => 1. for edge in getPathEdges(timings, t.orig[2], t.dest[1])]
+    if t.roadProj
+        sp[Edge(t.orig[1], t.orig[2])] = t.orig[3]
+        sp[Edge(t.dest[1], t.dest[2])] = t.dest[3]
+    end
+    return sp
+end
