@@ -33,7 +33,7 @@ function mipTimes(s::IterativeState, args...)
 
 
     # OBJECTIVE
-    @objective(m, Min, sum{ sqrt(tripData[d].weight/tripData[d].time)*epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum{ tripData[d].weight/tripData[d].time * epsilon[d], d=eachindex(tripData)})
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path

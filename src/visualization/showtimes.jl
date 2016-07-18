@@ -14,6 +14,7 @@ type ShowTimes <: NetworkVisualizer
     nodes::Vector{CircleShape}
     roads::Dict{Tuple{Int,Int},Line}
     nodeRadius::Float64
+    nodesToView::Vector{Node}
 
 
     "times to show"
@@ -34,6 +35,7 @@ type ShowTimes <: NetworkVisualizer
         end
                 obj = new()
         obj.network  = n
+        obj.nodesToView = n.nodes
         obj.times = times
         obj.currentTime = 1
         obj.palette = Colors.colormap("Blues")

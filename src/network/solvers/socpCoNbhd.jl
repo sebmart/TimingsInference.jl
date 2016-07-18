@@ -28,8 +28,8 @@ function socpTimesContNbhd(s::IterativeState, velocityBound::Float64 = 0.1; args
     @variable(m, velocity[(i,j,p,q) in flatten([[(src(edge), dst(edge), src(nearEdge), dst(nearEdge)) for nearEdge in findNearEdgesSameType(s.data.network, edge)] for edge in collect(edges(g))])] >= 0)
 
     # OBJECTIVE
-    @objective(m, Min, sum{epsilon[d], d=eachindex(tripData)})
-
+    @objective(m, Min, sum{tripData[d].weight * epsilon[d], d=eachindex(tripData)})
+    
     # CONSTRAINTS
     # big T constraints
     @constraint(m, pathTime[d=eachindex(tripData)],
