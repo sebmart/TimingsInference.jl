@@ -58,7 +58,7 @@ function updateState!(s::LimitedPaths, times::AbstractArray{Float64, 2})
     for (d,t) in enumerate(s.trips)
         # get new shortest path with extra edges if necessary
         sp = getFullPathEdges(t, s.timings)
-        s.pathdiff += length(symdiff(collect(keys(sp)), collect(keys(s.paths[d][1]))))/2
+        s.pathDiff += length(symdiff(collect(keys(sp)), collect(keys(s.paths[d][1]))))/2
         if s.pathsPerTrip == 1 || traveltime(s.roadDistances, t.orig[2], t.dest[1]) < s.tripLength # short trips get one path
             s.paths[d][1] = sp
         else

@@ -3,10 +3,10 @@
 ## Create networks with particular congestion patterns
 ###################################################
 
-function centerCongestion()
-	n = squareNetwork(8)
+function centerCongestion(size::Int)
+	n = squareNetwork(size)
 	timings = roadTypeTimings(n)
-	nodeList = [19, 20, 21, 22, 27, 28, 29, 30, 35, 36, 37, 38, 43, 44, 45, 46]
+	nodeList = div(size * (size+1), 4) + squareNodes(div(size, 2), size)
 	for edge in findEdges(n, nodeList)
 		timings.times[src(edge), dst(edge)] *= 2
 	end
@@ -14,28 +14,56 @@ function centerCongestion()
 	return n, timings
 end
 
-function twoCongestions()
-	n = squareNetwork(8)
+function twoCongestions(size::Int)
+	n = squareNetwork(size)
 	timings = roadTypeTimings(n)
-	nodeList1 = [10, 11, 12, 18, 19, 20, 26, 27, 28]
-	nodeList2 = nodeList1 + 27
+	nodeList1 = squareNodes(div(size, 2) - 1, size) + size + 1
+	nodeList2 = nodeList1 + (div(size, 2) - 1) * (size + 1)
 	for edge in findEdges(n, nodeList1)
 		timings.times[src(edge), dst(edge)] *= 2
 	end
 	for edge in findEdges(n, nodeList2)
-		timings.times[src(edge), dst(edge)] *= 3
+		timings.times[src(edge), dst(edge)] *= 4
 	end
 	timings = NetworkTimings(n, timings.times)
 	return n, timings
 end
 
-function squareCongestion()
-	n = squareNetwork(8)
+function squareCongestion(size::Int)
+	n = squareNetwork(size)
 	timings = roadTypeTimings(n)
-	nodeList = [10, 11, 12, 13, 14, 15, 18, 23, 26, 31, 34, 39, 42, 47, 50, 51, 52, 53, 54, 55]
+	nodeList = div(size, 8) * (size + 1) + setdiff(squareNodes(size - div(size, 8) * 2, size), (size + 1) + squareNodes(size - div(size, 8) * 2 - 2, size))
 	for edge in findEdges(n, nodeList)
 		timings.times[src(edge), dst(edge)] *= 2
 	end
 	timings = NetworkTimings(n, timings.times)
 	return n, timings
+end
+
+function gradientCongestion(size::Int)
+	n = squareNetwork(size)
+	g = n.graph
+	times = maxSpeedTimes(n)
+	for u in vertices(g) 
+		for v in out_neighbors(g, u)
+			if v > u
+				times[u,v] *= div(u-1, size^2/4) + 1
+			end
+		end
+		for v in in_neighbors(g, u)
+			if v > u
+				times[v,u] *= div(u-1, size^2/4) + 1
+			end
+		end
+	end
+	timings = NetworkTimings(n, times)
+	return n, timings
+end
+
+function squareNodes(edge::Int, size::Int)
+	nodeList = Int[]
+	for i=1:edge
+		append!(nodeList, collect(1:edge) + ((i-1) * size))
+	end
+	return nodeList
 end

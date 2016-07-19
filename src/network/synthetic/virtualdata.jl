@@ -18,6 +18,7 @@
 """
 function noisyVirtualData(t::NetworkTimings, density::Float64=0.2, frequency::Float64=2.;
                           timeStd::Float64 = 20.)
+    srand()
     g = t.network.graph
     trips = NetworkTrip[]
     # subset rides
@@ -41,14 +42,14 @@ end
     generates rides in a network
     parameters:
     - `t` is the timings object representing timings
-    Rides are only created if travel time exceeds 30s
+    Rides are only created if travel time exceeds minTripTime
 """
-function perfectVirtualData(t::NetworkTimings)
+function perfectVirtualData(t::NetworkTimings, minTripTime::Float64=30.)
     g = t.network.graph
     trips = NetworkTrip[]
     tt = getPathTimes(t)
     for orig in 1:nv(g), dest in 1:nv(g)
-        if tt[orig, dest] >= 30.
+        if tt[orig, dest] >= minTripTime
             push!(trips, NetworkTrip((orig, orig, 0.), (dest, dest, 0.), tt[orig,dest], 1., false))
         end
     end

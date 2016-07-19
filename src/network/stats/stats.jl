@@ -27,7 +27,7 @@ type RealNetworkStats <: NetworkStats
 	times::AbstractArray{Float64, 2}
 	sdict::Dict{AbstractString, Float64}
 
-	function RealNetworkStats(name::AbstractString, timings::NetworkTimings, trainingData::NetworkData, testingData::NetworkData)
+	function RealNetworkStats(name::AbstractString, timings::NetworkTimings, trainingData::NetworkData, testingData::NetworkData, pathDiff::Float64 = -1.)
 		obj = new()
 		obj.times = timings.times
 		obj.name = name
@@ -35,7 +35,8 @@ type RealNetworkStats <: NetworkStats
 			"trNetworkTripsLogError" => 100 * nwTripsLogError(timings, trainingData),
 			"testNetworkTripsLogError" => 100 * nwTripsLogError(timings, testingData),
 			"trNetworkTripsLogBias" => 100 * nwTripsLogBias(timings, trainingData),
-			"testNetworkTripsLogBias" => 100 * nwTripsLogBias(timings, testingData))
+			"testNetworkTripsLogBias" => 100 * nwTripsLogBias(timings, testingData),
+			"pathDiff" => pathDiff)
 		return obj
 	end
 end
@@ -48,7 +49,7 @@ type VirtNetworkStats <: NetworkStats
 	times::AbstractArray{Float64,2}
 	sdict::Dict{AbstractString, Float64}
 
-	function VirtNetworkStats(name::AbstractString, timingsNew::NetworkTimings, timingsRef::NetworkTimings, data::NetworkData)
+	function VirtNetworkStats(name::AbstractString, timingsNew::NetworkTimings, timingsRef::NetworkTimings, data::NetworkData, pathDiff::Float64 = -1.)
 		obj = new()
 		obj.times = timingsNew.times
 		obj.name = name
@@ -60,7 +61,8 @@ type VirtNetworkStats <: NetworkStats
 			"allPathsLogError" => 100 * allPathsLogError(timingsRef, timingsNew),
 			"allPathsLogBias" => 100 * allPathsLogBias(timingsRef, timingsNew),
 			"roadTimeLogError" => 100 * roadTimeLogError(timingsRef, timingsNew),
-			"roadTimeLogBias" => 100 * roadTimeLogBias(timingsRef, timingsNew))
+			"roadTimeLogBias" => 100 * roadTimeLogBias(timingsRef, timingsNew),
+			"pathDiff" => pathDiff)
 		return obj
 	end
 end
@@ -71,7 +73,10 @@ end
 function printStats(so::NetworkStats)
 	println(so)
 	for statName in sort(collect(keys(so.sdict)))
-		if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
+		if statName == "pathDiff"
+			print(statName, ":\t")
+			@printf("%.2f\n", so.sdict[statName])
+		elseif (contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log"))
 			print(statName, ":\t")
 			@printf("%.2f s\n", so.sdict[statName])
 		else
@@ -93,7 +98,9 @@ function printStats{T <: NetworkStats}(stats::Vector{T}, statName::AbstractStrin
 	end
 	println(statName)
 	for so in stats
-		if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
+		if statName == "pathDiff"
+			@printf("%s\t%.2f\n", so.name, so.sdict[statName])
+		elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 			@printf("%s\t%.0fs\n", so.name, so.sdict[statName])
 		else
 			@printf("%s\t%.2f%%\n", so.name, so.sdict[statName])

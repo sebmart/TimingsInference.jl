@@ -19,7 +19,7 @@ export roadTypeTimings, randomTimings, maxSpeedTimes, uniformTimes, randomTimes
 export noisyVirtualData, perfectVirtualData
 export findNetworkDependence, simplifyPath, evaluateTimes, getFullPathEdges
 export findNearEdges, findNearEdgesSameType, clusterEdges
-export centerCongestion, twoCongestions, squareCongestion
+export centerCongestion, twoCongestions, squareCongestion, gradientCongestion
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!
 export lpTimes, fraclpTimes, mipTimes, heuristicTimes, socpTimes 
@@ -40,11 +40,12 @@ include("network/networktypes.jl")
 include("network/stats/statistics.jl")
 include("network/stats/stats.jl")
 
-include("network/tools/virtualdata.jl")
-include("network/tools/virtualtimings.jl")
 include("network/tools/edges.jl")
 include("network/tools/graphdep.jl")
-include("network/tools/congestion.jl")
+
+include("network/synthetic/virtualdata.jl")
+include("network/synthetic/virtualtimings.jl")
+include("network/synthetic/congestion.jl")
 
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
