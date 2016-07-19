@@ -49,7 +49,7 @@ function perfectVirtualData(t::NetworkTimings, minTripTime::Float64=30.)
     trips = NetworkTrip[]
     tt = getPathTimes(t)
     for orig in 1:nv(g), dest in 1:nv(g)
-        if tt[orig, dest] >= minTripTime
+        if tt[orig, dest] > minTripTime
             push!(trips, NetworkTrip((orig, orig, 0.), (dest, dest, 0.), tt[orig,dest], 1., false))
         end
     end
