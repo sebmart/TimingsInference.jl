@@ -27,7 +27,8 @@ for size in SIZES
 				break
 			end
 		end
-		save("fullPerfectDataPerfectPaths-$size.jld", "nwstats", nwstats)
+		inputError = TimingsInference.tripsLogError(trueTimings, s.trips)
+		save("fullPerfectDataPerfectPaths-$size.jld", "nwstats", nwstats, "inputError", inputError)
 		initialTimes = randomTimes(n)
 		s = LimitedPaths(pb, initialTimes, pathsPerTrip = 3, maxTrip = 10000)
 		nwstats = VirtNetworkStats[]
@@ -39,7 +40,8 @@ for size in SIZES
 				break
 			end
 		end
-		save("fullPerfectDataRandomPaths-$size.jld", "nwstats", nwstats)
+		inputError = TimingsInference.tripsLogError(trueTimings, s.trips)
+		save("fullPerfectDataRandomPaths-$size.jld", "nwstats", nwstats, "inputError", inputError)
 	end
 	## Incomplete perfect data
 	pb = perfectVirtualData(trueTimings)
@@ -55,7 +57,8 @@ for size in SIZES
 				break
 			end
 		end
-		save("perfectData$nTrips-$size.jld", "nwstats", nwstats)
+		inputError = TimingsInference.tripsLogError(trueTimings, s.trips)
+		save("perfectData$nTrips-$size.jld", "nwstats", nwstats, "inputError", inputError)
 	end
 	## Incomplete noisy data
 	for noise in NOISE
@@ -72,7 +75,8 @@ for size in SIZES
 					break
 				end
 			end
-			save("noisyData$noise-$nTrips-$size.jld", "nwstats", nwstats)
+			inputError = TimingsInference.tripsLogError(trueTimings, s.trips)
+			save("noisyData$noise-$nTrips-$size.jld", "nwstats", nwstats, "inputError", inputError)
 		end
 	end
 end
