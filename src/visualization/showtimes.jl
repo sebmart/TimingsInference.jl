@@ -67,8 +67,12 @@ ShowTimes{T<:NetworkStats}(n::Network,stats::Vector{T}; speedRange::Tuple{Int,In
 ShowTimes{T<:NetworkStats}(n::Network, stats::Vector{T}, trueTimings::NetworkTimings; speedRange::Tuple{Int,Int} = (-1,-1)) = ShowTimes(n, vcat(AbstractArray{Float64,2}[s.times for s in stats], AbstractArray{Float64,2}[trueTimings.times]), speedRange=speedRange)
 
 function visualInit(v::ShowTimes)
-    #Change the road colors to the first timing set
+    # Change the road colors to the first timing set
     updateRoadsColor(v)
+    # change node color to black
+    for n in v.nodes
+        set_fillcolor(n, SFML.Color(0,0,0))
+    end
 end
 
 function visualEvent(v::ShowTimes, event::Event)

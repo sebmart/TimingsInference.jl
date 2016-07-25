@@ -9,6 +9,7 @@ NUMTRIPS = [100, 500, 1000, 5000, 10000]
 NOISE = [5., 10., 20., 40.]
 
 n = urbanNetwork(8)
+trueTimings = roadTypeTimings(n);
 
 # full perfect data
 pb = perfectVirtualData(trueTimings, 0.)
