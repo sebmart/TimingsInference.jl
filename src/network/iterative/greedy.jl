@@ -24,7 +24,7 @@ type GreedyEdges <: IterativeState
     "dependent edges"
     dependent::Vector{Edge}
     "original non-simplified paths"
-    origPaths::Vector{Vector{Vector{Edge}}}
+    origPaths::Vector{Vector{Dict{Edge,Float64}}}
     "dependency matrix"
     dependencies::SparseMatrixCSC{Float64,Int}
     "edge map"
