@@ -46,7 +46,7 @@ end
     takes in NetworkData object, initial timings (as link times or full timings),
     and max number of paths per trip as integer
 """
-function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep = 100, numDeps::Int = 3)
+function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep::Int = 100, numDeps::Int = 3)
     if pathsPerTrip < 1
         error("Must have at least one path per trip")
     end
@@ -55,7 +55,9 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
     paths = [Dict{Edge,Float64}[getFullPathEdges(t, startSolution)] for t in trips]
+    println(typeof(paths))
     origPaths = [Dict{Edge,Float64}[getFullPathEdges(t, startSolution)] for t in trips]
+    println(typeof(origPaths))
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
     dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = numDeps)
