@@ -5,7 +5,7 @@
 
 """
     Represents the data about the trip orig=>dest in the network
-    Origin and destination are represented as (edge, weight) pairs for generality. If origin and destination are nodes, then the edge is just a loop from that node to that node, with weight 0.
+    Origin and destination are represented as (edge, weight) pairs for generality. If origin and destination are nodes, then the edge is just a loop from that node to that node, with weight 0. So a path from node 1 to node 5 will be indicated as (1,1,0.0) to (5,5,0.0)
 """
 immutable NetworkTrip
     "Origin edge and weight of that edge"
