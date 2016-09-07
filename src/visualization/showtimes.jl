@@ -38,7 +38,7 @@ type ShowTimes <: NetworkVisualizer
         obj.nodesToView = n.nodes
         obj.times = times
         obj.currentTime = 1
-        obj.palette = Colors.colormap("Blues")
+        obj.palette = Colors.colormap("Reds")
 
         # if no speed range: compute it
         if speedRange == (-1,-1)
@@ -60,14 +60,19 @@ type ShowTimes <: NetworkVisualizer
     end
 end
 
-ShowTimes(n::Network,time::AbstractArray{Float64,2}; args...) = ShowTimes(n,AbstractArray{Float64,2}[time],args...)
-ShowTimes(n::Network,timing::NetworkTimings; args...) = ShowTimes(n,AbstractArray{Float64,2}[timing.times],args...)
-ShowTimes(n::Network,timings::Vector{NetworkTimings}; args...) = ShowTimes(n,AbstractArray{Float64,2}[t.times for t in timings],args...)
-ShowTimes{T<:NetworkStats}(n::Network,stats::Vector{T}; args...) = ShowTimes(n, AbstractArray{Float64,2}[s.times for s in stats],args...)
+ShowTimes(n::Network,time::AbstractArray{Float64,2}; speedRange::Tuple{Int,Int} = (-1,-1)) = ShowTimes(n,AbstractArray{Float64,2}[time], speedRange=speedRange)
+ShowTimes(n::Network,timing::NetworkTimings; speedRange::Tuple{Int,Int} = (-1,-1)) = ShowTimes(n,AbstractArray{Float64,2}[timing.times], speedRange=speedRange)
+ShowTimes(n::Network,timings::Vector{NetworkTimings}; speedRange::Tuple{Int,Int} = (-1,-1)) = ShowTimes(n,AbstractArray{Float64,2}[t.times for t in timings], speedRange=speedRange)
+ShowTimes{T<:NetworkStats}(n::Network,stats::Vector{T}; speedRange::Tuple{Int,Int} = (-1,-1)) = ShowTimes(n, AbstractArray{Float64,2}[s.times for s in stats], speedRange=speedRange)
+ShowTimes{T<:NetworkStats}(n::Network, stats::Vector{T}, trueTimings::NetworkTimings; speedRange::Tuple{Int,Int} = (-1,-1)) = ShowTimes(n, vcat(AbstractArray{Float64,2}[s.times for s in stats], AbstractArray{Float64,2}[trueTimings.times]), speedRange=speedRange)
 
 function visualInit(v::ShowTimes)
-    #Change the road colors to the first timing set
+    # Change the road colors to the first timing set
     updateRoadsColor(v)
+    # change node color to black
+    for n in v.nodes
+        set_fillcolor(n, SFML.Color(0,0,0))
+    end
 end
 
 function visualEvent(v::ShowTimes, event::Event)
@@ -96,7 +101,8 @@ function updateRoadsColor(v::ShowTimes)
     #change colors
     for ((o,d),r) in v.network.roads
         s = r.distance/v.times[v.currentTime][o,d]
-        c = round(Int,(s-v.minSpeed)/(v.maxSpeed-v.minSpeed) * (length(v.palette)-1)) +1
+        c = round(Int,max(0, min(1, (v.maxSpeed-s)/(v.maxSpeed-v.minSpeed))) * (length(v.palette)-1)) +1
+        # c = round(Int,(s-v.minSpeed)/(v.maxSpeed-v.minSpeed) * (length(v.palette)-1)) +1
         color = v.palette[c]
         set_fillcolor(v.roads[o,d],Color(round(Int,color.r*255),round(Int,255*color.g),round(Int,255*color.b)))
     end

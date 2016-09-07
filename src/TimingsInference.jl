@@ -15,9 +15,11 @@ import RoutingNetworks: visualInit, visualEvent, inPolygon
 
 #network
 export NetworkTimings, NetworkTrip, NetworkData
-export roadTypeTimings, randomTimings, maxSpeedTimes, uniformTimes, randomTimes, noisyVirtualData
-export findNetworkDependence, simplifyPath, evaluateTimes
+export roadTypeTimings, randomTimings, maxSpeedTimes, uniformTimes, randomTimes
+export noisyVirtualData, perfectVirtualData
+export findNetworkDependence, simplifyPath, evaluateTimes, getFullPathEdges
 export findNearEdges, findNearEdgesSameType, clusterEdges
+export centerCongestion, twoCongestions, squareCongestion, gradientCongestion
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!
 export lpTimes, fraclpTimes, mipTimes, heuristicTimes, socpTimes 
@@ -28,7 +30,7 @@ export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit
 export testSet, GeoStats, RealGeoStats, NetworkStats, RealNetworkStats, VirtNetworkStats
 export printStats, plotStats
 #projectors
-export NetworkProjector, NearestNode, AvgRadius
+export NetworkProjector, NearestNode, AvgRadius, NearestRoad
 #geo-timings
 export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 #visualization
@@ -38,10 +40,12 @@ include("network/networktypes.jl")
 include("network/stats/statistics.jl")
 include("network/stats/stats.jl")
 
-include("network/tools/virtualdata.jl")
-include("network/tools/virtualtimings.jl")
-include("network/tools/edgeneighbors.jl")
+include("network/tools/edges.jl")
 include("network/tools/graphdep.jl")
+
+include("network/synthetic/virtualdata.jl")
+include("network/synthetic/virtualtimings.jl")
+include("network/synthetic/congestion.jl")
 
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
@@ -64,6 +68,7 @@ include("geo/data/filters.jl")
 include("geo/projectors/networkprojector.jl")
 include("geo/projectors/nearestnode.jl")
 include("geo/projectors/avgradius.jl")
+include("geo/projectors/nearestroad.jl")
 
 include("geo/timings/geotimings.jl")
 

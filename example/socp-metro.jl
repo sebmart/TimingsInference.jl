@@ -5,16 +5,19 @@
 
 using RoutingNetworks, TimingsInference, JLD
 
-n = urbanNetwork(8)
-trueTimings = roadTypeTimings(n)
+n, trueTimings = squareCongestion(20)
 pb = noisyVirtualData(trueTimings, 0.4, timeStd = 20.)
+# pb = perfectVirtualData(trueTimings)
 
-initialTimes = uniformTimes(n);
-s = LimitedPaths(pb, initialTimes, pathsPerTrip = 3, maxTrip = 10000)
+initialTimes = randomTimes(n);
+s = LimitedPaths(pb, initialTimes, pathsPerTrip = 3, maxTrip = 1000)
 
 nwstats = VirtNetworkStats[]
-push!(nwstats, VirtNetworkStats("start", NetworkTimings(s), trueTimings, pb))
-for i = 1:15
+push!(nwstats, VirtNetworkStats("start", NetworkTimings(s), trueTimings, pb, s.pathDiff))
+for i = 1:40
 	doIteration!(s, method="socpCo")
-	push!(nwstats, VirtNetworkStats("iter$i", NetworkTimings(s), trueTimings, pb))
+	push!(nwstats, VirtNetworkStats("iter$i", NetworkTimings(s), trueTimings, pb, s.pathDiff))
+	if s.pathDiff == 0.
+		break
+	end
 end

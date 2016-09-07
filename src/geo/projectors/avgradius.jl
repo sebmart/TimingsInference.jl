@@ -97,9 +97,9 @@ function getNetworkTrips(ar::AvgRadius, tIds::AbstractArray{Int64,1})
             if haskey(netTrips, od)
                 nt = netTrips[od]
                 time = nt.time * nt.weight/(nt.weight + 1.) + t.time/(nt.weight + 1.)
-                netTrips[od] = NetworkTrip(nt.orig, nt.dest, time, nt.weight+1.)
+                netTrips[od] = NetworkTrip(nt.orig, nt.dest, time, nt.weight+1., false)
             else
-                netTrips[od] = NetworkTrip(od[1],od[2],t.time,1.)
+                netTrips[od] = NetworkTrip((od[1], od[1], 0.), (od[2], od[2], 0.), t.time, 1., false)
             end
         end
     end

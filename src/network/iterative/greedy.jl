@@ -15,6 +15,7 @@ type GreedyEdges <: IterativeState
     timings::NetworkTimings
     trips::Vector{NetworkTrip}
     paths::Vector{Vector{Dict{Edge,Float64}}}  # for each trip, a vector of paths
+    pathDiff::Float64
 
     "max number of paths per trip" #temporarily cannot be more than 1
     pathsPerTrip::Int64
@@ -23,7 +24,7 @@ type GreedyEdges <: IterativeState
     "dependent edges"
     dependent::Vector{Edge}
     "original non-simplified paths"
-    origPaths::Vector{Vector{Vector{Edge}}}
+    origPaths::Vector{Vector{Dict{Edge,Float64}}}
     "dependency matrix"
     dependencies::SparseMatrixCSC{Float64,Int}
     "edge map"
@@ -45,7 +46,7 @@ end
     takes in NetworkData object, initial timings (as link times or full timings),
     and max number of paths per trip as integer
 """
-function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep = 100, numDeps::Int = 3)
+function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerTrip::Int = typemax(Int), maxTrip::Int=1000, numEdges::Int = 10, numIter::Int = 3, minIndep::Int = 100, numDeps::Int = 3)
     if pathsPerTrip < 1
         error("Must have at least one path per trip")
     end
@@ -53,12 +54,14 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
     srand(1991)
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
-    paths = [Dict{Edge,Float64}[[edge => 1. for edge in getPathEdges(startSolution, t.orig, t.dest)]] for t in trips]
-    origPaths = [Vector{Edge}[getPathEdges(startSolution, t.orig, t.dest)] for t in trips]
+    paths = [Dict{Edge,Float64}[getFullPathEdges(t, startSolution)] for t in trips]
+    println(typeof(paths))
+    origPaths = [Dict{Edge,Float64}[getFullPathEdges(t, startSolution)] for t in trips]
+    println(typeof(origPaths))
     independent = collect(edges(data.network.graph))
     dependent = Edge[]
     dependencies, edgeMap = findNetworkDependence(data.network, independent, dependent, numDeps = numDeps)
-    return GreedyEdges(data,startSolution,trips,paths,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter, minIndep, 0, numDeps)
+    return GreedyEdges(data,startSolution,trips,paths,Inf,pathsPerTrip,independent, dependent,origPaths,dependencies,edgeMap,numEdges, numIter, minIndep, 0, numDeps)
 end
 
 GreedyEdges(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...) =
@@ -78,11 +81,15 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
         s.independent, s.dependent = updateIndependentEdges(s.paths, s.independent, s.dependent, s.numEdges, s.minIndep)
         s.dependencies, s.edgeMap = findNetworkDependence(s.data.network, s.independent, s.dependent, numDeps = s.numDeps)
         s.state = 0
-        s.origPaths = [Vector{Edge}[getPathEdges(s.timings, t.orig, t.dest)] for t in s.trips]
+        origPaths = [Dict{Edge,Float64}[getFullPathEdges(t, s.timings)] for t in s.trips]
+        s.pathDiff = sum([length(symdiff(collect(keys(origPaths[d][1])), collect(keys(s.origPaths[d][1])))) for d=eachindex(s.trips)])/(2 * length(s.trips))
+        s.origPaths = origPaths
     else
+        s.pathDiff = 0.
         # update paths normally
         for (d,t) in enumerate(s.trips)
-            sp = getPathEdges(s.timings, t.orig, t.dest)
+            sp = getFullPathEdges(t, s.timings)
+            s.pathDiff += length(symdiff(collect(keys(sp)), collect(keys(s.origPaths[d][1]))))/2
             if s.pathsPerTrip == 1
                 s.origPaths[d][1] = sp
             else
@@ -92,12 +99,13 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
                 elseif length(s.origPaths[d]) < s.pathsPerTrip # if not, and if enough room to add, add it in first position
                     unshift!(s.origPaths[d], sp)
                 else        # replace least useful path
-                    worstIndex = indmax([pathEdgesTime(s.timings, p) for p in s.origPaths[d]])
+                    worstIndex = indmax([pathEdgesTime(s.timings, collect(keys(p))) for p in s.paths[d]])
                     s.origPaths[d][worstIndex] = s.origPaths[d][1]
                     s.origPaths[d][1] = sp
                 end
             end
         end
+        s.pathDiff /= length(s.trips)
     end
     s.paths = [[simplifyPath(p, s.independent, s.dependencies, s.edgeMap) for p in s.origPaths[d]] for d = eachindex(s.trips)]
 end
