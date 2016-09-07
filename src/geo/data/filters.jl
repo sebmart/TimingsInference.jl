@@ -74,6 +74,7 @@ function inTimeWindow(trips::GeoData, startTime::AbstractString, endTime::Abstra
     endMin   = parse(Int, e[2])
     return inTimeWindow(trips, startHour, startMin, endHour, endMin)
 end
+
 """
     `onlyWeekdays`: keep trips that occur on weekdays
     - for GeoTrip object: returns boolean
@@ -95,6 +96,29 @@ function onlyWeekdays(trips::GeoData)
     @printf("\r%.2f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
     return newTrips
 end
+
+"""
+    `onlyWeekends`: keep trips that occur on weekends
+    - for GeoTrip object: returns boolean
+    - for GeoData object: returns filtered GeoData object
+"""
+function onlyWeekends(t::GeoTrip)
+    return Dates.dayofweek(t.pTime) > 5
+end
+
+function onlyWeekends(trips::GeoData)
+    mask = BitArray(length(trips))
+    for (i, t) in enumerate(trips)
+        if i%10_000 == 0
+            @printf("\r%.2f%% trips checked     ",100*i/length(trips))
+        end
+        mask[i] = onlyWeekends(t)
+    end
+    newTrips = trips[mask]
+    @printf("\r%.2f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
+    return newTrips
+end
+
 """
     `inPolygon`: keep trips with pickup and dropoff inside a polygon
     - for one trip: returns boolean

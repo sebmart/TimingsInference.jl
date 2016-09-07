@@ -61,6 +61,9 @@ type KnnTimings <: GeoTimings
 end
 KnnTimings(s::DataSplit, k::Int; args...) =  KnnTimings(s.geodata, trainSet(s), k; args...)
 
+"""
+    `estimateTime`: Implementation of required method for GeoTimings
+"""
 function estimateTime(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)
 @inbounds begin
     px, py = toENU(pLon, pLat, gt.center)
@@ -88,6 +91,9 @@ function estimateTime(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float3
 end #inbounds
 end
 
+"""
+    `estimateTimeWithDistance`: Alternate version of estimateTime that also returns average distance from point to neighbors
+"""
 function estimateTimeWithDistance(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)
 @inbounds begin
     px, py = toENU(pLon, pLat, gt.center)

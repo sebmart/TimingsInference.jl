@@ -31,9 +31,12 @@ function findNearEdgesSameType(n::Network, e::Edge)
 	append!(nearEdges, [Edge(orig, newDest) for newDest in out_neighbors(n.graph, orig)])
 	append!(nearEdges, [Edge(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
 	append!(nearEdges, [Edge(newOrig, dest) for newOrig in in_neighbors(n.graph, dest)])
-	# remove duplicates and edge e itself
+	# remove duplicates and edge e itself (as well as the reverse of e)
 	nearEdges = Set(nearEdges)
 	delete!(nearEdges, Edge(orig, dest))
+	if Edge(dest, orig) in nearEdges
+		delete!(nearEdges, Edge(dest, orig))
+	end
 	# remove edges not of same type as e
 	for edge in nearEdges
 		if n.roads[src(e),dst(e)].roadType != n.roads[src(edge),dst(edge)].roadType
