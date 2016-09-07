@@ -3,6 +3,11 @@
 ## Create networks with particular congestion patterns
 ###################################################
 
+"""
+	Creates a square grid where the center is twice as congested as the rest
+	Args:
+		- size: length of edge of square
+"""
 function centerCongestion(size::Int)
 	n = squareNetwork(size)
 	timings = roadTypeTimings(n)
@@ -14,6 +19,11 @@ function centerCongestion(size::Int)
 	return n, timings
 end
 
+"""
+	Creates a square grid where two regions (in the corners) are heavily congested (one twice as slow as the rest, the other four times as slow)
+	Args:
+		- size: length of edge of square
+"""
 function twoCongestions(size::Int)
 	n = squareNetwork(size)
 	timings = roadTypeTimings(n)
@@ -29,6 +39,11 @@ function twoCongestions(size::Int)
 	return n, timings
 end
 
+"""
+	Creates a square grid where a peripheral road is twice as slow as the rest.
+	Args:
+		- `size`: length of square side
+"""
 function squareCongestion(size::Int)
 	n = squareNetwork(size)
 	timings = roadTypeTimings(n)
@@ -40,6 +55,9 @@ function squareCongestion(size::Int)
 	return n, timings
 end
 
+"""
+	Creates a square grid of edge length 'size' with 4 zones in increasing congestion
+"""
 function gradientCongestion(size::Int)
 	n = squareNetwork(size)
 	g = n.graph
@@ -60,6 +78,9 @@ function gradientCongestion(size::Int)
 	return n, timings
 end
 
+"""
+	Helper function to construct squares
+"""
 function squareNodes(edge::Int, size::Int)
 	nodeList = Int[]
 	for i=1:edge

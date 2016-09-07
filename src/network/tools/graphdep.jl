@@ -71,15 +71,22 @@ end
 	Args:
 		dependency 	:	vector summing to 1
 		numDeps	  	:	number of components to keep, > 1
+		minSize		: 	minimum value that a component must have (after sparsification) to be kept
 	Returns:
 		newDependency : vector summing to 1, with only numDeps nonzeros
 """
-function sparsify(dependency::Vector{Float64}, numDeps::Int)
+function sparsify(dependency::Vector{Float64}, numDeps::Int, minSize::Float64 = 0.05)
+	# find largest components
 	p = reverse(sortperm(dependency))
 	newDependency = zeros(length(dependency))
+	# renormalize
 	total = sum(dependency[p[1:numDeps]])
 	for i = 1:numDeps
 		newDependency[p[i]] = dependency[p[i]]/total
+	end
+	# if smallest component is too small, re-sparsify with one less component
+	if minimum(newDependency[newDependency .> 0]) < minSize
+		return sparsify(dependency, numDeps-1, minSize)
 	end
 	return newDependency
 end
