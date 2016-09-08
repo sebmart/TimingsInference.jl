@@ -11,8 +11,8 @@
     - `data::NetworkData`           timing data in the network
     - `timings::NetworkTimings`     the current timings solution
     - `trips::Vector{NetworkTrip}`  trips that we currently optimize on
-    - `paths::Vector{Vector{Dict{Edge, Float64}}}` path subset for each current trip datapoint
-    - `pathDiff::Float64`           measure of difference in paths from previous step
+    - `paths::Vector{Vector{Dict{Edge, Float64}}}` path subset for each current trip datapoint. Each trip has a vector of paths associated to it. Each path is represented as a dictionary mapping edges to weights. This ensures that the path representation is consistent for all types of methods (including graph reduction). In most cases, the weights are all ones and the representation is equivalent to a vector of edges.
+    - `pathDiff::Float64`           measure of difference in paths from previous step. Full definition is in paper. The lower it is, the closer we are to convergence.
     Must implement:
     - `updateState!` updates the state when new link-times are computed
 """

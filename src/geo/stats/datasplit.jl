@@ -78,6 +78,7 @@ type LocSplit <: DataSplit
 	end
 end
 
+# extra classes for center/radius given as Int
 LocSplit(geodata::GeoData, network::Network, center::Tuple{Int, Int, Int, Int}, radius::Float64, trips::AbstractArray{Int,1} = eachindex(geodata)) = LocSplit(geodata, network, (Float64(center[1]), Float64(center[2]), Float64(center[3]), Float64(center[4])), radius, trips)
 LocSplit(geodata::GeoData, network::Network, center::Tuple{Int, Int, Int, Int}, radius::Int, trips::AbstractArray{Int,1} = eachindex(geodata)) = LocSplit(geodata, network, (Float64(center[1]), Float64(center[2]), Float64(center[3]), Float64(center[4])), Float64(radius), trips)
 LocSplit(geodata::GeoData, network::Network, center::Tuple{Float64, Float64, Float64, Float64}, radius::Int, trips::AbstractArray{Int,1} = eachindex(geodata)) = LocSplit(geodata, network, center, Float64(radius), trips)
