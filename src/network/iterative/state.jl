@@ -34,23 +34,27 @@ NetworkTimings(it::IterativeState) = it.timings
 """
 function doIteration!(it::IterativeState; method::AbstractString="lp", velocityBound::Float64 = 0.1, solverArgs...)
     if method=="lp"
-        updateState!(it, lpTimes(it, solverArgs...))
+        updateState!(it, lpTimes(it; solverArgs...))
     elseif method=="fraclp"
-        updateState!(it, fraclpTimes(it, solverArgs...))
+        updateState!(it, fraclpTimes(it; solverArgs...))
     elseif method=="mip"
-        updateState!(it, mipTimes(it, solverArgs...))
+        updateState!(it, mipTimes(it; solverArgs...))
     elseif method == "heuristic"
         updateState!(it, heuristicTimes(it))
     elseif method == "socp"
-        updateState!(it, socpTimes(it, solverArgs...))
+        updateState!(it, socpTimes(it; solverArgs...))
     elseif method == "lpCo"
-        updateState!(it, lpTimesCont(it, velocityBound, solverArgs...))
+        updateState!(it, lpTimes(it, continuityConstraint="simple",
+                                     velocityBound=velocityBound; solverArgs...))
     elseif method == "lpCoNbhd"
-        updateState!(it, lpTimesContNbhd(it, velocityBound, solverArgs...))
+        updateState!(it, lpTimes(it, continuityConstraint="neighborhoods",
+                                     velocityBound=velocityBound; solverArgs...))
     elseif method == "socpCo"
-        updateState!(it, socpTimesCont(it, velocityBound, solverArgs...))
+        updateState!(it, socpTimes(it, continuityConstraint="simple",
+                                       velocityBound=velocityBound; solverArgs...))
     elseif method == "socpCoNbhd"
-        updateState!(it, socpTimesContNbhd(it, velocityBound, solverArgs...))
+        updateState!(it, socpTimes(it, continuityConstraint="neighborhoods",
+                                       velocityBound=velocityBound; solverArgs...))
     else
         error("Unknown optimizer")
     end
