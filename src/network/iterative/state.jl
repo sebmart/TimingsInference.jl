@@ -12,7 +12,7 @@
     - `timings::NetworkTimings`     the current timings solution
     - `trips::Vector{NetworkTrip}`  trips that we currently optimize on
     - `paths::Vector{Vector{Dict{Edge, Float64}}}` path subset for each current trip datapoint
-    - pathDiff::Float64             measure of difference in paths from previous step
+    - `pathDiff::Float64`           measure of difference in paths from previous step
     Must implement:
     - `updateState!` updates the state when new link-times are computed
 """
