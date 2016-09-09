@@ -37,8 +37,6 @@ export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 export ShowTimes
 
 include("network/networktypes.jl")
-include("network/stats/statistics.jl")
-include("network/stats/stats.jl")
 
 include("network/tools/edges.jl")
 include("network/tools/graphdep.jl")
@@ -50,6 +48,9 @@ include("network/synthetic/congestion.jl")
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
 include("network/iterative/greedy.jl")
+
+include("network/stats/statistics.jl")
+include("network/stats/stats.jl")
 
 include("network/solvers/lp.jl")
 include("network/solvers/socp.jl")
