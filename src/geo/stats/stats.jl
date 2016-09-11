@@ -6,10 +6,10 @@
 """
 `GeoStats` : abstract type that stores statistics about an algorithm run
 must implement attributes:
-- name : some information about the method used to generate this
-- sdict : dictionary mapping stat names to relevant values
+- `name` : some information about the method used to generate this
+- `sdict` : dictionary mapping stat names to relevant values
 must implement methods:
-- printStats : print a summary of statistics on the algorithm run
+- `printStats` : print a summary of statistics on the algorithm run
 """
 
 abstract GeoStats
@@ -27,7 +27,7 @@ type RealGeoStats <: GeoStats
 
 	"array containing upper bounds for time breakdown of stats"
 	timeBound::Array{Float64,1}
-	function RealGeoStats(name::AbstractString, gt::GeoTimings, ds::DataSplit, 
+	function RealGeoStats(name::AbstractString, gt::GeoTimings, ds::DataSplit,
 		timeBound::Vector{Float64} = [270., 450., 720., 900., 100_000.])
 		obj = new()
 		obj.name = name

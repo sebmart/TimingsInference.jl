@@ -12,14 +12,14 @@ type AvgRadius <: NetworkProjector
     network::Network
     trips::GeoData
 
-    "radius"
+    "radius, in meters"
     radius::Float64
     "projection KD-tree (contains rides)"
     tree::KDTree
     "precomputation (node->trip list)"
     nodeList::Vector{Vector{Tuple{Int,Int}}}
 
-    function AvgRadius(n::Network, r::Float64)
+    function AvgRadius(n::Network, r::Real)
         obj = new()
         obj.radius = r
         obj.network = n
@@ -42,12 +42,11 @@ end
 """
     `AvgRadius` extended constructor: also preloads the data
 """
-function AvgRadius(n::Network, r::Float64, trips::GeoData)
+function AvgRadius(n::Network, r::Real, trips::GeoData)
     ar = AvgRadius(n, r)
     preloadData!(ar, trips)
     return ar
 end
-AvgRadius(n::Network, r::Int, trips::GeoData) = AvgRadius(n, Float64(r), trips)
 
 """
     `preloadData!`: project all trips onto their nearest node

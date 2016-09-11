@@ -3,3 +3,5 @@
 *.jl.mem
 .ipynb_checkpoints
 *.DS_Store
+*.jld
+*.csv

@@ -42,6 +42,9 @@ type RealNetworkStats <: NetworkStats
 	end
 end
 
+RealNetworkStats(name, state::IterativeState, testingData) =
+RealNetworkStats(name, state.timings, state.data, testingData, state.pathDiff)
+
 """
 	`VirtNetworkStats`: instance of NetworkStats made for virtual data
 """

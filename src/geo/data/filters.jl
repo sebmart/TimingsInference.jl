@@ -46,9 +46,9 @@ tripDistance(t::GeoTrip) = distanceGeo(t.pLon,t.pLat,t.dLon,t.dLat)
     - for GeoData object: returns filtered GeoData object
 """
 function inTimeWindow(t::GeoTrip, startHour::Int, startMin::Int, endHour::Int, endMin::Int)
-    return ((startHour < Dates.hour(t.pTime) || 
-        (startHour == Dates.hour(t.pTime) && startMin <= Dates.minute(t.pTime))) && 
-    (endHour > Dates.hour(t.pTime) || 
+    return ((startHour < Dates.hour(t.pTime) ||
+        (startHour == Dates.hour(t.pTime) && startMin <= Dates.minute(t.pTime))) &&
+    (endHour > Dates.hour(t.pTime) ||
         (endHour   == Dates.hour(t.pTime) && endMin > Dates.minute(t.pTime))))
 end
 
@@ -61,7 +61,7 @@ function inTimeWindow(trips::GeoData, startHour::Int, startMin::Int, endHour::In
         mask[i] = inTimeWindow(t, startHour, startMin, endHour, endMin)
     end
     newTrips = trips[mask]
-    @printf("\r%2.f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
+    @printf("\r%.2f%% trips removed\n", 100*(1-length(newTrips)/length(trips)))
     return newTrips
 end
 
