@@ -49,7 +49,7 @@ function AvgRadius(n::Network, r::Real, trips::GeoData)
 end
 
 """
-    `preloadData!`: project all trips onto their nearest node
+    `preloadData!`: project all trips onto the node pairs within the given radius
 """
 function preloadData!(ar::AvgRadius, trips::GeoData)
     nTrips = length(trips)
