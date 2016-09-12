@@ -68,9 +68,9 @@ function lpTimes(s::IterativeState;
                 p = src(edge)
                 q = dst(edge)
                 @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                    <= velocityBound)
+                    <= velocityBound * (roads[i,j].distance + roads[p,q].distance) / 2)
                 @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                    >= -velocityBound)
+                    >= - velocityBound * (roads[i,j].distance + roads[p,q].distance) / 2)
             end
         end
     elseif continuityConstraint == "neighborhoods"
@@ -82,12 +82,19 @@ function lpTimes(s::IterativeState;
                 for nearEdge in findNearEdgesSameType(s.data.network, edge)
                     p=src(nearEdge); q=dst(nearEdge);
                     @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                        <= velocity[(i,j,p,q)])
+                        <= velocity[(i,j,p,q)] * (roads[i,j].distance + roads[p,q].distance) / 2)
                     @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                        >= -velocity[(i,j,p,q)])
+                        >= - velocity[(i,j,p,q)] * (roads[i,j].distance + roads[p,q].distance) / 2)
                 end
             end
-            vList = flatten([[(src(edge), dst(edge), src(nearEdge), dst(nearEdge)) for nearEdge in findNearEdgesSameType(s.data.network, edge)] for edge in cluster])
+            vList = flatten(
+            [
+                [
+                    (src(edge), dst(edge), src(nearEdge), dst(nearEdge))
+                     for nearEdge in findNearEdgesSameType(s.data.network, edge)
+                ]
+                 for edge in cluster
+            ])
             @constraint(m, sum{velocity[(i,j,p,q)], (i,j,p,q) in vList} <= length(vList) * velocityBound)
         end
     end
