@@ -22,8 +22,8 @@ export findNearEdges, findNearEdgesSameType, clusterEdges
 export centerCongestion, twoCongestions, squareCongestion, gradientCongestion
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!
-export lpTimes, fraclpTimes, mipTimes, heuristicTimes, socpTimes 
-export lpTimesCont, lpTimesContNbhd, socpTimesCont, socpTimesContNbhd
+export lpTimes, fraclpTimes, mipTimes, heuristicTimes, socpTimes
+export socpTimesCont, socpTimesContNbhd
 #geo data
 export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
 export inTimeWindow, onlyWeekdays, inPolygon, getPolygon, DataSplit, RandomSplit, LocSplit, trainSet
@@ -37,8 +37,6 @@ export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 export ShowTimes
 
 include("network/networktypes.jl")
-include("network/stats/statistics.jl")
-include("network/stats/stats.jl")
 
 include("network/tools/edges.jl")
 include("network/tools/graphdep.jl")
@@ -51,15 +49,14 @@ include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
 include("network/iterative/greedy.jl")
 
+include("network/stats/statistics.jl")
+include("network/stats/stats.jl")
+
 include("network/solvers/lp.jl")
 include("network/solvers/socp.jl")
 include("network/solvers/fraclp.jl")
 include("network/solvers/mip.jl")
 include("network/solvers/heuristic.jl")
-include("network/solvers/lpCo.jl")
-include("network/solvers/lpCoNbhd.jl")
-include("network/solvers/socpCo.jl")
-include("network/solvers/socpCoNbhd.jl")
 
 include("geo/trips.jl")
 include("geo/data/nyctaxi.jl")

@@ -6,11 +6,11 @@
 """
 `NetworkStats` : abstract type that stores statistics about an algorithm run
 must implement attributes:
-- name : some information about the method used to generate this
-- times : road times after each iteration.
-- sdict : dictionary mapping stat names to relevant values
+- `name` : some information about the method used to generate this
+- `times` : road times after each iteration.
+- `sdict` : dictionary mapping stat names to relevant values
 must implement methods:
-- printStats : print a summary of statistics on the algorithm run
+- `printStats` : print a summary of statistics on the algorithm run
 """
 
 abstract NetworkStats
@@ -20,7 +20,8 @@ function Base.show(io::IO, ns::NetworkStats)
 end
 
 """
-	`RealNetworkStats`: instance of NetworkStats, made for real trip data
+	`RealNetworkStats`: instance of NetworkStats, made for real trip data. This corresponds
+	to the case where true time information is not available.
 """
 type RealNetworkStats <: NetworkStats
 	name::AbstractString
@@ -40,6 +41,9 @@ type RealNetworkStats <: NetworkStats
 		return obj
 	end
 end
+
+RealNetworkStats(name, state::IterativeState, testingData) =
+RealNetworkStats(name, state.timings, state.data, testingData, state.pathDiff)
 
 """
 	`VirtNetworkStats`: instance of NetworkStats made for virtual data
@@ -67,22 +71,20 @@ type VirtNetworkStats <: NetworkStats
 	end
 end
 
+VirtNetworkStats(name, state::IterativeState, timingsRef) =
+VirtNetworkStats(name, state.timings, timingsRef, state.data, state.pathDiff)
+
 """
 	`printStats`: takes in networkstats object, prints out summary of stats
 """
 function printStats(so::NetworkStats)
 	println(so)
-	for statName in sort(collect(keys(so.sdict)))
-		if statName == "pathDiff"
-			print(statName, ":\t")
-			@printf("%.2f\n", so.sdict[statName])
-		elseif (contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log"))
-			print(statName, ":\t")
-			@printf("%.2f s\n", so.sdict[statName])
-		else
-			print(statName, ":\t")
-			@printf("%.2f%%\n", so.sdict[statName])
-		end
+	statNames = sort(collect(keys(so.sdict)))
+	firstColumnWidth = maximum([length(name) for name in statNames])
+
+	for statName in statNames
+		print(statName, " " ^ (2 + firstColumnWidth - length(statName)))
+		@printf("%.3f\n", so.sdict[statName])
 	end
 end
 

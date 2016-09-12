@@ -12,7 +12,7 @@
     - `timings::NetworkTimings`     the current timings solution
     - `trips::Vector{NetworkTrip}`  trips that we currently optimize on
     - `paths::Vector{Vector{Dict{Edge, Float64}}}` path subset for each current trip datapoint. Each trip has a vector of paths associated to it. Each path is represented as a dictionary mapping edges to weights. This ensures that the path representation is consistent for all types of methods (including graph reduction). In most cases, the weights are all ones and the representation is equivalent to a vector of edges.
-    - `pathDiff::Float64`           measure of difference in paths from previous step. Full definition is in paper. The lower it is, the closer we are to convergence. 
+    - `pathDiff::Float64`           measure of difference in paths from previous step. Full definition is in paper. The lower it is, the closer we are to convergence.
     Must implement:
     - `updateState!` updates the state when new link-times are computed
 """
@@ -34,23 +34,27 @@ NetworkTimings(it::IterativeState) = it.timings
 """
 function doIteration!(it::IterativeState; method::AbstractString="lp", velocityBound::Float64 = 0.1, solverArgs...)
     if method=="lp"
-        updateState!(it, lpTimes(it, solverArgs...))
+        updateState!(it, lpTimes(it; solverArgs...))
     elseif method=="fraclp"
-        updateState!(it, fraclpTimes(it, solverArgs...))
+        updateState!(it, fraclpTimes(it; solverArgs...))
     elseif method=="mip"
-        updateState!(it, mipTimes(it, solverArgs...))
+        updateState!(it, mipTimes(it; solverArgs...))
     elseif method == "heuristic"
         updateState!(it, heuristicTimes(it))
     elseif method == "socp"
-        updateState!(it, socpTimes(it, solverArgs...))
+        updateState!(it, socpTimes(it; solverArgs...))
     elseif method == "lpCo"
-        updateState!(it, lpTimesCont(it, velocityBound, solverArgs...))
+        updateState!(it, lpTimes(it, continuityConstraint="simple",
+                                     velocityBound=velocityBound; solverArgs...))
     elseif method == "lpCoNbhd"
-        updateState!(it, lpTimesContNbhd(it, velocityBound, solverArgs...))
+        updateState!(it, lpTimes(it, continuityConstraint="neighborhoods",
+                                     velocityBound=velocityBound; solverArgs...))
     elseif method == "socpCo"
-        updateState!(it, socpTimesCont(it, velocityBound, solverArgs...))
+        updateState!(it, socpTimes(it, continuityConstraint="simple",
+                                       velocityBound=velocityBound; solverArgs...))
     elseif method == "socpCoNbhd"
-        updateState!(it, socpTimesContNbhd(it, velocityBound, solverArgs...))
+        updateState!(it, socpTimes(it, continuityConstraint="neighborhoods",
+                                       velocityBound=velocityBound; solverArgs...))
     else
         error("Unknown optimizer")
     end

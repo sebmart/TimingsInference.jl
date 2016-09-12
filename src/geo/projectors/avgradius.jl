@@ -12,14 +12,14 @@ type AvgRadius <: NetworkProjector
     network::Network
     trips::GeoData
 
-    "radius"
+    "radius, in meters"
     radius::Float64
     "projection KD-tree (contains rides)"
     tree::KDTree
     "precomputation (node->trip list)"
     nodeList::Vector{Vector{Tuple{Int,Int}}}
 
-    function AvgRadius(n::Network, r::Float64)
+    function AvgRadius(n::Network, r::Real)
         obj = new()
         obj.radius = r
         obj.network = n
@@ -42,15 +42,14 @@ end
 """
     `AvgRadius` extended constructor: also preloads the data
 """
-function AvgRadius(n::Network, r::Float64, trips::GeoData)
+function AvgRadius(n::Network, r::Real, trips::GeoData)
     ar = AvgRadius(n, r)
     preloadData!(ar, trips)
     return ar
 end
-AvgRadius(n::Network, r::Int, trips::GeoData) = AvgRadius(n, Float64(r), trips)
 
 """
-    `preloadData!`: project all trips onto their nearest node
+    `preloadData!`: project all trips onto the node pairs within the given radius
 """
 function preloadData!(ar::AvgRadius, trips::GeoData)
     nTrips = length(trips)
@@ -89,17 +88,23 @@ function getNetworkTrips(ar::AvgRadius, tIds::AbstractArray{Int64,1})
     for id in tIds
         t = ar.trips[id]
         nodePairs = ar.nodeList[id]
+        # compute weight of trip = inverse of number of ODs (network trips) it will be added to
+        tripWeight = 1/length(nodePairs)
         for od in nodePairs
             #if same origin/destination
             if od[1] == od[2]
                 continue
             end
+            # check if network trip for this OD pair already exists
             if haskey(netTrips, od)
                 nt = netTrips[od]
-                time = nt.time * nt.weight/(nt.weight + 1.) + t.time/(nt.weight + 1.)
-                netTrips[od] = NetworkTrip(nt.orig, nt.dest, time, nt.weight+1., false)
+                # compute new time = weighted average of times
+                time = (nt.time * nt.weight + t.time * tripWeight)/(nt.weight + tripWeight)
+                # update time and wait
+                netTrips[od] = NetworkTrip(nt.orig, nt.dest, time, nt.weight + tripWeight, false)
             else
-                netTrips[od] = NetworkTrip((od[1], od[1], 0.), (od[2], od[2], 0.), t.time, 1., false)
+                # create new network trip
+                netTrips[od] = NetworkTrip((od[1], od[1], 0.), (od[2], od[2], 0.), t.time, tripWeight, false)
             end
         end
     end
