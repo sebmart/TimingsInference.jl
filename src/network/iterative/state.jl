@@ -55,6 +55,8 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", velocityB
     elseif method == "socpCoNbhd"
         updateState!(it, socpTimes(it, continuityConstraint="neighborhoods",
                                        velocityBound=velocityBound; solverArgs...))
+    elseif method == "gradient"
+        updateState!(it)
     else
         error("Unknown optimizer")
     end

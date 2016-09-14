@@ -22,7 +22,7 @@ export findNearEdges, findNearEdgesSameType, clusterEdges
 export centerCongestion, twoCongestions, squareCongestion, gradientCongestion
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!
-export lpTimes, fraclpTimes, mipTimes, heuristicTimes, socpTimes
+export lpTimes, fraclpTimes, mipTimes, heuristicTimes, socpTimes, GradientDescent
 export socpTimesCont, socpTimesContNbhd
 #geo data
 export GeoTrip, GeoData, fromNYCTaxiCSV, removeOutliers, isRegular,  tripDistance, stats
@@ -48,6 +48,7 @@ include("network/synthetic/congestion.jl")
 include("network/iterative/state.jl")
 include("network/iterative/limitedpaths.jl")
 include("network/iterative/greedy.jl")
+include("network/iterative/gradientdescent.jl")
 
 include("network/stats/statistics.jl")
 include("network/stats/stats.jl")
