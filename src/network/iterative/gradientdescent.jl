@@ -17,8 +17,8 @@ type GradientDescent <: IterativeState
 
     "number of trips used at each iteration"
     batchSize::Int64
-    "Default negative speed gradient, to counter-balance minimum-effect"
-    defaultGrad::Float64
+    "Continuity parameter"
+    continuity::Float64
     "learning rate : step = firststep/n^alpha. Should be <1 and >1/2"
     alpha::Float64
     firstStep::Float64
@@ -29,8 +29,10 @@ type GradientDescent <: IterativeState
     iter::Int64
     "step number"
     step::Int64
+    "For each edge, the edges that are considered its neighbors"
+    nearEdges::Dict{Tuple{Int,Int}, Set{Edge}}
 
-    function GradientDescent(data::NetworkData, startSolution::NetworkTimings; batchSize::Int = 1000, defaultGrad::Float64 = -1., alpha::Float64=0.6, firstStep::Float64=1., stepsPerIteration::Int=1)
+    function GradientDescent(data::NetworkData, startSolution::NetworkTimings; batchSize::Int = 1000, continuity::Float64 = 1., alpha::Float64=0.6, firstStep::Float64=1., stepsPerIteration::Int=1)
         gd = new()
         srand(1991)
         gd.trips = shuffle(data.trips)
@@ -41,13 +43,19 @@ type GradientDescent <: IterativeState
 
 
         gd.batchSize = batchSize
-        gd.defaultGrad = defaultGrad
+        gd.continuity = continuity
         gd.alpha = alpha
         gd.firstStep = firstStep
         gd.stepsPerIteration = stepsPerIteration
 
         gd.iter = 1
         gd.step = 1
+
+        # compute the set of "neighbor edges"
+        gd.nearEdges = Dict{Tuple{Int,Int}, Set{Edge}}()
+        for (o,d) in keys(data.network.roads)
+            gd.nearEdges[o,d] = findNearEdges(data.network, Edge(o,d))
+        end
         return gd
     end
 end
@@ -81,8 +89,27 @@ end
 """
 function gradientStep!(s::GradientDescent, currentTimes)
     gradient = Dict{Tuple{Int64, Int64}, Float64}()
-    for (o,d) in keys(s.data.network.roads)
+    roads = s.data.network.roads
+    # Initialize gradient with continuity contraints
+    for (o,d) in keys(roads)
         gradient[o,d] = 0.
+    end
+    for (o,d) in keys(roads)
+        if length(s.nearEdges[o,d]) > 0
+            neighborsMeanSpeed = 0.
+            for e in s.nearEdges[o,d]
+                neighborsMeanSpeed += currentTimes[src(e), dst(e)]/ roads[src(e), dst(e)].distance
+            end
+            neighborsMeanSpeed /= length(s.nearEdges[o,d])
+            diffToMean = currentTimes[o,d] - neighborsMeanSpeed
+            grad = - 2 * s.continuity * diffToMean
+            gradient[o,d] += grad/roads[o,d].distance
+
+            # also updates neighbor's gradient:
+            for e in s.nearEdges[o,d]
+                gradient[src(e),dst(e)] += - grad/(length(s.nearEdges[o,d])*roads[src(e), dst(e)].distance)
+            end
+        end
     end
     for i = 1:s.batchSize
         trip = s.data.trips[(i-1+(s.iter-1)*s.batchSize)%length(s.data.trips) + 1]
@@ -97,10 +124,7 @@ function gradientStep!(s::GradientDescent, currentTimes)
     end
 
     for ((o,d), g) in gradient
-        if g == 0
-            g = s.defaultGrad
-        end
-        currentTimes[o,d] = currentTimes[o,d] + gradient[o,d] * s.firstStep/(s.step^s.alpha)
+        currentTimes[o,d] = currentTimes[o,d] + g * s.firstStep/(s.step^s.alpha)
         (currentTimes[o,d] < s.data.minTimes[o,d]) && (currentTimes[o,d] = s.data.minTimes[o,d])
     end
     return
