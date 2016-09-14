@@ -30,7 +30,7 @@ type GradientDescent <: IterativeState
     "step number"
     step::Int64
 
-    function GradientDescent(data::NetworkData, startSolution::NetworkTimings; batchSize::Int = 1000, defaultGrad::Float64 = -1., alpha::Float64=0.6, firstStep::Float64=1., stepsPerIteration=1)
+    function GradientDescent(data::NetworkData, startSolution::NetworkTimings; batchSize::Int = 1000, defaultGrad::Float64 = -1., alpha::Float64=0.6, firstStep::Float64=1., stepsPerIteration::Int=1)
         gd = new()
         srand(1991)
         gd.trips = shuffle(data.trips)
@@ -64,7 +64,6 @@ GradientDescent(data::NetworkData, initTimes::AbstractArray{Float64, 2}; args...
 """
 function updateState!(s::GradientDescent)
     # update the timings and compute shortest paths
-    s.timings = NetworkTimings(s.data.network, times)
     newTimes = copy(s.timings.times)
 
     for i in 1:s.stepsPerIteration
@@ -72,6 +71,9 @@ function updateState!(s::GradientDescent)
         s.step +=1
     end
     s.iter += 1
+
+    s.timings = NetworkTimings(s.data.network, newTimes)
+
 end
 
 """
@@ -98,7 +100,7 @@ function gradientStep!(s::GradientDescent, currentTimes)
         if g == 0
             g = s.defaultGrad
         end
-        currentTimes[o,d] = currentTimes[o,d] + gradient[o,d] * s.firstStep/(s.iter^s.alpha)
+        currentTimes[o,d] = currentTimes[o,d] + gradient[o,d] * s.firstStep/(s.step^s.alpha)
         (currentTimes[o,d] < s.data.minTimes[o,d]) && (currentTimes[o,d] = s.data.minTimes[o,d])
     end
     return
