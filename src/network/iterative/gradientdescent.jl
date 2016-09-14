@@ -101,7 +101,7 @@ function gradientStep!(s::GradientDescent, currentTimes)
                 neighborsMeanSpeed += currentTimes[src(e), dst(e)]/ roads[src(e), dst(e)].distance
             end
             neighborsMeanSpeed /= length(s.nearEdges[o,d])
-            diffToMean = currentTimes[o,d] - neighborsMeanSpeed
+            diffToMean = currentTimes[o,d]/roads[o,d].distance - neighborsMeanSpeed
             grad = - 2 * s.continuity * diffToMean
             gradient[o,d] += grad/roads[o,d].distance
 
