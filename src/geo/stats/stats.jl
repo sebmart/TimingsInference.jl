@@ -32,15 +32,16 @@ type RealGeoStats <: GeoStats
 		obj = new()
 		obj.name = name
 		obj.timeBound = timeBound
+		times = Float64[estimateTime(gt, ID) for ID in eachindex(gt.trips)]
 		obj.sdict = Dict{AbstractString, Union{Float64, Array{Float64,1}}}(
-			"testTripsLogError" => 100 * testTripsLogError(gt, ds),
-			"trTripsLogError" => 100 * trTripsLogError(gt, ds),
-			"testTripsLogBias" => 100 * testTripsLogBias(gt, ds),
-			"trTripsLogBias" => 100 * trTripsLogBias(gt, ds),
-			"testTripsLogErrorbt" => 100 * testTripsLogErrorByTime(gt, ds, obj.timeBound),
-			"trTripsLogErrorbt" => 100 * trTripsLogErrorByTime(gt, ds, obj.timeBound),
-			"testTripsLogBiasbt" => 100 * testTripsLogBiasByTime(gt, ds, obj.timeBound),
-			"trTripsLogBiasbt" => 100 * trTripsLogBiasByTime(gt, ds, obj.timeBound))
+			"testTripsLogError" => 100 * testTripsLogError(gt, ds, times),
+			"trTripsLogError" => 100 * trTripsLogError(gt, ds, times),
+			"testTripsLogBias" => 100 * testTripsLogBias(gt, ds, times),
+			"trTripsLogBias" => 100 * trTripsLogBias(gt, ds, times),
+			"testTripsLogErrorbt" => 100 * testTripsLogErrorByTime(gt, ds, times, obj.timeBound),
+			"trTripsLogErrorbt" => 100 * trTripsLogErrorByTime(gt, ds, times, obj.timeBound),
+			"testTripsLogBiasbt" => 100 * testTripsLogBiasByTime(gt, ds, times, obj.timeBound),
+			"trTripsLogBiasbt" => 100 * trTripsLogBiasByTime(gt, ds, times, obj.timeBound))
 		return obj
 	end
 end
