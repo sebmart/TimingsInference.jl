@@ -54,7 +54,7 @@ type GradientDescent <: IterativeState
         # compute the set of "neighbor edges"
         gd.nearEdges = Dict{Tuple{Int,Int}, Set{Edge}}()
         for (o,d) in keys(data.network.roads)
-            gd.nearEdges[o,d] = findNearEdges(data.network, Edge(o,d))
+            gd.nearEdges[o,d] = findNearEdgesSameType(data.network, Edge(o,d))
         end
         return gd
     end
