@@ -57,6 +57,7 @@ include("network/solvers/socp.jl")
 include("network/solvers/fraclp.jl")
 include("network/solvers/mip.jl")
 include("network/solvers/heuristic.jl")
+include("network/solvers/roadtypespeed.jl")
 
 include("geo/trips.jl")
 include("geo/data/nyctaxi.jl")
