@@ -13,7 +13,7 @@
     - "simple": simple ϵ-based continuity
     - "neighborhoods": continuity constraint for each neighborhood
 """
-function constantSpeedTimes(s::IterativeState; args...)
+function constantSpeedTimes(s::IterativeState; uniqueSpeed::Bool = false, args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -48,6 +48,10 @@ function constantSpeedTimes(s::IterativeState; args...)
     @constraint(m, errorUpper[d=eachindex(tripData)],
         T[d] <= maxRatioError[d] * tripData[d].time
         )
+
+    if uniqueSpeed
+        @constraint(m, equalSpeeds[i=2:6], s[i] == s[1])
+    end
 
     # SOLVE SOCP
     status = solve(m)
