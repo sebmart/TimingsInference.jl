@@ -13,7 +13,7 @@
     - "simple": simple ϵ-based continuity
     - "neighborhoods": continuity constraint for each neighborhood
 """
-function constantSpeedTimes(s::IterativeState; uniqueSpeed::Bool = false, args...)
+function constantSpeedSolver(s::IterativeState; uniqueSpeed::Bool = false, args...)
     g = s.data.network.graph
     paths = s.paths
     tripData = s.trips
@@ -58,11 +58,15 @@ function constantSpeedTimes(s::IterativeState; uniqueSpeed::Bool = false, args..
 
     invSpeeds = getvalue(s)
 
+    return Float64[1/iSp for iSp in invSpeeds]
+end
+
+function constantSpeedTimes(s::IterativeState; uniqueSpeed::Bool = false, args...)
     # Export result as sparse matrix
+    speeds = constantSpeedSolver(s, uniqueSpeed=uniqueSpeed; args...)
     result = spzeros(Float64, nv(g), nv(g))
     for i in vertices(g), j in out_neighbors(g,i)
-        result[i,j] = invSpeeds[roads[i ,j].roadType] * roads[i, j].distance
+        result[i,j] = roads[i, j].distance / speeds[roads[i ,j].roadType]
     end
-
-    return result
+    return results
 end
