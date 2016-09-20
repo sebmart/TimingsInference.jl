@@ -5,6 +5,7 @@
 
 """
     `CompareTimes`: Network visualizer that compares a set of road times to a given baseline
+    `SPACE` and `B` to move through visualizations
 """
 type CompareTimes <: NetworkVisualizer
     # Mandatory attributes
@@ -22,8 +23,10 @@ type CompareTimes <: NetworkVisualizer
     basetimes::AbstractArray{Float64,2}
     "current times to show"
     currentTime::Int
-    "color palette"
-    palette::Vector{Colors.RGB{Float64}}
+    "color palette for slow roads"
+    slowpalette::Vector{Colors.RGB{Float64}}
+    "color palette for fast roads"
+    fastpalette::Vector{Colors.RGB{Float64}}
     "ratio to baseline corresponding to extremes of color palette"
     maxRatio::Float64
 
@@ -39,7 +42,8 @@ type CompareTimes <: NetworkVisualizer
         obj.newtimes = newtimes
         obj.basetimes = basetimes
         obj.maxRatio = maxRatio
-        obj.palette = Colors.colormap("Reds")
+        obj.slowpalette = Colors.colormap("Reds")
+        obj.fastpalette = Colors.colormap("Greens")
         obj.currentTime = 1
         return obj
     end
@@ -60,16 +64,17 @@ CompareTimes(n, AbstractArray{Float64,2}[t.times for t in timings], basetimes; a
 CompareTimes{T<:NetworkStats}(n::Network, stats::Vector{T}, basetimes; args...) =
 CompareTimes(n, AbstractArray{Float64,2}[s.times for s in stats], basetimes; args...)
 
-function visualInit(v::ShowTimes)
+function visualInit(v::CompareTimes)
     # Change the road colors to the first timing set
     updateRoadsColor(v)
+
     # change node color to black
     for n in v.nodes
         set_fillcolor(n, SFML.Color(0,0,0))
     end
 end
 
-function visualEvent(v::ShowTimes, event::Event)
+function visualEvent(v::CompareTimes, event::Event)
     if get_type(event) == EventType.KEY_PRESSED
         if get_key(event).key_code == KeyCode.SPACE
             #move forward
@@ -91,13 +96,20 @@ end
 """
     `updateRoadsColor`: update road color given timings
 """
-function updateRoadsColor(v::ShowTimes)
-    #change colors
+function updateRoadsColor(v::CompareTimes)
+    times = v.newtimes[v.currentTime]
     for ((o,d),r) in v.network.roads
-        s = r.distance/v.times[v.currentTime][o,d]
-        c = round(Int,max(0, min(1, (v.maxSpeed-s)/(v.maxSpeed-v.minSpeed))) * (length(v.palette)-1)) +1
-        # c = round(Int,(s-v.minSpeed)/(v.maxSpeed-v.minSpeed) * (length(v.palette)-1)) +1
-        color = v.palette[c]
-        set_fillcolor(v.roads[o,d],Color(round(Int,color.r*255),round(Int,255*color.g),round(Int,255*color.b)))
+        speedratio = times[o,d]/v.basetimes[o,d]
+        if speedratio >= 1
+            palette = v.fastpalette
+        else
+            palette = v.slowpalette
+            speedratio = 1/speedratio
+        end
+
+        paletteBin = round(Int, 1 + (length(palette)-1) * (min(speedratio,v.maxRatio) - 1) / (v.maxRatio - 1))
+        roadColor = palette[paletteBin]
+
+        set_fillcolor(v.roads[o,d],Color(round(Int,roadColor.r*255),round(Int,255*roadColor.g),round(Int,255*roadColor.b)))
     end
 end
