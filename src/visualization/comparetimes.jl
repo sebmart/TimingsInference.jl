@@ -78,7 +78,7 @@ function visualEvent(v::CompareTimes, event::Event)
     if get_type(event) == EventType.KEY_PRESSED
         if get_key(event).key_code == KeyCode.SPACE
             #move forward
-            if v.currentTime < length(v.times)
+            if v.currentTime < length(v.newtimes)
                 v.currentTime += 1
                 updateRoadsColor(v)
             end
@@ -101,9 +101,9 @@ function updateRoadsColor(v::CompareTimes)
     for ((o,d),r) in v.network.roads
         speedratio = times[o,d]/v.basetimes[o,d]
         if speedratio >= 1
-            palette = v.fastpalette
-        else
             palette = v.slowpalette
+        else
+            palette = v.fastpalette
             speedratio = 1/speedratio
         end
 
