@@ -43,6 +43,10 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", velocityB
         updateState!(it, heuristicTimes(it))
     elseif method == "socp"
         updateState!(it, socpTimes(it; solverArgs...))
+    elseif method == "roadtype"
+        updateState!(it, constantSpeedTimes(it; solverArgs...))
+    elseif method == "constant"
+        updateState!(it, constantSpeedTimes(it; uniqueSpeed=true, solverArgs...))
     elseif method == "lpCo"
         updateState!(it, lpTimes(it, continuityConstraint="simple",
                                      velocityBound=velocityBound; solverArgs...))
