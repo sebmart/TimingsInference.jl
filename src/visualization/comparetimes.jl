@@ -42,8 +42,8 @@ type CompareTimes <: NetworkVisualizer
         obj.newtimes = newtimes
         obj.basetimes = basetimes
         obj.maxRatio = maxRatio
-        obj.slowpalette = Colors.colormap("Reds")
-        obj.fastpalette = Colors.colormap("Greens")
+        obj.slowpalette = Colors.colormap("Reds")[1:70]
+        obj.fastpalette = Colors.colormap("Greens")[1:70]
         obj.currentTime = 1
         return obj
     end
