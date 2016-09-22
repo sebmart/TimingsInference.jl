@@ -17,8 +17,10 @@ function tripsLogError(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{Float6
 		else
 			timing = estimateTime(gt, ID)
 		end
-		error += abs(log(timing/gt.trips[ID].time))
-		counter += 1
+		if timing > 0.
+			error += abs(log(timing/gt.trips[ID].time))
+			counter += 1
+		end
 	end
 	error = error/counter
 	return error
@@ -33,6 +35,7 @@ testTripsLogError(gt::GeoTimings, ds::DataSplit, times::Vector{Float64}=Float64[
 """
 function tripsLogBias(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{Float64}=Float64[])
 	bias = 0.
+	counter = 0
 	precomputed = (length(times) == length(gt.trips))
 	for ID in IDlist
 		if precomputed
@@ -40,9 +43,12 @@ function tripsLogBias(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{Float64
 		else
 			timing = estimateTime(gt, ID)
 		end
-		bias += log(timing) - log(gt.trips[ID].time)
+		if timing > 0
+			bias += log(timing) - log(gt.trips[ID].time)
+			counter += 1
+		end
 	end
-	bias = bias / length(IDlist)
+	bias = bias / counter
 	return bias
 end
 testTripsLogBias(gt::GeoTimings, ds::DataSplit, times::Vector{Float64}=Float64[]) = tripsLogBias(gt, testSet(ds), times)
@@ -67,8 +73,10 @@ function tripsLogErrorByTime(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{
 		while timing > timeBound[idx] && idx < length(timeBound)
 			idx += 1
 		end
-		error[idx] += abs(log(timing/gt.trips[ID].time))
-		numInBin[idx] += 1
+		if timing > 0
+			error[idx] += abs(log(timing/gt.trips[ID].time))
+			numInBin[idx] += 1
+		end
 	end
 	error = error ./ numInBin
 	return error
@@ -95,8 +103,10 @@ function tripsLogBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{F
 		while timing > timeBound[idx] && idx < length(timeBound)
 			idx += 1
 		end
-		error[idx] += (log(timing) - log(gt.trips[ID].time))
-		numInBin[idx] += 1
+		if timing > 0
+			error[idx] += (log(timing) - log(gt.trips[ID].time))
+			numInBin[idx] += 1
+		end
 	end
 	error = error ./ numInBin
 	return error

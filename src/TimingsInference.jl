@@ -37,7 +37,7 @@ export NetworkProjector, NearestNode, AvgRadius, NearestRoad
 #geo-timings
 export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 #visualization
-export ShowTimes
+export ShowTimes, CompareTimes
 
 include("network/networktypes.jl")
 
@@ -84,5 +84,6 @@ include("geo/timings/fromnetwork.jl")
 include("geo/timings/knn.jl")
 
 include("visualization/showtimes.jl")
+include("visualization/comparetimes.jl")
 
 end # module

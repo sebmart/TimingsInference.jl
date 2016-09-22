@@ -64,9 +64,9 @@ end
 function constantSpeedTimes(s::IterativeState; uniqueSpeed::Bool = false, args...)
     # Export result as sparse matrix
     speeds = constantSpeedSolver(s, uniqueSpeed=uniqueSpeed; args...)
-    result = spzeros(Float64, nv(g), nv(g))
-    for i in vertices(g), j in out_neighbors(g,i)
-        result[i,j] = roads[i, j].distance / speeds[roads[i ,j].roadType]
+    result = spzeros(Float64, nv(s.data.network.graph), nv(s.data.network.graph))
+    for i in vertices(s.data.network.graph), j in out_neighbors(s.data.network.graph,i)
+        result[i,j] = s.data.network.roads[i, j].distance / speeds[s.data.network.roads[i ,j].roadType]
     end
-    return results
+    return result
 end
