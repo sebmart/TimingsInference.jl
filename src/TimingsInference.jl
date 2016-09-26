@@ -8,15 +8,15 @@ module TimingsInference
 using RoutingNetworks, JuMP, Gurobi, Mosek, MathProgBase, LightGraphs, Distributions, SFML
 using Base.Dates, NearestNeighbors
 using PyPlot
+using Colors
 
-import Colors
 import RoutingNetworks: visualInit, visualEvent, inPolygon
 
 
 #network
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, randomTimings, maxSpeedTimes, uniformTimes, randomTimes
-export noisyVirtualData, perfectVirtualData
+export noisyVirtualData, perfectVirtualData, simpleVirtualData
 export findNetworkDependence, simplifyPath, evaluateTimes, getFullPathEdges
 export findNearEdges, findNearEdgesSameType, clusterEdges
 export centerCongestion, twoCongestions, squareCongestion, gradientCongestion

@@ -42,8 +42,12 @@ type CompareTimes <: NetworkVisualizer
         obj.newtimes = newtimes
         obj.basetimes = basetimes
         obj.maxRatio = maxRatio
-        obj.slowpalette = Colors.colormap("Reds")[1:70]
-        obj.fastpalette = Colors.colormap("Greens")[1:70]
+
+        slow = HSL(0,1.,.3)
+        normal = HSL(60, .5, 0.8)
+        fast =  HSL(120,0.7,.5)
+        obj.slowpalette = linspace(normal, slow)
+        obj.fastpalette = linspace(normal, fast)
         obj.currentTime = 1
         return obj
     end
@@ -110,6 +114,6 @@ function updateRoadsColor(v::CompareTimes)
         paletteBin = round(Int, 1 + (length(palette)-1) * (min(speedratio,v.maxRatio) - 1) / (v.maxRatio - 1))
         roadColor = palette[paletteBin]
 
-        set_fillcolor(v.roads[o,d],Color(round(Int,roadColor.r*255),round(Int,255*roadColor.g),round(Int,255*roadColor.b)))
+        set_fillcolor(v.roads[o,d],SFML.Color(round(Int,roadColor.r*255),round(Int,255*roadColor.g),round(Int,255*roadColor.b)))
     end
 end

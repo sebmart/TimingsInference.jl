@@ -38,6 +38,43 @@ function noisyVirtualData(t::NetworkTimings, density::Float64=0.2, frequency::Fl
 end
 
 """
+    `simpleVirtualData`
+    generates random rides in a network, one per selected OD, with a given expected
+    multiplicative log error.
+    parameters:
+    - `t` is the timings object representing timings expectation
+    - N is the number of OD that we will generate a ride on.
+    - logVariance is the multiplicative variance of the data from the truth.
+
+    rides must be longer than a 30s to be taken into account
+
+"""
+function simpleVirtualData(t::NetworkTimings, N::Int, logStd::Float64)
+    nNodes = nv(t.network.graph)
+    allRides = vec([(o,d) for o in 1:nNodes, d in 1:(nNodes -1)])
+    srand()
+    shuffle!(allRides)
+    selectedRides = allRides[1:N]
+    for (i, (o,d)) in enumerate(selectedRides)
+        if o == d
+            selectedRides[i] = (o, nNodes)
+        end
+    end
+
+    tt = getPathTimes(t)
+
+    trips = NetworkTrip[]
+    # subset rides
+
+    for (o,d) in selectedRides
+        realLogTime = log(tt[o,d])
+        noisyLogTime = rand(Normal(realLogTime, logStd))
+        push!(trips, NetworkTrip((o,o,0.),(d,d,0.),exp(noisyLogTime),1.,false))
+    end
+    return NetworkData(t.network,trips, maxSpeedTimes(t.network))
+end
+
+"""
     `perfectVirtualData`
     generates rides in a network
     parameters:

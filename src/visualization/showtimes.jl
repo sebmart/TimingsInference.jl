@@ -104,6 +104,6 @@ function updateRoadsColor(v::ShowTimes)
         c = round(Int,max(0, min(1, (v.maxSpeed-s)/(v.maxSpeed-v.minSpeed))) * (length(v.palette)-1)) +1
         # c = round(Int,(s-v.minSpeed)/(v.maxSpeed-v.minSpeed) * (length(v.palette)-1)) +1
         color = v.palette[c]
-        set_fillcolor(v.roads[o,d],Color(round(Int,color.r*255),round(Int,255*color.g),round(Int,255*color.b)))
+        set_fillcolor(v.roads[o,d],SFML.Color(round(Int,color.r*255),round(Int,255*color.g),round(Int,255*color.b)))
     end
 end
