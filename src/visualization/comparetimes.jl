@@ -29,7 +29,11 @@ type CompareTimes <: NetworkVisualizer
     withrouting::Bool
 
     "contructor"
-    function CompareTimes(n::Network, times::Vector{AbstractArray{Float64,2}}, routing::Vector{NetworkTimings}=NetworkTimings[]; colors::RoutingColors=SpeedColors(n, times[1]))
+    function CompareTimes(n::Network,
+                          times::Vector{AbstractArray{Float64,2}},
+                          routing::Vector{NetworkTimings}=NetworkTimings[];
+                          colors::RoutingColors=SpeedColors(n, times[1]),
+                          computePaths::Bool = false)
         if length(times) == 0
             error("Need at least one set of road times")
         end
@@ -38,6 +42,9 @@ type CompareTimes <: NetworkVisualizer
         obj.times = times
         obj.routing = routing
         obj.colors = colors
+        if computePaths && isempty(obj.routing)
+            obj.routing = NetworkTimings[NetworkTimings(n, t) for t in times]
+        end
         return obj
     end
 end
