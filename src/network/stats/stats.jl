@@ -58,7 +58,7 @@ type VirtNetworkStats <: NetworkStats
 		obj.times = timingsNew.times
 		obj.name = name
 		obj.sdict = Dict{AbstractString, Float64}(
-			"tripsLogError" => 100 * nwTripsLogError(timingsNew, data),
+			"tripsLogError" => 100 * nwTripsLogError(timingsRef, data),
 			"tripsLogBias" => 100 * nwTripsLogBias(timingsNew, data),
 			"tripsRealLogError" => 100 * nwTripsRealLogError(timingsRef, timingsNew, data),
 			"tripsRealLogBias" => 100 * nwTripsRealLogBias(timingsRef, timingsNew, data),

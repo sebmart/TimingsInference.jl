@@ -8,15 +8,15 @@ module TimingsInference
 using RoutingNetworks, JuMP, Gurobi, Mosek, MathProgBase, LightGraphs, Distributions, SFML
 using Base.Dates, NearestNeighbors
 using PyPlot
+using Colors
 
-import Colors
-import RoutingNetworks: visualInit, visualEvent, inPolygon
+import RoutingNetworks: visualInit, visualEvent, visualStartUpdate, visualEndUpdate, visualRedraw, inPolygon
 
 
 #network
 export NetworkTimings, NetworkTrip, NetworkData
 export roadTypeTimings, randomTimings, maxSpeedTimes, uniformTimes, randomTimes
-export noisyVirtualData, perfectVirtualData
+export noisyVirtualData, perfectVirtualData, simpleVirtualData
 export findNetworkDependence, simplifyPath, evaluateTimes, getFullPathEdges
 export findNearEdges, findNearEdgesSameType, clusterEdges
 export centerCongestion, twoCongestions, squareCongestion, gradientCongestion
@@ -37,7 +37,7 @@ export NetworkProjector, NearestNode, AvgRadius, NearestRoad
 #geo-timings
 export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 #visualization
-export ShowTimes, CompareTimes
+export CompareTimes
 
 include("network/networktypes.jl")
 
@@ -83,7 +83,6 @@ include("geo/stats/stats.jl")
 include("geo/timings/fromnetwork.jl")
 include("geo/timings/knn.jl")
 
-include("visualization/showtimes.jl")
 include("visualization/comparetimes.jl")
 
 end # module

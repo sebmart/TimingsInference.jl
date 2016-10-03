@@ -1,11 +1,12 @@
 ###################################################
-## showtimes.jl
-## Compare a set of road times to a reference one.
+## comparetimes.jl
+## Add the possibility to compare several timings situations
 ###################################################
 
 """
     `CompareTimes`: Network visualizer that compares a set of road times to a given baseline
     `SPACE` and `B` to move through visualizations
+    If given NetworkTimings, triggers path visualization.
 """
 type CompareTimes <: NetworkVisualizer
     # Mandatory attributes
@@ -14,102 +15,89 @@ type CompareTimes <: NetworkVisualizer
     nodes::Vector{CircleShape}
     roads::Dict{Tuple{Int,Int},Line}
     nodeRadius::Float64
-    nodesToView::Vector{Node}
+    colors::VizColors
 
-
+    "the underlying visualizer"
+    viz::NetworkVisualizer
     "list of times to show"
-    newtimes::Vector{AbstractArray{Float64,2}}
-    "current times values"
-    basetimes::AbstractArray{Float64,2}
+    times::Vector{AbstractArray{Float64,2}}
+    "routing information"
+    routing::Vector{NetworkTimings}
     "current times to show"
     currentTime::Int
-    "color palette for slow roads"
-    slowpalette::Vector{Colors.RGB{Float64}}
-    "color palette for fast roads"
-    fastpalette::Vector{Colors.RGB{Float64}}
-    "ratio to baseline corresponding to extremes of color palette"
-    maxRatio::Float64
+    "if we use a routing visualizer"
+    withrouting::Bool
 
     "contructor"
-    function CompareTimes(n::Network, newtimes::Vector{AbstractArray{Float64,2}}, basetimes; maxRatio::Float64=3.)
-        if length(newtimes) == 0
+    function CompareTimes(n::Network,
+                          times::Vector{AbstractArray{Float64,2}},
+                          routing::Vector{NetworkTimings}=NetworkTimings[];
+                          colors::RoutingColors=SpeedColors(n, times[1]),
+                          computePaths::Bool = false)
+        if length(times) == 0
             error("Need at least one set of road times")
         end
         obj = new()
         obj.network  = n
-        obj.nodesToView = n.nodes
-
-        obj.newtimes = newtimes
-        obj.basetimes = basetimes
-        obj.maxRatio = maxRatio
-        obj.slowpalette = Colors.colormap("Reds")[1:70]
-        obj.fastpalette = Colors.colormap("Greens")[1:70]
-        obj.currentTime = 1
+        obj.times = times
+        obj.routing = routing
+        obj.colors = colors
+        if computePaths && isempty(obj.routing)
+            obj.routing = NetworkTimings[NetworkTimings(n, t) for t in times]
+        end
         return obj
     end
 end
 
-CompareTimes(n::Network,time::AbstractArray{Float64,2}, basetimes; args...) =
-CompareTimes(n,AbstractArray{Float64,2}[time], basetimes; args...)
+CompareTimes{T<:NetworkStats}(n::Network, stats::Vector{T}; args...) =
+CompareTimes(n, AbstractArray{Float64,2}[s.times for s in stats]; args...)
 
-CompareTimes(n::Network,timing::NetworkTimings, basetimes; args...) =
-CompareTimes(n, AbstractArray{Float64,2}[timing.times], basetimes; args...)
-
-CompareTimes(n::Network,stats::NetworkStats, basetimes; args...) =
-CompareTimes(n, stats.times, basetimes; args...)
-
-CompareTimes{T<:NetworkTimings}(n::Network,timings::Vector{T}, basetimes; args...) =
-CompareTimes(n, AbstractArray{Float64,2}[t.times for t in timings], basetimes; args...)
-
-CompareTimes{T<:NetworkStats}(n::Network, stats::Vector{T}, basetimes; args...) =
-CompareTimes(n, AbstractArray{Float64,2}[s.times for s in stats], basetimes; args...)
+CompareTimes(n::Network, routing::Vector{NetworkTimings}; args...) =
+CompareTimes(n, AbstractArray{Float64,2}[r.times for r in routing], routing; args...)
 
 function visualInit(v::CompareTimes)
-    # Change the road colors to the first timing set
-    updateRoadsColor(v)
+    v.withrouting = (length(v.routing) == length(v.times))
 
-    # change node color to black
-    for n in v.nodes
-        set_fillcolor(n, SFML.Color(0,0,0))
+    if v.withrouting
+        v.viz = RoutingViz(v.routing[1], colors=v.colors)
+    else
+        v.viz = NetworkViz(v.network, colors=v.colors)
     end
+    v.currentTime = 1
+    v.colors.roadtimes = v.times[v.currentTime]
+    copyVisualData(v,v.viz)
+    visualInit(v.viz)
 end
+
+visualStartUpdate(v::CompareTimes, frameTime::Float64) = visualStartUpdate(v.viz, frameTime)
+
+visualEndUpdate(v::CompareTimes, frameTime::Float64) = visualEndUpdate(v.viz, frameTime)
+
+visualRedraw(v::CompareTimes) = visualRedraw(v.viz)
+
 
 function visualEvent(v::CompareTimes, event::Event)
-    if get_type(event) == EventType.KEY_PRESSED
-        if get_key(event).key_code == KeyCode.SPACE
-            #move forward
-            if v.currentTime < length(v.newtimes)
-                v.currentTime += 1
-                updateRoadsColor(v)
+    if get_type(event) == EventType.KEY_PRESSED && get_key(event).key_code == KeyCode.SPACE
+        #move forward
+        if v.currentTime < length(v.times)
+            v.currentTime += 1
+            if v.withrouting
+                v.viz.routing = v.routing[v.currentTime]
             end
-        elseif get_key(event).key_code == KeyCode.B
-            #move backward
-            if v.currentTime > 1
-                v.currentTime -= 1
-                updateRoadsColor(v)
+            v.colors.roadtimes = v.times[v.currentTime]
+            redraw!(v)
+        end
+    elseif get_type(event) == EventType.KEY_PRESSED && get_key(event).key_code == KeyCode.B
+        #move backward
+        if v.currentTime > 1
+            v.currentTime -= 1
+            if v.withrouting
+                v.viz.routing = v.routing[v.currentTime]
             end
+            v.colors.roadtimes = v.times[v.currentTime]
+            redraw!(v)
         end
-    end
-end
-
-
-"""
-    `updateRoadsColor`: update road color given timings
-"""
-function updateRoadsColor(v::CompareTimes)
-    times = v.newtimes[v.currentTime]
-    for ((o,d),r) in v.network.roads
-        speedratio = times[o,d]/v.basetimes[o,d]
-        if speedratio >= 1
-            palette = v.slowpalette
-        else
-            palette = v.fastpalette
-            speedratio = 1/speedratio
-        end
-
-        paletteBin = round(Int, 1 + (length(palette)-1) * (min(speedratio,v.maxRatio) - 1) / (v.maxRatio - 1))
-        roadColor = palette[paletteBin]
-
-        set_fillcolor(v.roads[o,d],Color(round(Int,roadColor.r*255),round(Int,255*roadColor.g),round(Int,255*roadColor.b)))
+    else
+        visualEvent(v.viz, event)
     end
 end
