@@ -10,7 +10,7 @@ using Base.Dates, NearestNeighbors
 using PyPlot
 using Colors
 
-import RoutingNetworks: visualInit, visualEvent, inPolygon
+import RoutingNetworks: visualInit, visualEvent, visualStartUpdate, visualRedraw, inPolygon
 
 
 #network
@@ -37,7 +37,7 @@ export NetworkProjector, NearestNode, AvgRadius, NearestRoad
 #geo-timings
 export GeoTimings, TimingsFromNetwork, estimateTime, KnnTimings
 #visualization
-export ShowTimes, CompareTimes
+export CompareTimes
 
 include("network/networktypes.jl")
 
@@ -83,7 +83,6 @@ include("geo/stats/stats.jl")
 include("geo/timings/fromnetwork.jl")
 include("geo/timings/knn.jl")
 
-include("visualization/showtimes.jl")
 include("visualization/comparetimes.jl")
 
 end # module
