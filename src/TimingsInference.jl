@@ -10,7 +10,7 @@ using Base.Dates, NearestNeighbors
 using PyPlot
 using Colors
 
-import RoutingNetworks: visualInit, visualEvent, visualStartUpdate, visualRedraw, inPolygon
+import RoutingNetworks: visualInit, visualEvent, visualStartUpdate, visualEndUpdate, visualRedraw, inPolygon
 
 
 #network

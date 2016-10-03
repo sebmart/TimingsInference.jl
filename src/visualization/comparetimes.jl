@@ -69,9 +69,9 @@ function visualInit(v::CompareTimes)
     visualInit(v.viz)
 end
 
-function visualStartUpdate(v::CompareTimes,frameTime::Float64)
-    visualStartUpdate(v.viz,frameTime)
-end
+visualStartUpdate(v::CompareTimes, frameTime::Float64) = visualStartUpdate(v.viz, frameTime)
+
+visualEndUpdate(v::CompareTimes, frameTime::Float64) = visualEndUpdate(v.viz, frameTime)
 
 visualRedraw(v::CompareTimes) = visualRedraw(v.viz)
 
