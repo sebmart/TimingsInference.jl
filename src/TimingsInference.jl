@@ -5,13 +5,14 @@
 
 module TimingsInference
 
-using RoutingNetworks, JuMP, Gurobi, Mosek, MathProgBase, LightGraphs, Distributions, SFML
-using Base.Dates, NearestNeighbors
-using PyPlot
-using Colors
+using RoutingNetworks, LightGraphs, SFML, NearestNeighbors
+using Distributions, DataStructures
+using JuMP, Gurobi, Mosek, MathProgBase
+using Base.Dates
+using PyPlot, Colors
 
 import RoutingNetworks: visualInit, visualEvent, visualStartUpdate, visualEndUpdate, visualRedraw, inPolygon
-
+import Base.<
 
 #network
 export NetworkTimings, NetworkTrip, NetworkData
@@ -21,6 +22,7 @@ export findNetworkDependence, simplifyPath, evaluateTimes, getFullPathEdges
 export findNearEdges, findNearEdgesSameType, clusterEdges
 export centerCongestion, twoCongestions, squareCongestion, gradientCongestion
 export typicalSpeeds
+export yenKSP
 
 #iterative
 export IterativeState, doIteration!, LimitedPaths, heuristicPaths, GreedyEdges, updateState!
@@ -63,6 +65,7 @@ include("network/solvers/heuristic.jl")
 include("network/solvers/roadtypespeed.jl")
 
 include("network/tools/speeds.jl")
+include("network/tools/yenksp.jl")
 
 
 include("geo/trips.jl")

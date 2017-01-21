@@ -137,3 +137,15 @@ function getFullPathEdges(t::NetworkTrip, timings::NetworkTimings)
     end
     return sp
 end
+
+"""
+	`toPathEdgesDict`: given a trip and path (list of nodes), convert to (edge, weight) dictionary
+"""
+function toPathEdgesDict(t::NetworkTrip, path::Vector{Int})
+	pathEdges = [Edge(path[i], path[i+1]) => 1. for i = 1:(length(path)-1)]
+	if t.roadProj
+        pathEdges[Edge(t.orig[1], t.orig[2])] = t.orig[3]
+        pathEdges[Edge(t.dest[1], t.dest[2])] = t.dest[3]
+    end
+	return pathEdges
+end
