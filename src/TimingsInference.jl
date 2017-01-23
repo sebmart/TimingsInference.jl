@@ -63,6 +63,7 @@ include("network/solvers/fraclp.jl")
 include("network/solvers/mip.jl")
 include("network/solvers/heuristic.jl")
 include("network/solvers/roadtypespeed.jl")
+include("network/solvers/pathchoice.jl")
 
 include("network/tools/speeds.jl")
 include("network/tools/yenksp.jl")

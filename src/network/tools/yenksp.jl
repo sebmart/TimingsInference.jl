@@ -64,12 +64,10 @@ function yenKSP(timings::NetworkTimings, t::NetworkTrip, k::Int)
             end
             d = dijkstra_shortest_paths(timings.network.graph, node, times)
             if d.dists[dest] < Inf
-                println(getPathFromParents(d.parents, node, dest))
                 append!(rootPath, getPathFromParents(d.parents, node, dest)[2:end])
                 if !(rootPath in pathList)
                     push!(H, HeapEntry(rootPath, pathTime(timings, rootPath)))
                 end
-                println(H)
             end
         end
         if length(H) == 0
@@ -80,7 +78,6 @@ function yenKSP(timings::NetworkTimings, t::NetworkTrip, k::Int)
                 newPathEntry = pop!(H)
             end
             push!(pathList, newPathEntry.path)
-            println(pathList)
         end
     end
     pathEdgesList = [toPathEdgesDict(t, path) for path in pathList]
