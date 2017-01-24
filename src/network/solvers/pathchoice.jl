@@ -17,7 +17,7 @@ function pathChoice(s::IterativeState; args...)
 
     beta1 = 0.275 / 60.
     beta2 = 1.563 / 1609.344
-    lambda = 0.1
+    lambda = 0.001
     DROP = 0.01
     BOOST = 10.
     oldObjective = 0
@@ -77,10 +77,11 @@ function pathChoice(s::IterativeState; args...)
                 J[i,k] = 1/S[i] ^ 2 * sum(
                                           [(p[i,m] * S[i] * get(paths[i][m], Edge(src, dst), 0) 
                                             * (1 - beta1 * theta * g[i,m])) for m=1:s.pathsPerTrip] 
-                                          + g[i,:] .* p[i,:] * dSdt[i,k]
+                                          - g[i,:] .* p[i,:] * dSdt[i,k]
                                           )
             end
-            J[i,end] = dot(p[i,:], beta1 * g[i,:] + beta2 * d[i,:] + dSdt[i,end]/S[i])
+            J[i,end] = - dot(p[i,:] .* g[i,:]/S[i], 
+                             beta1 * g[i,:] + beta2 * d[i,:] + dSdt[i,end]/S[i])
         end
         println("Solving LM")
         while true
@@ -92,7 +93,7 @@ function pathChoice(s::IterativeState; args...)
                 end
             end
             updateDir = (J'*J + lambda * diagm(vec(sumabs2(J,1)))) \ (J'*r)
-            println(J'*r)
+            println(updateDir)
             sleep(1)
             # update parameters
             for (k, (src, dst)) in enumerate(keys(roads))
@@ -112,9 +113,7 @@ function pathChoice(s::IterativeState; args...)
                 println("Reselecting lambda")
                 lambda = lambda * BOOST     # need steeper descent
             end
-            break
         end
-        break
     end
     println("θ = ", theta)
     return t
