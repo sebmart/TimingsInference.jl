@@ -5,13 +5,12 @@
 
 
 """
-    socpTimes :
-    optimize travel times to minimize L1 error from data with given paths
+    constantSpeedSolver :
+    optimize travel times to minimize SOCP error from data with given paths
 
-    `continuityConstraint` can be
-    - "none" : no constraint
-    - "simple": simple ϵ-based continuity
-    - "neighborhoods": continuity constraint for each neighborhood
+    `uniqueSpeed` can be
+    - false: one speed per roadType
+    - true : one speed for everyone
 """
 function constantSpeedSolver(s::IterativeState; uniqueSpeed::Bool = false, args...)
     g = s.data.network.graph
