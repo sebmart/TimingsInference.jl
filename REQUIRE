@@ -1,0 +1,12 @@
+julia 0.5
+RoutingNetworks
+JuMP
+Gurobi
+Mosek
+MathProgBase
+LightGraphs
+Distributions
+SFML
+NearestNeighbors
+PyPlot
+Colors
