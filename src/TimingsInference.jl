@@ -16,7 +16,6 @@ import Base.<
 
 #network
 export NetworkTimings, NetworkTrip, NetworkData
-export roadTypeTimings, randomTimings, maxSpeedTimes, uniformTimes, randomTimes
 export noisyVirtualData, perfectVirtualData, simpleVirtualData
 export findNetworkDependence, simplifyPath, evaluateTimes, getFullPathEdges
 export findNearEdges, findNearEdgesSameType, clusterEdges
@@ -47,7 +46,6 @@ include("network/tools/edges.jl")
 include("network/tools/graphdep.jl")
 
 include("network/synthetic/virtualdata.jl")
-include("network/synthetic/virtualtimings.jl")
 include("network/synthetic/congestion.jl")
 
 include("network/iterative/state.jl")
