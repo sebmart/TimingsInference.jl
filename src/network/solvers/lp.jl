@@ -45,21 +45,21 @@ function lpTimes(s::IterativeState;
     end
 
     # OBJECTIVE
-    @objective(m, Min, sum{ tripData[d].weight/tripData[d].time * epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum(tripData[d].weight/tripData[d].time * epsilon[d] for d in eachindex(tripData)))
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @constraint(m, epsLower[d=eachindex(tripData)],
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - tripData[d].time >=
+        sum(paths[d][1][edge] * t[src(edge), dst(edge)] for edge in keys(paths[d][1])) - tripData[d].time >=
         - epsilon[d])
     @constraint(m, epsUpper[d=eachindex(tripData)],
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - tripData[d].time <=
+        sum(paths[d][1][edge] * t[src(edge), dst(edge)] for edge in keys(paths[d][1])) - tripData[d].time <=
         epsilon[d])
 
     # inequality constraints
     @constraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
+        sum(paths[d][p+1][edge] * t[src(edge), dst(edge)] for edge in keys(paths[d][p+1])) >=
+        sum(paths[d][1][edge] * t[src(edge), dst(edge)] for edge in keys(paths[d][1]))
         )
 
     if continuityConstraint == "simple"
@@ -95,7 +95,7 @@ function lpTimes(s::IterativeState;
                 ]
                  for edge in cluster
             ])
-            @constraint(m, sum{velocity[(i,j,p,q)], (i,j,p,q) in vList} <= length(vList) * velocityBound)
+            @constraint(m, sum(velocity[(i,j,p,q)] for (i,j,p,q) in vList) <= length(vList) * velocityBound)
         end
     end
 

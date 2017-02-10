@@ -6,7 +6,7 @@
 """
 	`findNetworkDependence`: express independent edges as sum of dependent edges
 	Args:
-		n 			: 	the network 
+		n 			: 	the network
 		independent : 	list of independent edges
 		dependent   : 	list of the remaining (dependent) edges
 		numDeps		: 	optional, sparsity parameter
@@ -18,7 +18,7 @@
 function findNetworkDependence(n::Network, independent::Vector{Edge}, dependent::Vector{Edge}; numDeps::Int = 3)
 	# initialize independent edges
 	edgeList = collect(edges(n.graph))
-	edgeMap = [edgeList[i] => i for i = eachindex(edgeList)]
+	edgeMap = Dict(edgeList[i] => i for i = eachindex(edgeList))
 	dep = zeros(length(independent), length(edgeList))
 	dependencies = spzeros(length(independent), length(edgeList))
 	#special case of all independent edges
@@ -152,7 +152,7 @@ function updateIndependentEdges(paths::Vector{Vector{Dict{Edge, Float64}}}, inde
 	if numToRemove == 0
 		return independent, dependent
 	end
-	indices = [independent[i] => i for i=eachindex(independent)]
+	indices = Dict(independent[i] => i for i=eachindex(independent))
 	totalWeight = zeros(length(independent))
 	for pathVector in paths, path in pathVector, edge in keys(path)
 		totalWeight[indices[edge]] += path[edge]

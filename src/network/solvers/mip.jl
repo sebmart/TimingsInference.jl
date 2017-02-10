@@ -14,7 +14,7 @@ function mipTimes(s::IterativeState; args...)
 
     # Big M = max time of paths -- right now: 5km/h speed
     minTimes = uniformTimes(s.data.network, 5.)
-    M = Float64[maximum([pathTime(minTimes,p) for p in l]) for l in paths]
+    M = Float64[maximum(pathTime(minTimes,p) for p in l) for l in paths]
 
 
     #Create the model (will be changed to avoid hard-coded parameters)
@@ -33,7 +33,7 @@ function mipTimes(s::IterativeState; args...)
 
 
     # OBJECTIVE
-    @objective(m, Min, sum{ tripData[d].weight/tripData[d].time * epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum(tripData[d].weight/tripData[d].time * epsilon[d] for d in eachindex(tripData)))
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
@@ -42,14 +42,14 @@ function mipTimes(s::IterativeState; args...)
 
     # inequality constraints
     @constraint(m, inequalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
-        sum{paths[d][p][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p])} >= T[d] )
+        sum(paths[d][p][edge] * t[src(edge), dst(edge)] for edge in keys(paths[d][p])) >= T[d] )
 
     # "minimum equality" contraints
     @constraint(m, equalityPath[d=eachindex(tripData), p=eachindex(paths[d])],
-        sum{paths[d][p][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p])} - M[d]*(1 - minP[d,p]) <= T[d])
+        sum(paths[d][p][edge] * t[src(edge), dst(edge)] for edge in keys(paths[d][p])) - M[d]*(1 - minP[d,p]) <= T[d])
 
     # integer constraints
-    @constraint(m, equalityPath[d=eachindex(tripData)], sum{minP[d,p], p = eachindex(paths[d])} == 1)
+    @constraint(m, equalityPath[d=eachindex(tripData)], sum(minP[d,p] for p in eachindex(paths[d])) == 1)
 
     # SOLVE LP
     status = solve(m)

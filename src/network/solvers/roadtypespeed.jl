@@ -32,12 +32,12 @@ function constantSpeedSolver(s::IterativeState; uniqueSpeed::Bool = false, args.
     @variable(m, T[d=eachindex(tripData)] >= 0)
 
     # OBJECTIVE
-    @objective(m, Min, sum{tripData[d].weight * maxRatioError[d], d=eachindex(tripData)})
+    @objective(m, Min, sum(tripData[d].weight * maxRatioError[d] for d in eachindex(tripData)))
 
     # CONSTRAINTS
     # big T constraints
     @constraint(m, pathTime[d=eachindex(tripData)],
-        T[d] == sum{paths[d][1][edge] * s[roads[src(edge), dst(edge)].roadType] * roads[src(edge), dst(edge)].distance, edge=keys(paths[d][1])})
+        T[d] == sum(paths[d][1][edge] * s[roads[src(edge), dst(edge)].roadType] * roads[src(edge), dst(edge)].distance for edge in keys(paths[d][1])))
 
     # second order cone constraints (define epsilon), equal to time of first path
     @constraint(m, errorLower[d=eachindex(tripData)],

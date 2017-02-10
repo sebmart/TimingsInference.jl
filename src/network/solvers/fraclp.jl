@@ -26,29 +26,29 @@ function fraclpTimes(s::IterativeState; args...)
     @variable(m, y >= 0)
 
     # OBJECTIVE
-    @objective(m, Min, sum{tripData[d].weight * epsilon[d], d=eachindex(tripData)})
+    @objective(m, Min, sum(tripData[d].weight * epsilon[d] for d in eachindex(tripData)))
 
     # CONSTRAINTS
     # absolute values contraints (define epsilon), equal to time of first path
     @constraint(m, epsLower[d=eachindex(tripData)],
         epsilon[d] >=
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} - y * tripData[d].time
+        sum(paths[d][1][edge] * t[src(edge), dst(edge)] for edge in keys(paths[d][1])) - y * tripData[d].time
         )
     @constraint(m, epsUpper[d=eachindex(tripData)],
-        epsilon[d] >= 
-        - sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])} + y * tripData[d].time
+        epsilon[d] >=
+        - sum(paths[d][1][edge] * t[src(edge), dst(edge)] for edge in keys(paths[d][1])) + y * tripData[d].time
         )
 
     # inequality constraints
     @constraint(m, inequalityPath[d=eachindex(tripData), p=1:(length(paths[d])-1)],
-        sum{paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])} >=
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1])}
+        sum(paths[d][p+1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][p+1])) >=
+        sum(paths[d][1][edge] * t[src(edge), dst(edge)], edge=keys(paths[d][1]))
         )
 
     # fractional programming constraint
     @constraint(m, fracProgram,
-        sum{paths[d][1][edge] * t[src(edge), dst(edge)], d=eachindex(tripData), edge=keys(paths[d][1])}
-        + y * sum([tripData[d].time for d=eachindex(tripData)]) == 1
+        sum(paths[d][1][edge] * t[src(edge), dst(edge)], d=eachindex(tripData) for edge in keys(paths[d][1]))
+        + y * sum(tripData[d].time for d in eachindex(tripData)) == 1
         )
 
     # new bounds on edge velocities
