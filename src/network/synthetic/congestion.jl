@@ -10,7 +10,7 @@
 """
 function centerCongestion(size::Int)
 	n = squareNetwork(size)
-	timings = roadTypeTimings(n)
+	timings = roadTypeRouting(n)
 	nodeList = div(size * (size+1), 4) + squareNodes(div(size, 2), size)
 	for edge in findEdges(n, nodeList)
 		timings.times[src(edge), dst(edge)] *= 2
@@ -26,7 +26,7 @@ end
 """
 function twoCongestions(size::Int)
 	n = squareNetwork(size)
-	timings = roadTypeTimings(n)
+	timings = roadTypeRouting(n)
 	nodeList1 = squareNodes(div(size, 2) - 1, size) + size + 1
 	nodeList2 = nodeList1 + (div(size, 2) - 1) * (size + 1)
 	for edge in findEdges(n, nodeList1)
@@ -46,7 +46,7 @@ end
 """
 function squareCongestion(size::Int)
 	n = squareNetwork(size)
-	timings = roadTypeTimings(n)
+	timings = roadTypeRouting(n)
 	nodeList = div(size, 8) * (size + 1) + setdiff(squareNodes(size - div(size, 8) * 2, size), (size + 1) + squareNodes(size - div(size, 8) * 2 - 2, size))
 	for edge in findEdges(n, nodeList)
 		timings.times[src(edge), dst(edge)] *= 2
@@ -62,7 +62,7 @@ function gradientCongestion(size::Int)
 	n = squareNetwork(size)
 	g = n.graph
 	times = maxSpeedTimes(n)
-	for u in vertices(g) 
+	for u in vertices(g)
 		for v in out_neighbors(g, u)
 			if v > u
 				times[u,v] *= div(u-1, size^2/4) + 1

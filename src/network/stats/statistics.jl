@@ -50,7 +50,7 @@ function allPathsLogError(timingsRef::NetworkTimings, timingsNew::NetworkTimings
     tt1 = getPathTimes(timingsRef)
     tt2 = getPathTimes(timingsNew)
 
-    res = log(tt1./tt2)^2
+    res = log(tt1./tt2).^2
     #remove NAN where o==d
     for i in 1:size(tt1)[1]
         res[i,i] = 0.
