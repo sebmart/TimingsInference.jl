@@ -98,8 +98,8 @@ function getNetworkTrips(ar::AvgRadius, tIds::AbstractArray{Int64,1})
             # check if network trip for this OD pair already exists
             if haskey(netTrips, od)
                 nt = netTrips[od]
-                # compute new time = weighted average of times
-                time = (nt.time * nt.weight + t.time * tripWeight)/(nt.weight + tripWeight)
+                # compute new time = weighted geometric average of times
+                time = nt.time ^ (nt.weight/(nt.weight + tripWeight)) * t.time ^ (tripWeight/(nt.weight + tripWeight))
                 # update time and wait
                 netTrips[od] = NetworkTrip(nt.orig, nt.dest, time, nt.weight + tripWeight, false)
             else
@@ -116,12 +116,12 @@ end
 """
 function getTripTiming(ar::AvgRadius, timings::NetworkTimings, tId::Int)
     nodePairs = ar.nodeList[tId]
-    # average over neighboring nodes
-    time = 0.
+    # geometric average over neighboring nodes
+    time = 1.
     for od in nodePairs
-        time += timings.pathTimes[od[1], od[2]]
+        time *= timings.pathTimes[od[1], od[2]]
     end
-    return time / length(nodePairs)
+    return time^(1./length(nodePairs))
 end
 function getTripTiming(ar::AvgRadius, timings::NetworkTimings,
         pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)
@@ -132,12 +132,12 @@ function getTripTiming(ar::AvgRadius, timings::NetworkTimings,
     nodePairs = inrange(ar.tree, tripLocation, ar.radius)
     nodePairs = [decipherNodePairIndex(node, length(ar.network.nodes)) for node in nodePairs]
     nodePairs = nodePairs[map(isValidNodePair, nodePairs)]
-    # average travel times
-    time = 0.
+    # geometric average of travel times
+    time = 1.
     for od in nodePairs
-        time += timings.pathTimes[od[1], od[2]]
+        time *= timings.pathTimes[od[1], od[2]]
     end
-    return time / length(nodePairs)
+    return time^(1./length(nodePairs))
 end
 
 """
