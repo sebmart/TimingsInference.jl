@@ -38,10 +38,11 @@ type RealGeoStats <: GeoStats
 			"trTripsLogError" => 100 * trTripsLogError(gt, ds, times),
 			"testTripsLogBias" => 100 * testTripsLogBias(gt, ds, times),
 			"trTripsLogBias" => 100 * trTripsLogBias(gt, ds, times),
-			"testTripsLogErrorbt" => 100 * testTripsLogErrorByTime(gt, ds, times, obj.timeBound),
-			"trTripsLogErrorbt" => 100 * trTripsLogErrorByTime(gt, ds, times, obj.timeBound),
-			"testTripsLogBiasbt" => 100 * testTripsLogBiasByTime(gt, ds, times, obj.timeBound),
-			"trTripsLogBiasbt" => 100 * trTripsLogBiasByTime(gt, ds, times, obj.timeBound))
+			# "testTripsLogErrorbt" => 100 * testTripsLogErrorByTime(gt, ds, times, obj.timeBound),
+			# "trTripsLogErrorbt" => 100 * trTripsLogErrorByTime(gt, ds, times, obj.timeBound),
+			# "testTripsLogBiasbt" => 100 * testTripsLogBiasByTime(gt, ds, times, obj.timeBound),
+			# "trTripsLogBiasbt" => 100 * trTripsLogBiasByTime(gt, ds, times, obj.timeBound)
+		)
 		return obj
 	end
 end

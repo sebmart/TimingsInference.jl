@@ -18,7 +18,7 @@ function tripsLogError(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{Float6
 			timing = estimateTime(gt, ID)
 		end
 		if timing > 0.
-			error += abs(log(timing/gt.trips[ID].time))
+			error += log(timing/gt.trips[ID].time)^2
 			counter += 1
 		end
 	end
@@ -44,7 +44,7 @@ function tripsLogBias(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{Float64
 			timing = estimateTime(gt, ID)
 		end
 		if timing > 0
-			bias += log(timing) - log(gt.trips[ID].time)
+			bias += log(timing/gt.trips[ID].time)
 			counter += 1
 		end
 	end
@@ -74,7 +74,7 @@ function tripsLogErrorByTime(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{
 			idx += 1
 		end
 		if timing > 0
-			error[idx] += abs(log(timing/gt.trips[ID].time))
+			error[idx] += log(timing/gt.trips[ID].time)^2
 			numInBin[idx] += 1
 		end
 	end
@@ -104,7 +104,7 @@ function tripsLogBiasByTime(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{F
 			idx += 1
 		end
 		if timing > 0
-			error[idx] += (log(timing) - log(gt.trips[ID].time))
+			error[idx] += log(timing/gt.trips[ID].time)
 			numInBin[idx] += 1
 		end
 	end
