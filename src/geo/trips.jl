@@ -22,7 +22,7 @@ immutable GeoTrip
     time::Float32
 end
 function Base.show(io::IO, t::GeoTrip)
-    print(io,"$(t.pTime) -- ($(t.pLon),$(t.pLat))=>($(t.dLon),$(t.dLat)): $(tripDistance(t))m in $(t.time)s ")
+    @printf(io, "%s -- (%.5f,%.5f)=>(%.5f,%.5f): %7.1fm in %4.0fs", t.pTime, t.pLon, t.pLat, t.dLon, t.dLat, tripDistance(t), t.time)
 end
 
 """
