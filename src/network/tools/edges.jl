@@ -21,25 +21,20 @@ function findNearEdges(n::Network, e::Edge)
 end
 
 """
-	`findNearEdgesSameType`	: find all edges that share a vertex with input e in network n and are of the same type, as a set of edges
+	`findNearEdgesSameType`	: find all edges that can be an out neighbor of input e in network n and are of the same type, as a set of edges
 """
 function findNearEdgesSameType(n::Network, e::Edge)
 	orig = src(e)
 	dest = dst(e)
 	# find all edges that share a vertex with e
-	nearEdges = [Edge(dest, newDest) for newDest in out_neighbors(n.graph, dest)]
-	append!(nearEdges, [Edge(orig, newDest) for newDest in out_neighbors(n.graph, orig)])
-	append!(nearEdges, [Edge(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
-	append!(nearEdges, [Edge(newOrig, dest) for newOrig in in_neighbors(n.graph, dest)])
+	nearEdges = Set(out_edges(n.graph, dest))
 	# remove duplicates and edge e itself (as well as the reverse of e)
-	nearEdges = Set(nearEdges)
-	delete!(nearEdges, Edge(orig, dest))
-	if Edge(dest, orig) in nearEdges
-		delete!(nearEdges, Edge(dest, orig))
+	if reverse(e) in nearEdges
+		delete!(nearEdges, reverse(e))
 	end
 	# remove edges not of same type as e
 	for edge in nearEdges
-		if n.roads[src(e),dst(e)].roadType != n.roads[src(edge),dst(edge)].roadType
+		if n.roads[orig,dest].roadType != n.roads[src(edge),dst(edge)].roadType
 			delete!(nearEdges, edge)
 		end
 	end

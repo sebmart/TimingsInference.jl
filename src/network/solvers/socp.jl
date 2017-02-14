@@ -12,11 +12,12 @@
     - "none" : no constraint
     - "simple": simple ϵ-based continuity
     - "neighborhoods": continuity constraint for each neighborhood
+    - "regularized": soft continuity constraint
 """
 function socpTimes(s::IterativeState;
                    inequalityConstraints::Bool = true,
                    continuityConstraint::AbstractString="none",
-                   velocityBound::Float64 = 0.1,
+                   continuityParam::Float64 = 0.1,
                    args...)
     g = s.data.network.graph
     paths = s.paths
@@ -46,10 +47,25 @@ function socpTimes(s::IterativeState;
         ])
         @variable(m, velocity[(i,j,p,q) = edgesAndNeighbors] >= 0)
     end
-
+    if continuityConstraint == "regularized"
+        edgesAndNeighbors = flatten(
+        [
+            [
+                (src(edge), dst(edge), src(nearEdge), dst(nearEdge))
+                 for nearEdge in findNearEdgesSameType(s.data.network, edge)
+            ]
+         for edge in edges(g)
+        ])
+        @variable(m, velocityDiff[(i,j,p,q) = edgesAndNeighbors] >= 0)
+    end
     # OBJECTIVE
-    @objective(m, Min, sum(tripData[d].weight * epsilon[d] for d in eachindex(tripData)))
-
+    if continuityConstraint == "regularized" # we add a soft constraint for regularized velocities, weighted by road distances
+        @objective(m, Min, sum(tripData[d].weight * epsilon[d] for d in eachindex(tripData))
+        + continuityParam *sum(velocityDiff[(i,j,p,q)]*2/(roads[i,j].distance + roads[p,q].distance) for (i,j,p,q) in edgesAndNeighbors)
+        )
+    else
+        @objective(m, Min, sum(tripData[d].weight * epsilon[d] for d in eachindex(tripData)))
+    end
     # CONSTRAINTS
     # big T constraints
     @constraint(m, pathTime[d=eachindex(tripData)],
@@ -78,10 +94,18 @@ function socpTimes(s::IterativeState;
                 p = src(edge)
                 q = dst(edge)
                 @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                    <= velocityBound * (roads[i,j].distance + roads[p,q].distance) / 2)
+                    <= continuityParam * (roads[i,j].distance + roads[p,q].distance) / 2)
                 @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
-                    >= - velocityBound * (roads[i,j].distance + roads[p,q].distance) / 2)
+                    >= - continuityParam * (roads[i,j].distance + roads[p,q].distance) / 2)
             end
+        end
+    elseif continuityConstraint == "regularized"
+        # continuity constraints
+        for (i,j,p,q) = edgesAndNeighbors
+            @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+                <= velocityDiff[(i,j,p,q)])
+            @constraint(m, t[i,j]/roads[i,j].distance - t[p,q]/roads[p,q].distance
+                >= - velocityDiff[(i,j,p,q)])
         end
     elseif continuityConstraint == "neighborhoods"
         # continuity constraints
@@ -105,7 +129,7 @@ function socpTimes(s::IterativeState;
                 ]
                  for edge in cluster
             ])
-            @constraint(m, sum(velocity[(i,j,p,q)] for (i,j,p,q) in vList) <= length(vList) * velocityBound)
+            @constraint(m, sum(velocity[(i,j,p,q)] for (i,j,p,q) in vList) <= length(vList) * continuityParam)
         end
     end
     # SOLVE SOCP

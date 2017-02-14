@@ -33,10 +33,10 @@ type RealNetworkStats <: NetworkStats
 		obj.times = timings.times
 		obj.name = name
 		obj.sdict = Dict{AbstractString, Float64}(
-			"trNetworkTripsLogError" => 100 * nwTripsLogError(timings, trainingData),
-			"testNetworkTripsLogError" => 100 * nwTripsLogError(timings, testingData),
-			"trNetworkTripsLogBias" => 100 * nwTripsLogBias(timings, trainingData),
-			"testNetworkTripsLogBias" => 100 * nwTripsLogBias(timings, testingData),
+			"trNetworkTripsLogError" => nwTripsLogError(timings, trainingData),
+			"testNetworkTripsLogError" => nwTripsLogError(timings, testingData),
+			"trNetworkTripsLogBias" => nwTripsLogBias(timings, trainingData),
+			"testNetworkTripsLogBias" => nwTripsLogBias(timings, testingData),
 			"pathDiff" => pathDiff)
 		return obj
 	end
@@ -58,14 +58,14 @@ type VirtNetworkStats <: NetworkStats
 		obj.times = timingsNew.times
 		obj.name = name
 		obj.sdict = Dict{AbstractString, Float64}(
-			"tripsLogError" => 100 * nwTripsLogError(timingsRef, data),
-			"tripsLogBias" => 100 * nwTripsLogBias(timingsNew, data),
-			"tripsRealLogError" => 100 * nwTripsRealLogError(timingsRef, timingsNew, data),
-			"tripsRealLogBias" => 100 * nwTripsRealLogBias(timingsRef, timingsNew, data),
-			"allPathsLogError" => 100 * allPathsLogError(timingsRef, timingsNew),
-			"allPathsLogBias" => 100 * allPathsLogBias(timingsRef, timingsNew),
-			"roadTimeLogError" => 100 * roadTimeLogError(timingsRef, timingsNew),
-			"roadTimeLogBias" => 100 * roadTimeLogBias(timingsRef, timingsNew),
+			"tripsLogError" => nwTripsLogError(timingsRef, data),
+			"tripsLogBias" => nwTripsLogBias(timingsNew, data),
+			"tripsRealLogError" => nwTripsRealLogError(timingsRef, timingsNew, data),
+			"tripsRealLogBias" => nwTripsRealLogBias(timingsRef, timingsNew, data),
+			"allPathsLogError" => allPathsLogError(timingsRef, timingsNew),
+			"allPathsLogBias" => allPathsLogBias(timingsRef, timingsNew),
+			"roadTimeLogError" => roadTimeLogError(timingsRef, timingsNew),
+			"roadTimeLogBias" => roadTimeLogBias(timingsRef, timingsNew),
 			"pathDiff" => pathDiff)
 		return obj
 	end
@@ -84,7 +84,7 @@ function printStats(so::NetworkStats)
 
 	for statName in statNames
 		print(statName, " " ^ (2 + firstColumnWidth - length(statName)))
-		@printf("%.3f\n", so.sdict[statName])
+		@printf("%.6f\n", so.sdict[statName])
 	end
 end
 

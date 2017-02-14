@@ -32,7 +32,7 @@ NetworkTimings(it::IterativeState) = it.timings
 """
     `doIteration!`, shortcut to update state with optimizer's output
 """
-function doIteration!(it::IterativeState; method::AbstractString="lp", velocityBound::Float64 = 0.1, solverArgs...)
+function doIteration!(it::IterativeState; method::AbstractString="lp", continuityParam::Float64 = 0.1, solverArgs...)
     if method=="lp"
         updateState!(it, lpTimes(it; solverArgs...))
     elseif method=="fraclp"
@@ -46,20 +46,23 @@ function doIteration!(it::IterativeState; method::AbstractString="lp", velocityB
     elseif method == "roadtype"
         updateState!(it, constantSpeedTimes(it; solverArgs...), updatePaths=false)
     elseif method == "constant"
-        updateState!(it, constantSpeedTimes(it; uniqueSpeed=true, solverArgs...), 
+        updateState!(it, constantSpeedTimes(it; uniqueSpeed=true, solverArgs...),
                      updatePaths=false)
     elseif method == "lpCo"
         updateState!(it, lpTimes(it, continuityConstraint="simple",
-                                     velocityBound=velocityBound; solverArgs...))
+                                     velocityBound=continuityParam; solverArgs...))
     elseif method == "lpCoNbhd"
         updateState!(it, lpTimes(it, continuityConstraint="neighborhoods",
-                                     velocityBound=velocityBound; solverArgs...))
+                                     velocityBound=continuityParam; solverArgs...))
     elseif method == "socpCo"
         updateState!(it, socpTimes(it, continuityConstraint="simple",
-                                       velocityBound=velocityBound; solverArgs...))
+                                       continuityParam=continuityParam; solverArgs...))
     elseif method == "socpCoNbhd"
         updateState!(it, socpTimes(it, continuityConstraint="neighborhoods",
-                                       velocityBound=velocityBound; solverArgs...))
+                                       continuityParam=continuityParam; solverArgs...))
+    elseif method == "socpCoReg"
+        updateState!(it, socpTimes(it, continuityConstraint="regularized",
+                                       continuityParam=continuityParam; solverArgs...))
     elseif method == "pathchoice"
         updateState!(it, pathChoice(it), updatePaths=false)
     else

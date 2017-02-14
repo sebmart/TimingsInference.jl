@@ -16,7 +16,7 @@ function tripsLogError(timings::NetworkTimings, trips::Vector{NetworkTrip})
         if t.roadProj
             error += t.weight * log(t.time / (tt[t.orig[2], t.dest[1]] + t.orig[3] * times[t.orig[1], t.orig[2]] + t.dest[3] * times[t.dest[1], t.dest[2]]))^2
         else
-            error += t.weight * log(t.time / tt[t.orig[2],t.dest[1]])
+            error += t.weight * log(t.time / tt[t.orig[2],t.dest[1]])^2
         end
     end
     return error/length(trips)
