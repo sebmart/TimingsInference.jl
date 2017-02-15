@@ -12,7 +12,7 @@ function tripsLogError(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
     times = timings.times
     error = 0.
-    count = 0
+    weight = 0.
     for t in trips
         if t.roadProj
             error += t.weight * log(t.time / (tt[t.orig[2], t.dest[1]] + t.orig[3] * times[t.orig[1], t.orig[2]] + t.dest[3] * times[t.dest[1], t.dest[2]]))^2
@@ -20,12 +20,11 @@ function tripsLogError(timings::NetworkTimings, trips::Vector{NetworkTrip})
             err = t.weight * log(t.time / tt[t.orig[2],t.dest[1]])^2
             if err < Inf
                 error += err
-            else
-                count += 1
+                weight += t.weight
             end
         end
     end
-    return error/(length(trips)-count)
+    return error/weight
 end
 
 """
@@ -37,7 +36,7 @@ function tripsLogBias(timings::NetworkTimings, trips::Vector{NetworkTrip})
     tt = getPathTimes(timings)
     times = timings.times
     bias = 0.
-    count = 0
+    weight = 0.
     for t in trips
         if t. roadProj
             bias += t.weight * log(tt[t.orig[2], t.dest[1]] + t.orig[3] * times[t.orig[1], t.orig[2]] + t.dest[3] * times[t.dest[1], t.dest[2]]) - log(t.time)
@@ -45,12 +44,11 @@ function tripsLogBias(timings::NetworkTimings, trips::Vector{NetworkTrip})
             err = t.weight * log(tt[t.orig[2], t.dest[1]]/t.time)
             if abs(err) < Inf
                 bias += err
-            else
-                count += 1
+                weight += t.weight
             end
         end
     end
-    return bias/(length(trips) - count)
+    return bias/weight
 end
 
 """
