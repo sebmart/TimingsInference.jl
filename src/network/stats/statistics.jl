@@ -44,7 +44,7 @@ function tripsLogBias(timings::NetworkTimings, trips::Vector{NetworkTrip})
         else
             err = t.weight * log(tt[t.orig[2], t.dest[1]]/t.time)
             if abs(err) < Inf
-                error += err
+                bias += err
             else
                 count += 1
             end
