@@ -61,7 +61,7 @@ function printStats(so::RealGeoStats; outputFileName = "")
 					if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 						@printf("\t\tTime < %.0f s:\t%.0fs\n", time, so.sdict[statName][i])
 					else
-						@printf("\t\tTime < %.0f s:\t%.2f%%\n", time, so.sdict[statName][i])
+						@printf("\t\tTime < %.0f s:\t%.5f\n", time, so.sdict[statName][i])
 					end
 				end
 			elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
@@ -69,7 +69,7 @@ function printStats(so::RealGeoStats; outputFileName = "")
 				@printf("%.2f s\n", so.sdict[statName])
 			else
 				print(statName, ":\t")
-				@printf("%.2f%%\n", so.sdict[statName])
+				@printf("%.5f\n", so.sdict[statName])
 			end
 		end
 	else
@@ -81,7 +81,7 @@ function printStats(so::RealGeoStats; outputFileName = "")
 					if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 						@printf(f, "\t\tTime < %.0f s:\t%.0fs\n", time, so.sdict[statName][i])
 					else
-						@printf(f, "\t\tTime < %.0f s:\t%.2f%%\n", time, so.sdict[statName][i])
+						@printf(f, "\t\tTime < %.0f s:\t%.5f\n", time, so.sdict[statName][i])
 					end
 				end
 			elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
@@ -89,7 +89,7 @@ function printStats(so::RealGeoStats; outputFileName = "")
 				@printf(f, "%.0fs\n", so.sdict[statName])
 			else
 				write(f, string(statName, ":\t"))
-				@printf(f, "%.2f%%\n", so.sdict[statName])
+				@printf(f, "%.5f\n", so.sdict[statName])
 			end
 		end
 		close(f)
@@ -127,14 +127,14 @@ function printStats(stats::Vector{RealGeoStats}, statName::AbstractString)
 				if contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 					@printf("%.0fs\t", so.sdict[statName][i])
 				else
-					@printf("%.2f%%\t", so.sdict[statName][i])
+					@printf("%.5f\t", so.sdict[statName][i])
 				end
 			end
 			print("\n")
 		elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
 			@printf("%s\t\t%.0fs\n", so.name, so.sdict[statName])
 		else
-			@printf("%s\t\t%.2f%%\n", so.name, so.sdict[statName])
+			@printf("%s\t\t%.5f\n", so.name, so.sdict[statName])
 		end
 	end
 end
