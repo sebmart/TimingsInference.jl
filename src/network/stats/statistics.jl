@@ -38,8 +38,8 @@ function tripsLogBias(timings::NetworkTimings, trips::Vector{NetworkTrip})
     bias = 0.
     weight = 0.
     for t in trips
-        if t. roadProj
-            bias += t.weight * log(tt[t.orig[2], t.dest[1]] + t.orig[3] * times[t.orig[1], t.orig[2]] + t.dest[3] * times[t.dest[1], t.dest[2]]) - log(t.time)
+        if t.roadProj
+            bias += t.weight * (log(tt[t.orig[2], t.dest[1]] + t.orig[3] * times[t.orig[1], t.orig[2]] + t.dest[3] * times[t.dest[1], t.dest[2]]) - log(t.time))
         else
             err = t.weight * log(tt[t.orig[2], t.dest[1]]/t.time)
             if abs(err) < Inf

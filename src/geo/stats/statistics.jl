@@ -17,7 +17,7 @@ function tripsLogError(gt::GeoTimings, IDlist::Vector{Int}, times::Vector{Float6
 		else
 			timing = estimateTime(gt, ID)
 		end
-		if timing > 0.
+		if timing > 0
 			error += log(timing/gt.trips[ID].time)^2
 			counter += 1
 		end

@@ -25,9 +25,7 @@ function typicalSpeeds(pb::NetworkData;
         # get the speeds
         speeds = constantSpeedSolver(s, uniqueSpeed=uniqueSpeed; solverargs...)
         # compute the times
-        for i in vertices(pb.network.graph), j in out_neighbors(pb.network.graph,i)
-            times[i,j] = pb.network.roads[i, j].distance / speeds[pb.network.roads[i ,j].roadType]
-        end
+        times = fixedSpeedTimes(pb.network,speeds)
         # update the state
         updateState!(s, times)
 
