@@ -26,8 +26,7 @@ function socpTimes(s::IterativeState;
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = MosekSolver(MSK_DPAR_OPTIMIZER_MAX_TIME=10000.,
-                                   MSK_IPAR_INFEAS_REPORT_AUTO = MSK_ON; args...))
+    m = Model(solver = MosekSolver(MSK_IPAR_INFEAS_REPORT_AUTO = MSK_ON; args...))
 
     # DECISION VARIABLES
     # Road times
