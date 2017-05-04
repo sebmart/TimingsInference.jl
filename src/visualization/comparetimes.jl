@@ -12,6 +12,7 @@ type CompareTimes <: NetworkVisualizer
     # Mandatory attributes
     network::Network
     window::RenderWindow
+    view::View
     nodes::Vector{CircleShape}
     roads::Dict{Tuple{Int,Int},Line}
     nodeRadius::Float64
