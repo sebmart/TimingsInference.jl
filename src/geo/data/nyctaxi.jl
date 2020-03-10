@@ -11,7 +11,7 @@
 function fromNYCTaxiCSV(fileName::AbstractString)
     println("Counting lines...")
     f = open(fileName)
-    const NLINES = countlines(f) - 1
+    NLINES = countlines(f) - 1
     close(f)
     println("$NLINES trips to parse")
 
@@ -19,12 +19,12 @@ function fromNYCTaxiCSV(fileName::AbstractString)
     dateFormat = DateFormat("y-m-d H:M:S")
     f = open(fileName)
     names = split(strip(readline(f)),",")
-    const PLON  = findfirst(names, "pickup_longitude")
-    const PLAT  = findfirst(names, "pickup_latitude")
-    const DLON  = findfirst(names, "dropoff_longitude")
-    const DLAT  = findfirst(names, "dropoff_latitude")
-    const PTIME = findfirst(names, "tpep_pickup_datetime")
-    const DTIME = findfirst(names, "tpep_dropoff_datetime")
+    PLON  = findfirst(names, "pickup_longitude")
+    PLAT  = findfirst(names, "pickup_latitude")
+    DLON  = findfirst(names, "dropoff_longitude")
+    DLAT  = findfirst(names, "dropoff_latitude")
+    PTIME = findfirst(names, "tpep_pickup_datetime")
+    DTIME = findfirst(names, "tpep_dropoff_datetime")
 
     println("Beginning trip parsing...")
     for (i,ln) in enumerate(eachline(f))

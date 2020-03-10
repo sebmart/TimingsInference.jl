@@ -6,7 +6,7 @@
 """
 	`NearestRoad` : projects ride origin and destination to nearest road
 """
-type NearestRoad <: NetworkProjector
+mutable struct NearestRoad <: NetworkProjector
 	# compulsory attributes
     network::Network
     trips::GeoData

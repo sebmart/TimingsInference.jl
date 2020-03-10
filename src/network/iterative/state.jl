@@ -16,7 +16,7 @@
     Must implement:
     - `updateState!` updates the state when new link-times are computed
 """
-abstract IterativeState
+abstract type IterativeState end
 
 
 function Base.show(io::IO, s::IterativeState)

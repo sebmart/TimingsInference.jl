@@ -6,7 +6,7 @@
 """
     `TimingsFromNetwork`, uses projector to extend timings from network
 """
-type TimingsFromNetwork <: GeoTimings
+mutable struct TimingsFromNetwork <: GeoTimings
     trips::GeoData # compulsory attribute
 
     "timings in network"

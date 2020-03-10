@@ -12,7 +12,7 @@ must implement methods:
 - `printStats` : print a summary of statistics on the algorithm run
 """
 
-abstract GeoStats
+abstract type GeoStats end
 function Base.show(io::IO, so::GeoStats)
 	typeName = split(string(typeof(so)),".")[end]
 	println(io, "$(typeName): $(so.name)")
@@ -21,7 +21,7 @@ end
 """
 	`RealGeoStats`: instance of GeoStats, made for real trip data
 """
-type RealGeoStats <: GeoStats
+mutable struct RealGeoStats <: GeoStats
 	name::AbstractString
 	sdict::Dict{AbstractString, Union{Float64, Array{Float64,1}}}
 

@@ -7,7 +7,7 @@
 """
     `KnnTimings`, K-nearest-neighbors timings estimator
 """
-type KnnTimings <: GeoTimings
+mutable struct KnnTimings <: GeoTimings
     trips::GeoData # compulsary attribute
 
     "number of neighbors to average"
@@ -70,23 +70,23 @@ function estimateTime(gt::KnnTimings, pLon::Float32, pLat::Float32, dLon::Float3
     dx, dy = toENU(dLon, dLat, gt.center)
     idxs, dists = knn(gt.tree, [px, py, dx, dy], gt.k)
     if gt.weighted
-        num = 1.
+        num = 1.0
         denum = 0.
         for i in eachindex(idxs)
             if dists[i] == 0.
                 return gt.trips[gt.trainset[idxs[i]]].time
             else
                 num *= gt.trips[gt.trainset[idxs[i]]].time ^ (1/ dists[i])
-                denum += 1./dists[i]
+                denum += 1.0/dists[i]
             end
         end
         return num^(1/denum)
     else
-        mean = 1.
+        mean = 1.0
         for id in idxs
             mean *= gt.trips[gt.trainset[id]].time
         end
-        return mean^(1/length(idxs))
+        return mean^(1.0/length(idxs))
     end
 end #inbounds
 end
@@ -100,19 +100,19 @@ function estimateTimeWithDistance(gt::KnnTimings, pLon::Float32, pLat::Float32, 
     dx, dy = toENU(dLon, dLat, gt.center)
     idxs, dists = knn(gt.tree, [px, py, dx, dy], gt.k)
     if gt.weighted
-        num = 1.
+        num = 1.0
         denum = 0.
         for i in eachindex(idxs)
             if dists[i] == 0.
                 return gt.trips[gt.trainset[idxs[i]]].time
             else
                 num *= gt.trips[gt.trainset[idxs[i]]].time ^ (1/ dists[i])
-                denum += 1./dists[i]
+                denum += 1.0/dists[i]
             end
         end
         return num^(1/denum), sum(dists)/length(dists)
     else
-        mean = 1.
+        mean = 1.0
         for id in idxs
             mean *= gt.trips[gt.trainset[id]].time
         end

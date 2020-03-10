@@ -97,7 +97,7 @@ end
 	`flatten` : recursively concatenate all vectors in a vector of vectors
 	Useful helper function for neighborhood continuity
 """
-flatten{T}(a::Array{T,1}) = any(x->isa(x,Array),a)? flatten(vcat(map(flatten,a)...)): a
+flatten(a::Array) = any(x -> isa(x, Array), a) ? flatten(vcat(map(flatten,a)...)) : a
 
 """
 	`findEdges`	: find all edges that begin and end in the provided list of nodes

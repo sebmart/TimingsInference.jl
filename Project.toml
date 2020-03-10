@@ -1,0 +1,21 @@
+name = "TimingsInference"
+uuid = "f20884e2-6281-11ea-3dd3-01a1c9396b4e"
+authors = ["Arthur Delarue <adelarue@mit.edu>", "Sebastien Martin <semartin@mit.edu>"]
+version = "0.1.0"
+
+[deps]
+Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+MathProgBase = "fdba3010-5040-5b88-9595-932c9decdf73"
+Mosek = "6405355b-0ac2-5fba-af84-adbd65488c0e"
+NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+RoutingNetworks = "b558eade-6257-11ea-0495-8fc02fa5ba64"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"

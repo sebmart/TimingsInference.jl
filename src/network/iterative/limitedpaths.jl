@@ -8,7 +8,7 @@
     - each trip has a fixed max number of paths
     - Default number of paths per trip is infinite
 """
-type LimitedPaths <: IterativeState
+mutable struct LimitedPaths <: IterativeState
     # inherited attributes
     data::NetworkData
     timings::NetworkTimings

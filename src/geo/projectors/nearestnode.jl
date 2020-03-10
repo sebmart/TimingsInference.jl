@@ -6,7 +6,7 @@
 """
     `NearestNode` : Projects trips to the nearest nodes, give the associated prediction
 """
-type NearestNode <: NetworkProjector
+mutable struct NearestNode <: NetworkProjector
     # compulsory attributes
     network::Network
     trips::GeoData

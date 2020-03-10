@@ -10,7 +10,7 @@
 	- testingIDs: list of IDs of trips of testing set
 	- geodata: GeoData object that this DataSplit object is related to
 """
-abstract DataSplit
+abstract type DataSplit end
 
 function Base.show(io::IO, ds::DataSplit)
 	typeName = split(string(typeof(ds)),".")[end]
@@ -24,7 +24,7 @@ testSet(s::DataSplit) = s.testingIDs
 	`RandomSplit`: split data set randomly, with a given fraction of the data in the training set
 	and the remainder in the testing set
 """
-type RandomSplit <: DataSplit
+mutable struct RandomSplit <: DataSplit
 	# compulsory
 	trainingIDs::Vector{Int}
 	testingIDs::Vector{Int}
@@ -48,7 +48,7 @@ end
 """
 	`LocSplit`: split data set geographically. All testing rides are included in a 4D sphere, everything else forms training set.
 """
-type LocSplit <: DataSplit
+mutable struct LocSplit <: DataSplit
 	# compulsory
 	trainingIDs::Vector{Int}
 	testingIDs::Vector{Int}

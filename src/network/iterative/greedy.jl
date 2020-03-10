@@ -9,7 +9,7 @@
     - Default number of paths per trip is infinite
     - Set of independent edges is updated at every iteration
 """
-type GreedyEdges <: IterativeState
+mutable struct GreedyEdges <: IterativeState
     # inherited attributes
     data::NetworkData
     timings::NetworkTimings
