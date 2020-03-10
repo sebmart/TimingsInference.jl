@@ -8,7 +8,7 @@ module TimingsInference
 using RoutingNetworks, LightGraphs, NearestNeighbors
 using Distributions, DataStructures
 using JuMP, Gurobi, Mosek, MathProgBase
-using Dates, Printf, SparseArrays, Distributed
+using Dates, Printf, SparseArrays, Distributed, Random, LinearAlgebra, Statistics
 using PyPlot, Colors
 
 import RoutingNetworks: inPolygon

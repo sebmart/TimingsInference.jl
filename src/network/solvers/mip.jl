@@ -23,7 +23,7 @@ function mipTimes(s::IterativeState; args...)
 
     # DECISION VARIABLES
     # Road times
-    @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
+    @variable(m, t[i=vertices(g), j=outneighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @variable(m, epsilon[d=eachindex(tripData)] >= 0)
     # Time of the trips
@@ -57,7 +57,7 @@ function mipTimes(s::IterativeState; args...)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
-    for i in vertices(g), j in out_neighbors(g,i)
+    for i in vertices(g), j in outneighbors(g,i)
         result[i,j] = times[i,j]
     end
 

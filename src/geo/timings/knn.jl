@@ -41,7 +41,7 @@ mutable struct KnnTimings <: GeoTimings
         end
         gt.center = ((maxLon + minLon)/2, (maxLat + minLat)/2)
         println("Creating KDTree...")
-        dataPos = Array(Float64,(4, length(trainSet)))
+        dataPos = Array{Float64}(undef, (4, length(trainSet)))
         for (k,i) in enumerate(trainSet)
             if (k % 100_000) == 0
                 @printf("\r%.2f%% trips loaded     ",100*k/length(trainSet))

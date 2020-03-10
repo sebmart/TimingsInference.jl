@@ -22,7 +22,7 @@ mutable struct NearestRoad <: NetworkProjector
         obj.trips = GeoData()
         obj.proj  = Tuple{Edge,Float64,Edge,Float64}[]
         # Constructing tree
-        dataPos = Array(Float64,(2,length(n.nodes)))
+        dataPos = Array{Float64}(undef, (2,length(n.nodes)))
         for (i,node) in enumerate(n.nodes)
            dataPos[1,i] = node.x
            dataPos[2,i] = node.y
@@ -49,7 +49,7 @@ function preloadData!(nr::NearestRoad, trips::GeoData)
     println("Projecting $nTrips geo-trips onto network roads...")
     #initializing containers
     nr.trips = trips
-    nr.proj = Array(Tuple{Edge,Float64,Edge,Float64},nTrips)
+    nr.proj = Array{Tuple{Edge,Float64,Edge,Float64}}(undef, nTrips)
     for (i,t) in enumerate(trips)
         if i % 50_000 == 0
             @printf("\r%.2f%% trips projected     ",100*i/nTrips)

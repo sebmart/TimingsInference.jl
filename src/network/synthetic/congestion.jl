@@ -63,7 +63,7 @@ function gradientCongestion(size::Int)
 	g = n.graph
 	times = maxSpeedTimes(n)
 	for u in vertices(g)
-		for v in out_neighbors(g, u)
+		for v in outneighbors(g, u)
 			if v > u
 				times[u,v] *= div(u-1, size^2/4) + 1
 			end

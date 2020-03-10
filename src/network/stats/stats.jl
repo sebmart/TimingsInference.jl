@@ -102,7 +102,7 @@ function printStats(stats::Vector{T}, statName::AbstractString) where T <: Netwo
 	for so in stats
 		if statName == "pathDiff"
 			@printf("%s\t%.5f\n", so.name, so.sdict[statName])
-		elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
+		elseif occursin("bias", lowercase(statName)) && !occursin("log", lowercase(statName))
 			@printf("%s\t%.0fs\n", so.name, so.sdict[statName])
 		else
 			@printf("%s\t%.5f\n", so.name, so.sdict[statName])

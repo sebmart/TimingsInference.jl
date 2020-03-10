@@ -33,9 +33,9 @@ function findNetworkDependence(n::Network, independent::Vector{Edge}, dependent:
 		nNearEdges = length(nearEdges)
 		for edge in nearEdges
 			if edge in independent
-				B[row, findfirst(independent, edge)] = 1/nNearEdges
+				B[row, findfirst(isequal(edge), independent)] = 1/nNearEdges
 			else
-				A[row, findfirst(dependent, edge)] = 1/nNearEdges
+				A[row, findfirst(isequal(edge), dependent)] = 1/nNearEdges
 			end
 		end
 	end

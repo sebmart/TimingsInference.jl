@@ -26,11 +26,11 @@ function socpTimes(s::IterativeState;
 
     #Create the model (will be changed to avoid hard-coded parameters)
     # !BarConvTol needs to be changed
-    m = Model(solver = MosekSolver(MSK_IPAR_INFEAS_REPORT_AUTO = MSK_ON; args...))
+    m = Model(solver = MosekSolver(; args...))
 
     # DECISION VARIABLES
     # Road times
-    @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
+    @variable(m, t[i=vertices(g), j=outneighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @variable(m, epsilon[d=eachindex(tripData)] >= 0)
     @variable(m, T[d=eachindex(tripData)] >= 0)
@@ -88,7 +88,7 @@ function socpTimes(s::IterativeState;
     end
     if continuityConstraint == "simple"
         # continuity constraints
-        for i in vertices(g), j in out_neighbors(g,i)
+        for i in vertices(g), j in outneighbors(g,i)
             for edge in findNearEdgesSameType(s.data.network, Edge(i,j))
                 p = src(edge)
                 q = dst(edge)
@@ -141,7 +141,7 @@ function socpTimes(s::IterativeState;
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
-    for i in vertices(g), j in out_neighbors(g,i)
+    for i in vertices(g), j in outneighbors(g,i)
         result[i,j] = times[i,j]
     end
 

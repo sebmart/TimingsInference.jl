@@ -27,7 +27,7 @@ mutable struct AvgRadius <: NetworkProjector
         obj.nodeList = Vector{Tuple{Int,Int}}[]
         nNodePairs = length(n.nodes) * length(n.nodes)
         println("Creating KDTree...")
-        dataPos = Array(Float64,(4, nNodePairs))
+        dataPos = Array{Float64}(undef,(4, nNodePairs))
         for (i, startNode) in enumerate(n.nodes), (j, endNode) in enumerate(n.nodes)
             dataPos[1, (i-1) * length(n.nodes) + j] = startNode.x
             dataPos[2, (i-1) * length(n.nodes) + j] = startNode.y
@@ -56,7 +56,7 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
     println("Projecting $nTrips geo-trips onto network-nodes...")
     #initializing containers
     ar.trips = trips
-    ar.nodeList = Array(Vector{Tuple{Int,Int}}, nTrips)
+    ar.nodeList = Array{Vector{Tuple{Int,Int}}}(undef, nTrips)
 
     for (i,t) in enumerate(trips)
         if i%100_000 == 0
