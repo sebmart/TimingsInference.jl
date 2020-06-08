@@ -1,2 +1,2 @@
 # TimingsInference
-This repo was made to run with a now outdated version of Julia. The packages it uses may also be outdated.
+This repo was runs on v1.x of Julia. This is research code and some dependencies may be outdated.
