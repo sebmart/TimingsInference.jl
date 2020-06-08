@@ -10,7 +10,7 @@
     must implement:
     - `estimateTime`, estimate time between two points, or for a trip
 """
-abstract GeoTimings
+abstract type GeoTimings end
 
 function Base.show(io::IO, p::GeoTimings)
     typeName = split(string(typeof(p)),".")[end]

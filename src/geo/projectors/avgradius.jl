@@ -7,7 +7,7 @@
     `AvgRadius` : Projects trips to nodes within given radius, give the associated prediction
     If no available nodes within radius, projects to (at most) 3 nearest neighbors
 """
-type AvgRadius <: NetworkProjector
+mutable struct AvgRadius <: NetworkProjector
     # compulsory attributes
     network::Network
     trips::GeoData
@@ -27,7 +27,7 @@ type AvgRadius <: NetworkProjector
         obj.nodeList = Vector{Tuple{Int,Int}}[]
         nNodePairs = length(n.nodes) * length(n.nodes)
         println("Creating KDTree...")
-        dataPos = Array(Float64,(4, nNodePairs))
+        dataPos = Array{Float64}(undef,(4, nNodePairs))
         for (i, startNode) in enumerate(n.nodes), (j, endNode) in enumerate(n.nodes)
             dataPos[1, (i-1) * length(n.nodes) + j] = startNode.x
             dataPos[2, (i-1) * length(n.nodes) + j] = startNode.y
@@ -56,7 +56,7 @@ function preloadData!(ar::AvgRadius, trips::GeoData)
     println("Projecting $nTrips geo-trips onto network-nodes...")
     #initializing containers
     ar.trips = trips
-    ar.nodeList = Array(Vector{Tuple{Int,Int}}, nTrips)
+    ar.nodeList = Array{Vector{Tuple{Int,Int}}}(undef, nTrips)
 
     for (i,t) in enumerate(trips)
         if i%100_000 == 0
@@ -117,11 +117,11 @@ end
 function getTripTiming(ar::AvgRadius, timings::NetworkTimings, tId::Int)
     nodePairs = ar.nodeList[tId]
     # geometric average over neighboring nodes
-    time = 1.
+    time = 1.0
     for od in nodePairs
         time *= timings.pathTimes[od[1], od[2]]
     end
-    return time^(1./length(nodePairs))
+    return time^(1.0/length(nodePairs))
 end
 function getTripTiming(ar::AvgRadius, timings::NetworkTimings,
         pLon::Float32, pLat::Float32, dLon::Float32, dLat::Float32)
@@ -133,11 +133,11 @@ function getTripTiming(ar::AvgRadius, timings::NetworkTimings,
     nodePairs = [decipherNodePairIndex(node, length(ar.network.nodes)) for node in nodePairs]
     nodePairs = nodePairs[map(isValidNodePair, nodePairs)]
     # geometric average of travel times
-    time = 1.
+    time = 1.0
     for od in nodePairs
         time *= timings.pathTimes[od[1], od[2]]
     end
-    return time^(1./length(nodePairs))
+    return time^(1.0/length(nodePairs))
 end
 
 """

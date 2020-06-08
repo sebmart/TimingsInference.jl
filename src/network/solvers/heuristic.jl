@@ -79,7 +79,7 @@ function heuristicTimes(s::IterativeState)
                 unknownRoads[key] += 1
             end
         end
-        for neighbor in RoutingNetworks.out_neighbors(g, key[2])
+        for neighbor in RoutingNetworks.outneighbors(g, key[2])
             if !((key[2], neighbor) in keys(unknownRoads))
                 unknownRoads[key] += 1
             end
@@ -107,7 +107,7 @@ function heuristicTimes(s::IterativeState)
                 count += 1
             end
         end
-        for neighbor in RoutingNetworks.out_neighbors(g, newRoad[2])
+        for neighbor in RoutingNetworks.outneighbors(g, newRoad[2])
             if (newRoad[2], neighbor) in keys(unknownRoads)
                 unknownRoads[(newRoad[2], neighbor)] += 1
             else

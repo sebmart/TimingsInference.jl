@@ -10,8 +10,8 @@ function findNearEdges(n::Network, e::Edge)
 	orig = src(e)
 	dest = dst(e)
 	# find all edges that share a vertex with e
-	nearEdges = [Edge(dest, newDest) for newDest in out_neighbors(n.graph, dest)]
-	append!(nearEdges, [Edge(orig, newDest) for newDest in out_neighbors(n.graph, orig)])
+	nearEdges = [Edge(dest, newDest) for newDest in outneighbors(n.graph, dest)]
+	append!(nearEdges, [Edge(orig, newDest) for newDest in outneighbors(n.graph, orig)])
 	append!(nearEdges, [Edge(newOrig, orig) for newOrig in in_neighbors(n.graph, orig)])
 	append!(nearEdges, [Edge(newOrig, dest) for newOrig in in_neighbors(n.graph, dest)])
 	# remove duplicates and edge e itself
@@ -52,7 +52,7 @@ function clusterEdges(n::Network, nNeighbors::Int=div(nRoads(n), 180))
 	clusters = [Edge[] for i=1:nNeighbors]
 	nodeMap = Dict{Int, Int}()
 	# define starting points of clusters
-	srand(2002)
+	Random.seed!(2002)
 	for i = 1:nNeighbors
 		while true
 			idx = rand(eachindex(edgeList))
@@ -97,7 +97,7 @@ end
 	`flatten` : recursively concatenate all vectors in a vector of vectors
 	Useful helper function for neighborhood continuity
 """
-flatten{T}(a::Array{T,1}) = any(x->isa(x,Array),a)? flatten(vcat(map(flatten,a)...)): a
+flatten(a::Array) = any(x -> isa(x, Array), a) ? flatten(vcat(map(flatten,a)...)) : a
 
 """
 	`findEdges`	: find all edges that begin and end in the provided list of nodes
@@ -106,7 +106,7 @@ function findEdges(n::Network, nodeList::Vector{Int})
 	nodeSet = Set(nodeList)
 	edges = Set(Edge[])
 	for node in nodeList
-		for neighbor in out_neighbors(n.graph, node)
+		for neighbor in outneighbors(n.graph, node)
 			if neighbor in nodeSet && n.roads[node, neighbor].roadType > 1
 				push!(edges, Edge(node, neighbor))
 			end

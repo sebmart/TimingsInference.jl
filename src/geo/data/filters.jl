@@ -53,7 +53,7 @@ function inTimeWindow(t::GeoTrip, startHour::Int, startMin::Int, endHour::Int, e
 end
 
 function inTimeWindow(trips::GeoData, startHour::Int, startMin::Int, endHour::Int, endMin::Int)
-    mask = BitArray(length(trips))
+    mask = falses(length(trips))
     for (i, t) in enumerate(trips)
         if i%10_000 == 0
             @printf("\r%.2f%% trips checked     ",100*i/length(trips))
@@ -85,7 +85,7 @@ function onlyWeekdays(t::GeoTrip)
 end
 
 function onlyWeekdays(trips::GeoData)
-    mask = BitArray(length(trips))
+    mask = falses(length(trips))
     for (i, t) in enumerate(trips)
         if i%10_000 == 0
             @printf("\r%.2f%% trips checked     ",100*i/length(trips))
@@ -107,7 +107,7 @@ function onlyWeekends(t::GeoTrip)
 end
 
 function onlyWeekends(trips::GeoData)
-    mask = BitArray(length(trips))
+    mask = falses(length(trips))
     for (i, t) in enumerate(trips)
         if i%10_000 == 0
             @printf("\r%.2f%% trips checked     ",100*i/length(trips))
@@ -129,7 +129,7 @@ function inPolygon(t::GeoTrip, poly::Vector{Tuple{Float32,Float32}})
 end
 
 function inPolygon(trips::GeoData, poly::Vector{Tuple{Float32,Float32}})
-    mask = BitArray(length(trips))
+    mask = falses(length(trips))
     for (i,t) in enumerate(trips)
         if i%10_000 == 0
             @printf("\r%.2f%% trips checked     ",100*i/length(trips))

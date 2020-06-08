@@ -60,7 +60,7 @@ function allPathsLogError(timingsRef::NetworkTimings, timingsNew::NetworkTimings
     tt1 = getPathTimes(timingsRef)
     tt2 = getPathTimes(timingsNew)
 
-    res = log(tt1./tt2).^2
+    res = log.(tt1./tt2).^2
     #remove NAN where o==d
     for i in 1:size(tt1)[1]
         res[i,i] = 0.
@@ -77,7 +77,7 @@ function allPathsLogBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     tt1 = getPathTimes(timingsRef)
     tt2 = getPathTimes(timingsNew)
 
-    res = log(tt2./tt1)
+    res = log.(tt2./tt1)
     #remove NAN where o==d
     for i in 1:size(tt1)[1]
         res[i,i] = 0.
@@ -95,7 +95,7 @@ function roadTimeLogError(timingsRef::NetworkTimings, timingsNew::NetworkTimings
     t1 = timingsRef.times
     t2 = timingsNew.times
     error = 0.
-    for o in vertices(g), d in out_neighbors(g,o)
+    for o in vertices(g), d in outneighbors(g,o)
         error += log(t1[o,d]/t2[o,d])^2
     end
     return error/ne(g)
@@ -111,7 +111,7 @@ function roadTimeLogBias(timingsRef::NetworkTimings, timingsNew::NetworkTimings)
     t1 = timingsRef.times
     t2 = timingsNew.times
     error = 0.
-    for o in vertices(g), d in out_neighbors(g,o)
+    for o in vertices(g), d in outneighbors(g,o)
         error += log(t2[o,d]/t1[o,d])
     end
     return error/ne(g)

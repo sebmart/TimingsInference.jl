@@ -18,7 +18,6 @@
 """
 function noisyVirtualData(t::NetworkTimings, density::Float64=0.2, frequency::Float64=2.;
                           timeStd::Float64 = 20.)
-    srand()
     g = t.network.graph
     trips = NetworkTrip[]
     # subset rides
@@ -52,7 +51,6 @@ end
 function simpleVirtualData(t::NetworkTimings, N::Int, logStd::Float64)
     nNodes = nv(t.network.graph)
     allRides = vec([(o,d) for o in 1:nNodes, d in 1:(nNodes -1)])
-    srand()
     shuffle!(allRides)
     selectedRides = allRides[1:N]
     for (i, (o,d)) in enumerate(selectedRides)

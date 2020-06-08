@@ -6,7 +6,7 @@
 """
     `GeoTrip` : data for one geographical trip
 """
-immutable GeoTrip
+struct GeoTrip
     "pick-up lonlat coordinates"
     pLon::Float32
     pLat::Float32
@@ -28,7 +28,7 @@ end
 """
     `GeoData`: list of `GeoTrip`
 """
-typealias GeoData Vector{GeoTrip}
+const GeoData = Vector{GeoTrip}
 
 """
     `stats`: print information

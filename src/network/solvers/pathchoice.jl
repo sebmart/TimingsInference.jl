@@ -15,17 +15,17 @@ function pathChoice(s::IterativeState; args...)
     tripData = s.trips
     roads = s.data.network.roads
 
-    const beta1 = 0.275 / 60.
-    const beta2 = 1.563 / 1609.344
+    beta1 = 0.275 / 60.
+    beta2 = 1.563 / 1609.344
 
-    const MAX_SPEED = 30 * 1609.344 / 3600
-    const MIN_SPEED = 1 * 1609.344 / 3600
+    MAX_SPEED = 30 * 1609.344 / 3600
+    MIN_SPEED = 1 * 1609.344 / 3600
 
     lambda = 1e2
-    const DROP = 0.1
-    const BOOST = 10.
-    const MAX_LAMBDA = 1e16
-    const MIN_LAMBDA = 1e-16
+    DROP = 0.1
+    BOOST = 10.
+    MAX_LAMBDA = 1e16
+    MIN_LAMBDA = 1e-16
 
     oldObjective = 0
     objective = 1e16

@@ -9,7 +9,7 @@
     - Default number of paths per trip is infinite
     - Set of independent edges is updated at every iteration
 """
-type GreedyEdges <: IterativeState
+mutable struct GreedyEdges <: IterativeState
     # inherited attributes
     data::NetworkData
     timings::NetworkTimings
@@ -51,7 +51,7 @@ function GreedyEdges(data::NetworkData, startSolution::NetworkTimings; pathsPerT
         error("Must have at least one path per trip")
     end
     # randomly select the trips
-    srand(1991)
+    Random.seed!(1991)
     trips = shuffle(data.trips)[1:min(maxTrip,length(data.trips))]
     # One path per trip: the initial shortest path
     paths = [Dict{Edge,Float64}[getFullPathEdges(t, startSolution)] for t in trips]
@@ -93,13 +93,13 @@ function updateState!(s::GreedyEdges, times::AbstractArray{Float64, 2})
             if s.pathsPerTrip == 1
                 s.origPaths[d][1] = sp
             else
-                index = findfirst(s.origPaths[d], sp)
-                if index != 0   # if so, put it in first position
+                index = findfirst(isequal(sp), s.origPaths[d])
+                if index != nothing   # if so, put it in first position
                     s.origPaths[d][index], s.origPaths[d][1] = s.origPaths[d][1], s.origPaths[d][index] #swap
                 elseif length(s.origPaths[d]) < s.pathsPerTrip # if not, and if enough room to add, add it in first position
-                    unshift!(s.origPaths[d], sp)
+                    pushfirst!(s.origPaths[d], sp)
                 else        # replace least useful path
-                    worstIndex = indmax([pathEdgesTime(s.timings, collect(keys(p))) for p in s.paths[d]])
+                    worstIndex = argmax([pathEdgesTime(s.timings, collect(keys(p))) for p in s.paths[d]])
                     s.origPaths[d][worstIndex] = s.origPaths[d][1]
                     s.origPaths[d][1] = sp
                 end

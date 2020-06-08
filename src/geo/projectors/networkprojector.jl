@@ -14,7 +14,7 @@
     - `getNetworkTrips`: returns network trips associated with given geo-trips
     - `getTripTiming` : returns timing estimation for a geographical trip (random or known)
 """
-abstract NetworkProjector
+abstract type NetworkProjector end
 
 function Base.show(io::IO, p::NetworkProjector)
     typeName = split(string(typeof(p)),".")[end]

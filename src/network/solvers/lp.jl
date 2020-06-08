@@ -28,7 +28,7 @@ function lpTimes(s::IterativeState;
 
     # DECISION VARIABLES
     # Road times
-    @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= s.data.minTimes[i,j])
+    @variable(m, t[i=vertices(g), j=outneighbors(g,i)] >= s.data.minTimes[i,j])
     # Absolute difference between tripData times and computed times
     @variable(m, epsilon[d=eachindex(tripData)] >= 0)
 
@@ -63,7 +63,7 @@ function lpTimes(s::IterativeState;
         )
 
     if continuityConstraint == "simple"
-        for i in vertices(g), j in out_neighbors(g,i)
+        for i in vertices(g), j in outneighbors(g,i)
             for edge in findNearEdgesSameType(s.data.network, Edge(i,j))
                 p = src(edge)
                 q = dst(edge)
@@ -105,7 +105,7 @@ function lpTimes(s::IterativeState;
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
-    for i in vertices(g), j in out_neighbors(g,i)
+    for i in vertices(g), j in outneighbors(g,i)
         result[i,j] = times[i,j]
     end
 

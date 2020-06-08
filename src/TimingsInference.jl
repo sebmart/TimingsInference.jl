@@ -5,13 +5,13 @@
 
 module TimingsInference
 
-using RoutingNetworks, LightGraphs, SFML, NearestNeighbors
+using RoutingNetworks, LightGraphs, NearestNeighbors
 using Distributions, DataStructures
 using JuMP, Gurobi, Mosek, MathProgBase
-using Base.Dates
+using Dates, Printf, SparseArrays, Distributed, Random, LinearAlgebra, Statistics
 using PyPlot, Colors
 
-import RoutingNetworks: visualInit, visualEvent, visualStartUpdate, visualEndUpdate, visualRedraw, inPolygon
+import RoutingNetworks: inPolygon
 import Base.<
 
 #network
@@ -84,7 +84,5 @@ include("geo/stats/stats.jl")
 
 include("geo/timings/fromnetwork.jl")
 include("geo/timings/knn.jl")
-
-include("visualization/comparetimes.jl")
 
 end # module

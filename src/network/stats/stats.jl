@@ -13,7 +13,7 @@ must implement methods:
 - `printStats` : print a summary of statistics on the algorithm run
 """
 
-abstract NetworkStats
+abstract type NetworkStats end
 function Base.show(io::IO, ns::NetworkStats)
 	typeName = split(string(typeof(ns)),".")[end]
 	println(io, "$(typeName): $(ns.name)")
@@ -23,7 +23,7 @@ end
 	`RealNetworkStats`: instance of NetworkStats, made for real trip data. This corresponds
 	to the case where true time information is not available.
 """
-type RealNetworkStats <: NetworkStats
+mutable struct RealNetworkStats <: NetworkStats
 	name::AbstractString
 	times::AbstractArray{Float64, 2}
 	sdict::Dict{AbstractString, Float64}
@@ -48,7 +48,7 @@ RealNetworkStats(name, state.timings, state.data, testingData, state.pathDiff)
 """
 	`VirtNetworkStats`: instance of NetworkStats made for virtual data
 """
-type VirtNetworkStats <: NetworkStats
+mutable struct VirtNetworkStats <: NetworkStats
 	name::AbstractString
 	times::AbstractArray{Float64,2}
 	sdict::Dict{AbstractString, Float64}
@@ -91,7 +91,7 @@ end
 """
 	`printStats`: print stat evolution from list of NetworkStats objects
 """
-function printStats{T <: NetworkStats}(stats::Vector{T}, statName::AbstractString)
+function printStats(stats::Vector{T}, statName::AbstractString) where T <: NetworkStats
 	# check if stat is valid and if timebounds are same
 	for so in stats
 		if !(statName in collect(keys(so.sdict)))
@@ -102,7 +102,7 @@ function printStats{T <: NetworkStats}(stats::Vector{T}, statName::AbstractStrin
 	for so in stats
 		if statName == "pathDiff"
 			@printf("%s\t%.5f\n", so.name, so.sdict[statName])
-		elseif contains(lowercase(statName), "bias") && !contains(lowercase(statName), "log")
+		elseif occursin("bias", lowercase(statName)) && !occursin("log", lowercase(statName))
 			@printf("%s\t%.0fs\n", so.name, so.sdict[statName])
 		else
 			@printf("%s\t%.5f\n", so.name, so.sdict[statName])
@@ -113,7 +113,7 @@ end
 """
 	`plotStats`: plot stat evolution from list of NetworkStats objects
 """
-function plotStats{T <: NetworkStats}(stats::Vector{T}, statName::AbstractString)
+function plotStats(stats::Vector{T}, statName::AbstractString) where T <: NetworkStats
 	# check if stat is valid and if timebounds are same
 	for so in stats
 		if !(statName in collect(keys(so.sdict)))

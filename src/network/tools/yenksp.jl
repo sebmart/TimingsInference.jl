@@ -3,7 +3,7 @@
 ## Yen's K-shortest path algorithm
 ###################################################
 
-immutable HeapEntry
+struct HeapEntry
   path::Vector{Int}
   length::Float64
 end
@@ -96,7 +96,7 @@ function yenKSP(timings::NetworkTimings, trips::Vector{NetworkTrip}, k::Int)
         end
     else
         paths = SharedArray(Vector{Dict{Edge, Float64}}, length(trips))
-        @sync @parallel for (i,t) in enumerate(trips)
+        @sync @distributed for (i,t) in enumerate(trips)
             paths[i] = yenKSP(timings, t, k)
         end
     end

@@ -10,7 +10,7 @@
     node, with weight 0. So a path from node 1 to node 5 will be indicated as
      (1,1,0.0) to (5,5,0.0)
 """
-immutable NetworkTrip
+struct NetworkTrip
     "Origin edge and weight of that edge"
     orig::Tuple{Int,Int,Float64}
     "Destination edge and weight of that edge"
@@ -34,7 +34,7 @@ end
     `NetworkData`
     Represent all data to use for timings inference in Network
 """
-type NetworkData
+mutable struct NetworkData
     "The city routing network"
     network::Network
     "The trips data"
@@ -59,4 +59,4 @@ end
     - `times` : link times
     - `pathTimes`: all timings
 """
-typealias NetworkTimings RoutingPaths
+const NetworkTimings = RoutingNetworks.RoutingPaths

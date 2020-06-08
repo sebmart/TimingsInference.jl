@@ -20,7 +20,7 @@ function fraclpTimes(s::IterativeState; args...)
 
     # DECISION VARIABLES
     # Road times
-    @variable(m, t[i=vertices(g), j=out_neighbors(g,i)] >= 0)
+    @variable(m, t[i=vertices(g), j=outneighbors(g,i)] >= 0)
     # Absolute difference between tripData times and computed times
     @variable(m, epsilon[d=eachindex(tripData)] >= 0)
     @variable(m, y >= 0)
@@ -52,7 +52,7 @@ function fraclpTimes(s::IterativeState; args...)
         )
 
     # new bounds on edge velocities
-    @constraint(m, speedLimits[i=vertices(g), j=out_neighbors(g,i)],
+    @constraint(m, speedLimits[i=vertices(g), j=outneighbors(g,i)],
         t[i,j] >= s.data.minTimes[i,j] * y)
 
     # SOLVE LP
@@ -66,7 +66,7 @@ function fraclpTimes(s::IterativeState; args...)
 
     # Export result as sparse matrix
     result = spzeros(Float64, nv(g), nv(g))
-    for i in vertices(g), j in out_neighbors(g,i)
+    for i in vertices(g), j in outneighbors(g,i)
         result[i,j] = times[i,j] / yVal
     end
 
